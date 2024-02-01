@@ -1,0 +1,216 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+#: mainunit.rsbtngo
+msgid "Go"
+msgstr ""
+
+#: mainunit.rsbtnstop
+msgctxt "mainunit.rsbtnstop"
+msgid "Stop"
+msgstr ""
+
+#: mainunit.rsdowfriday
+msgid "Friday"
+msgstr ""
+
+#: mainunit.rsdowmonday
+msgid "Monday"
+msgstr ""
+
+#: mainunit.rsdowsaturday
+msgid "Saturday"
+msgstr ""
+
+#: mainunit.rsdowsunday
+msgid "Sunday"
+msgstr ""
+
+#: mainunit.rsdowthursday
+msgid "Thursday"
+msgstr ""
+
+#: mainunit.rsdowtuesday
+msgid "Tuesday"
+msgstr ""
+
+#: mainunit.rsdowwednesday
+msgid "Wednesday"
+msgstr ""
+
+#: mainunit.rsinformationunknown
+msgid "???"
+msgstr ""
+
+#: mainunit.rsmodeviewexpert
+msgctxt "mainunit.rsmodeviewexpert"
+msgid "Expert view"
+msgstr ""
+
+#: mainunit.rsmodeviewnormal
+msgid "Normal view"
+msgstr ""
+
+#: mainunit.rsnextscreentext
+msgid "Next screen in"
+msgstr ""
+
+#: tmainform.bitbtn1.caption
+msgid "Italiano"
+msgstr ""
+
+#: tmainform.caption
+msgid "VFD-Studio  2"
+msgstr ""
+
+#: tmainform.clearlogbutton.caption
+msgctxt "tmainform.clearlogbutton.caption"
+msgid "Clear log"
+msgstr ""
+
+#: tmainform.exit1.caption
+msgid "&Exit"
+msgstr ""
+
+#: tmainform.exitbutton.caption
+msgid "Exit"
+msgstr ""
+
+#: tmainform.exitbutton.hint
+msgid "Terminate the application"
+msgstr ""
+
+#: tmainform.expertviewbutton.caption
+msgctxt "tmainform.expertviewbutton.caption"
+msgid "Expert view"
+msgstr ""
+
+#: tmainform.groupbox1.caption
+msgctxt "tmainform.groupbox1.caption"
+msgid "Language"
+msgstr ""
+
+#: tmainform.groupbox2.caption
+msgctxt "tmainform.groupbox2.caption"
+msgid "Settings"
+msgstr ""
+
+#: tmainform.hyperlinklabel.caption
+msgid "cypax.net"
+msgstr ""
+
+#: tmainform.infobutton.caption
+msgid "Info"
+msgstr ""
+
+#: tmainform.label1.caption
+msgid "Currently displayed:"
+msgstr ""
+
+#: tmainform.label2.caption
+msgid "Log file:"
+msgstr ""
+
+#: tmainform.label3.caption
+msgid "Color of preview display"
+msgstr ""
+
+#: tmainform.label4.caption
+msgid ", 2004-2024"
+msgstr ""
+
+#: tmainform.label5.caption
+msgid "by "
+msgstr ""
+
+#: tmainform.langdebutton.caption
+msgid "Deutsch"
+msgstr ""
+
+#: tmainform.langenbutton.caption
+msgid "English"
+msgstr ""
+
+#: tmainform.listeladen1.caption
+msgid "&Load list..."
+msgstr ""
+
+#: tmainform.listtestbutton.caption
+msgid "Load list..."
+msgstr ""
+
+#: tmainform.loglistview.columns[0].caption
+msgid "#"
+msgstr ""
+
+#: tmainform.loglistview.columns[1].caption
+msgid "Time"
+msgstr ""
+
+#: tmainform.loglistview.columns[2].caption
+msgid "Level"
+msgstr ""
+
+#: tmainform.loglistview.columns[3].caption
+msgid "Message"
+msgstr ""
+
+#: tmainform.menuitem1.caption
+msgctxt "tmainform.menuitem1.caption"
+msgid "Reload"
+msgstr ""
+
+#: tmainform.nchsterscreen1.caption
+msgid "&Next screen"
+msgstr ""
+
+#: tmainform.nextbutton.caption
+msgid "Next screen"
+msgstr ""
+
+#: tmainform.okbutton.caption
+msgid "OK"
+msgstr ""
+
+#: tmainform.okbutton.hint
+msgid "Minimize to system tray"
+msgstr ""
+
+#: tmainform.onlyonidlebox.caption
+msgid "Play animations only when CPU is idle"
+msgstr ""
+
+#: tmainform.opendialog.title
+msgid "Open file"
+msgstr ""
+
+#: tmainform.popupstopbutton.caption
+msgid "&Stop"
+msgstr ""
+
+#: tmainform.reloadbutton.caption
+msgctxt "tmainform.reloadbutton.caption"
+msgid "Reload"
+msgstr ""
+
+#: tmainform.savedialog.title
+msgid "Save file as"
+msgstr ""
+
+#: tmainform.savelogbutton.caption
+msgid "Save log file..."
+msgstr ""
+
+#: tmainform.scr_time_label.caption
+msgid "ScreenTime:"
+msgstr ""
+
+#: tmainform.show1.caption
+msgid "&Main window"
+msgstr ""
+
+#: tmainform.stopbutton.caption
+msgctxt "tmainform.stopbutton.caption"
+msgid "Stop"
+msgstr ""
+
