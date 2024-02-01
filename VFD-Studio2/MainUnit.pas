@@ -153,6 +153,7 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormWindowStateChange(Sender: TObject);
     procedure GroupBox1Resize(Sender: TObject);
     procedure HideTimerTimer(Sender: TObject);
     procedure InfoButtonClick(Sender: TObject);
@@ -1539,6 +1540,12 @@ begin
   FAnimationData.AnimationBitmap.Free;
   FVirtualLayer0.Free;
   FVirtualLayer1.Free;
+end;
+
+procedure TMainForm.FormWindowStateChange(Sender: TObject);
+begin
+  if (wsMinimized = WindowState) then
+    Hide;
 end;
 
 procedure TMainForm.GroupBox1Resize(Sender: TObject);

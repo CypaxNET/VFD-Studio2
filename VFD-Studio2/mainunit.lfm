@@ -4,6 +4,7 @@ object MainForm: TMainForm
   Top = 652
   Width = 1073
   AutoSize = True
+  BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'VFD-Studio  2'
   ClientHeight = 635
@@ -11,6 +12,7 @@ object MainForm: TMainForm
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnWindowStateChange = FormWindowStateChange
   Position = poScreenCenter
   LCLVersion = '3.0.0.3'
   object SCR_Time_Label: TLabel
