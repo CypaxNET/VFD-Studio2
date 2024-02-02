@@ -220,6 +220,9 @@ type
   private
   protected
 
+    FSMBios: TSMBios;
+
+
     FVirtualLayer0: TBitmap;
     FVirtualLayer1: TBitmap;
 
@@ -311,12 +314,9 @@ function TMainForm.SubstituteStaticInfo(AText: string): string;
 var
   I: Integer;
   Tmp: string;
-  SMBios: TSMBios;
   S: string;
 begin
   S:= AText;
-
-  SMBios:= TSMBios.Create;
 
   while (Pos('$VERSION$', S) <> 0 ) do begin
     I:= Pos('$VERSION$', S);
@@ -351,8 +351,8 @@ begin
   while (Pos('$CPUCORES$', S) <> 0 ) do begin
     I:= Pos('$CPUCORES$', S);
     Delete(S, I, Length('$CPUCORES$'));
-    if (SMBios.HasProcessorInfo) then begin
-      Insert(IntToStr(SMBios.ProcessorInfo[0].RAWProcessorInformation^.CoreCount), S, I);
+    if (FSMBios.HasProcessorInfo) then begin
+      Insert(IntToStr(FSMBios.ProcessorInfo[0].RAWProcessorInformation^.CoreCount), S, I);
     end else begin
       Insert('?', S, I);
     end;
@@ -361,8 +361,8 @@ begin
   while (Pos('$CPUMAX$', S) <> 0 ) do begin
     I:= Pos('$CPUMAX$', S);
     Delete(S, I, Length('$CPUMAX$'));
-    if (SMBios.HasProcessorInfo) then begin
-      Insert(IntToStr(SMBios.ProcessorInfo[0].RAWProcessorInformation^.MaxSpeed), S, I);
+    if (FSMBios.HasProcessorInfo) then begin
+      Insert(IntToStr(FSMBios.ProcessorInfo[0].RAWProcessorInformation^.MaxSpeed), S, I);
     end else begin
       Insert(RsInformationUnknown, S, I);
     end;
@@ -377,8 +377,8 @@ begin
   while (Pos('$CPUSOCKET$', S) <> 0 ) do begin
     I:= Pos('$CPUSOCKET$', S);
     Delete(S, I, Length('$CPUSOCKET$'));
-    if (SMBios.HasProcessorInfo) then begin
-     Insert(SMBios.ProcessorInfo[0].SocketDesignationStr, S, I);
+    if (FSMBios.HasProcessorInfo) then begin
+     Insert(FSMBios.ProcessorInfo[0].SocketDesignationStr, S, I);
     end else begin
       Insert(RsInformationUnknown, S, I);
     end;
@@ -401,8 +401,8 @@ begin
   while (Pos('$CPUFAMILY$', S) <> 0 ) do begin
     I:= Pos('$CPUFAMILY$', S);
     Delete(S, I, Length('$CPUFAMILY$'));
-    if (SMBios.HasProcessorInfo) then begin
-      Insert(SMBios.ProcessorInfo[0].ProcessorFamilyStr, S, I);
+    if (FSMBios.HasProcessorInfo) then begin
+      Insert(FSMBios.ProcessorInfo[0].ProcessorFamilyStr, S, I);
     end else begin
       Insert(RsInformationUnknown, S, I);
     end;
@@ -430,8 +430,8 @@ begin
   while (Pos('$BIOSVENDOR$', S) <> 0 ) do begin
     I:= Pos('$BIOSVENDOR$', S);
     Delete(S, I, Length('$BIOSVENDOR$'));
-    if (SMBios.HasProcessorInfo) then begin
-      Insert(SMBios.BiosInfo.VendorStr, S, I);
+    if (FSMBios.HasProcessorInfo) then begin
+      Insert(FSMBios.BiosInfo.VendorStr, S, I);
     end else begin
       Insert(RsInformationUnknown, S, I);
     end;
@@ -440,8 +440,8 @@ begin
   while (Pos('$BIOSVERSION$', S) <> 0 ) do begin
     I:= Pos('$BIOSVERSION$', S);
     Delete(S, I, Length('$BIOSVERSION$'));
-    if (SMBios.HasProcessorInfo) then begin
-      Insert(SMBios.BiosInfo.VersionStr, S, I);
+    if (FSMBios.HasProcessorInfo) then begin
+      Insert(FSMBios.BiosInfo.VersionStr, S, I);
     end else begin
       Insert(RsInformationUnknown, S, I);
     end;
@@ -450,8 +450,8 @@ begin
   while (Pos('$BIOSDATE$', S) <> 0 ) do begin
     I:= Pos('$BIOSDATE$', S);
     Delete(S, I, Length('$BIOSDATE$'));
-    if (SMBios.HasProcessorInfo) then begin
-      Insert(SMBios.BiosInfo.ReleaseDateStr, S, I);
+    if (FSMBios.HasProcessorInfo) then begin
+      Insert(FSMBios.BiosInfo.ReleaseDateStr, S, I);
     end else begin
       Insert(RsInformationUnknown, S, I);
     end;
@@ -460,8 +460,8 @@ begin
   while (Pos('$BOARDVENDOR$', S) <> 0 ) do begin
     I:= Pos('$BOARDVENDOR$', S);
     Delete(S, I, Length('$BOARDVENDOR$'));
-    if (SMBios.HasProcessorInfo) then begin
-      Insert(SMBios.BaseBoardInfo[0].ManufacturerStr, S, I);
+    if (FSMBios.HasProcessorInfo) then begin
+      Insert(FSMBios.BaseBoardInfo[0].ManufacturerStr, S, I);
     end else begin
       Insert(RsInformationUnknown, S, I);
     end;
@@ -470,8 +470,8 @@ begin
   while (Pos('$BOARDPRODUCT$', S) <> 0 ) do begin
     I:= Pos('$BOARDPRODUCT$', S);
     Delete(S, I, Length('$BOARDPRODUCT$'));
-    if (SMBios.HasProcessorInfo) then begin
-      Insert(SMBios.BaseBoardInfo[0].ProductStr, S, I);
+    if (FSMBios.HasProcessorInfo) then begin
+      Insert(FSMBios.BaseBoardInfo[0].ProductStr, S, I);
     end else begin
       Insert(RsInformationUnknown, S, I);
     end;
@@ -480,8 +480,8 @@ begin
   while (Pos('$BOARDVERSION$', S) <> 0 ) do begin
     I:= Pos('$BOARDVERSION$', S);
     Delete(S, I, Length('$BOARDVERSION$'));
-    if (SMBios.HasProcessorInfo) then begin
-      Insert(SMBios.BaseBoardInfo[0].VersionStr, S, I);
+    if (FSMBios.HasProcessorInfo) then begin
+      Insert(FSMBios.BaseBoardInfo[0].VersionStr, S, I);
     end else begin
       Insert(RsInformationUnknown, S, I);
     end;
@@ -499,8 +499,6 @@ begin
     end;
   end;
   *)
-
-  SMBios.Free;
 
   Result:= S;
 end;
@@ -789,13 +787,15 @@ var
   overlength: Integer;
   subs: string;
   p0: Integer;
-  SMBios: TSMBios;
   BmpDimensions: TPoint;
 begin
-  SMBios:= TSMBios.Create;
 
   for z:= 0 to (MAX_VARIABLE_INFO - 1) do begin
     S:= FVariableInfo[z].Text;
+
+    if ('' = S) then
+      Continue;
+
     OldText:= FVariableInfo[z].SubsText;
     S:= SubstituteVariableInfo(S);
     if(nil <> FDisplay) then
@@ -855,7 +855,6 @@ begin
     FVariableInfo[Z].SubsText:= S;
   end;  //for z
 
-  SMBios.Free;
   Inc(FScrollStringIndex);
 
 end;
@@ -1438,6 +1437,8 @@ var
   IniFilePath: string;
 begin
 
+  FSMBios:= TSMBios.Create;
+
   FVirtualLayer0:= TBitmap.Create;
   FVirtualLayer1:= TBitmap.Create;
 
@@ -1534,6 +1535,7 @@ end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
+  FSMBios.Free;
   FSysInfo.Free;
   FWinampControl.Free;
   FDisplay.Free;
@@ -1583,13 +1585,26 @@ begin
 end;
 
 procedure TMainForm.InfoTimerTimer(Sender: TObject);
+var
+  I: Integer;
+  IsVariableInfo: Boolean;
 begin
 
   UpdateTimeLabel;
   if (FRemainingSeconds > 0) then
     Dec(FRemainingSeconds);
 
-  RefreshTextOutputs;
+  // check if there are any varaiable infos
+  IsVariableInfo:= False;
+  for I:= 0 to (MAX_VARIABLE_INFO - 1) do begin
+    if (FVariableInfo[I].Text <> '') then begin
+      IsVariableInfo:= True;
+      Break;
+    end;
+  end;
+  if (IsVariableInfo) then
+    RefreshTextOutputs;
+
   RefreshClocks;
 
 end;
