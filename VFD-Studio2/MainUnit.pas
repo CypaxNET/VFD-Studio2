@@ -1053,6 +1053,7 @@ begin
           else begin
             LogEvent(lvINFO, 'This screen was once. Clearing lines ' + IntToStr(ITmp) + '..' + IntToStr(FListIndex), Now);
             ListBox.MultiSelect:= True;
+            ListBox.ClearSelection;
             for n:= ITmp to FListIndex do begin
               ListBox.selected[n]:= True;
             end;
