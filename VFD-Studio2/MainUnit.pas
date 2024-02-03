@@ -71,6 +71,19 @@ type
     HourPoint, MinutePoint, SecondsPoint: TPoint;
   end;
 
+  // structure of one column of text dropping down the display
+  TMatrixDrop = record
+    Text: string;          // goes bottom up: first char will be in lowest column
+    MaxTextLen: Byte;      // maximum length of this drop
+    Row: Integer;          // current row (where the first character is located); can be out of display area
+    SlownessFactor: Byte;  // controls the speed of the drop; the higher, the slower
+  end;
+
+  TMatrixData = record
+    CycleCounter: Int64;
+    Drops: array of TMatrixDrop;
+  end;
+
   TAnimationData = record
     IsAnimationDisplayed: Boolean; // is an animation currently displayed?
     IsAnimationPaused: Boolean;    // is the animation paused?
@@ -217,11 +230,14 @@ type
     function SubstituteVariableInfo(AText: string): string;
     function AddVariableInfo(AText: string; X, Y: Byte; FontName: string; FontSize: Integer): Boolean;
 
+    procedure AddMatrixDrop(const AText: string; MaxTextLen, Row: Integer; SlownessFactor: Byte);
+    procedure UpdateMatrixDrops;
+    procedure InitTheMatrix;
+
   private
   protected
 
     FSMBios: TSMBios;
-
 
     FVirtualLayer0: TBitmap;
     FVirtualLayer1: TBitmap;
@@ -247,6 +263,9 @@ type
 
     FScrollStringIndex: Word;
 
+    FTheMatrix: TMatrixData;
+
+    FIsScreenDelayed: Boolean;
 
     //ExtraScreens
     CPUMONITORenabled: Boolean;
@@ -1225,6 +1244,19 @@ begin
           P6:= strtoint(cmdparts[6]);
           AddClock(P1, P2, P3, P4, P5, P6);
         end;
+
+      end else if ('THEMATRIX' = cmd) then begin
+        // p1 = speed
+        if (cmdparts.Count >= 2) then begin
+          P1:= strtoint(cmdparts[1]);
+
+          // Setting up the drops
+          InitTheMatrix;
+          ExtraTimer.Interval:= P1;
+          ExtraTimer.Enabled:= True;
+
+        end;
+
       end;
 
 
@@ -1436,7 +1468,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
 var
   IniFilePath: string;
 begin
-
+  Randomize;
   FSMBios:= TSMBios.Create;
 
   FVirtualLayer0:= TBitmap.Create;
@@ -1542,6 +1574,7 @@ begin
   FAnimationData.AnimationBitmap.Free;
   FVirtualLayer0.Free;
   FVirtualLayer1.Free;
+  SetLength(FTheMatrix.Drops, 0);
 end;
 
 procedure TMainForm.FormWindowStateChange(Sender: TObject);
@@ -1650,6 +1683,7 @@ end;
 procedure TMainForm.StopProcessing;
 begin
   WaitTimer.Enabled:= False;
+  ExtraTimer.Enabled:= False;
   StopAnimation; // this also disables the animation timer
   DisableClocks;
   ClearInfoStrings;
@@ -1795,6 +1829,10 @@ end;
 
 procedure TMainForm.ExtraTimerTimer(Sender: TObject);
 begin
+  if (Length(FTheMatrix.Drops) > 0) then begin
+    UpdateMatrixDrops;
+    Inc(FTheMatrix.CycleCounter);
+  end;
 
 end;
 
@@ -2317,6 +2355,142 @@ begin
   CombinedImage.Picture.Bitmap.Canvas.Draw(0, 0, TmpBitmap);
   TmpBitmap.Free;
 end;
+
+procedure TMainForm.AddMatrixDrop(const AText: string; MaxTextLen, Row: Integer; SlownessFactor: Byte);
+var
+  Drop: TMatrixDrop;
+begin
+  SetLength(FTheMatrix.Drops, Length(FTheMatrix.Drops) + 1);
+
+  Drop.Text := AText;
+  Drop.MaxTextLen := MaxTextLen;
+  Drop.Row := Row;
+  Drop.SlownessFactor := SlownessFactor;
+
+  FTheMatrix.Drops[High(FTheMatrix.Drops)]:= Drop;
+end;
+
+procedure TMainForm.UpdateMatrixDrops;
+var
+  I, N: Integer;
+  PDrop: ^TMatrixDrop;
+  Pos: Integer;
+  C: Char;
+  DspRowCount: Integer;
+  BottomRow, TopRow: Integer;
+  ARow: Integer;
+  DoRepaintFirstChar: Boolean;
+  DoRepaintAll: Boolean;
+
+const
+  MATRIXLETTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789^!"§$%&/()=?`°²{[]}\*+~#µ<>|@';
+begin
+  DspRowCount:= (FStudioConfig.DisplayConfig.ResY div GLYPH_H);
+
+  for I:= 0 to High(FTheMatrix.Drops) do begin
+    PDrop:= @FTheMatrix.Drops[I];
+
+    DoRepaintFirstChar:= False;
+    DoRepaintAll:= False;
+
+
+    // randomly select a new character
+    Pos:= Random(Length(MATRIXLETTERS)) + 1;
+    C:= MATRIXLETTERS[Pos];
+
+    if (Length(PDrop^.Text) < PDrop^.MaxTextLen) then begin
+      // insert new character at begin if max length is not yet reached
+      PDrop^.Text:= C + PDrop^.Text;
+      DoRepaintAll:= True;
+      DoRepaintFirstChar:= True;
+    end else begin
+      // just change first character
+      PDrop^.Text[1]:= C;
+      DoRepaintFirstChar:= True;
+    end;
+
+    // check if this drop is to be moved at all
+    if ((FTheMatrix.CycleCounter mod PDrop^.SlownessFactor) = 0) then begin
+      // inc position and restart at begin if needed
+      Inc(PDrop^.Row);
+      DoRepaintAll:= True;
+      DoRepaintFirstChar:= True;
+
+      if (PDrop^.Row > (DspRowCount + Length(PDrop^.Text) + 1)) then begin
+        PDrop^.Row:= (Length(PDrop^.Text) + Random(20)) * -1;
+        PDrop^.SlownessFactor:= Random(3) + 1;
+        DoRepaintAll:= False;
+        DoRepaintFirstChar:= False;
+      end;
+    end;
+
+    BottomRow:= PDrop^.Row;
+    TopRow:= PDrop^.Row - Length(PDrop^.Text);
+
+    // check if the drop is (at least partially) within the visible display area
+    if ((BottomRow >= 0) and (TopRow < (DspRowCount - 1))) then begin
+
+      (*
+      // with a certain chance, randomly replace a character with a ranom character (not the first and not the last cahracter though)
+      if (Length(PDrop^.Text) > 3) then begin
+        Pos:= Random(8);
+        if (Pos = 0) then begin
+          Pos:= Random(Length(MATRIXLETTERS)) + 1;
+          C:= MATRIXLETTERS[Pos];
+          Pos:= Random(Length(PDrop^.Text) - 2) + 2;
+          PDrop^.Text[Pos]:= C;
+          DoRepaintAll:= True;
+        end;
+      end;
+      *)
+
+      if (DoRepaintAll) then
+        N:= Length(PDrop^.Text)
+      else
+        N:= 1;
+
+      // check if the drop actually needs to be repainted
+      if (DoRepaintAll or DoRepaintFirstChar) then begin
+
+        for Pos:= 1 to N do begin
+          ARow:= BottomRow - Pos + 1;
+          if (ARow < 0) then
+            Break;
+          if (ARow >= DspRowCount) then
+            Continue;
+
+          PaintStringOnVirtualDisplay(PDrop^.Text[Pos], I, ARow);
+
+          if (nil <> FDisplay) then
+            FDisplay.PaintString(PDrop^.Text[Pos], I, ARow);
+
+        end;
+      end;
+    end;
+
+
+
+  end;
+end;
+
+
+procedure TMainForm.InitTheMatrix;
+var
+  I: Integer;
+  AText: string;
+  MaxTextLen, Row: Integer; SlownessFactor: Byte;
+begin
+
+  SetLength(FTheMatrix.Drops, 0);
+  for I:= 1 to (FStudioConfig.DisplayConfig.ResX div (GLYPH_W + GLYPH_GAP)) do begin
+    MaxTextLen:= Random(4) + 4;
+    SlownessFactor:= Random(3) + 1;
+    AText:= ' ';
+    Row:= (Random(10) + 1) * -1;
+    AddMatrixDrop(AText, MaxTextLen, Row, SlownessFactor);
+  end;
+end;
+
 
 end.
 
