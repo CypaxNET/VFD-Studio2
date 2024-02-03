@@ -265,8 +265,6 @@ type
 
     FTheMatrix: TMatrixData;
 
-    FIsScreenDelayed: Boolean;
-
     //ExtraScreens
     CPUMONITORenabled: Boolean;
     CPUMONITORcharEnabled: Boolean;
@@ -1092,7 +1090,7 @@ begin
           P1:= strtoint(cmdparts[1]);
           WaitTimer.Interval:= P1 * 1000;
           //SCR_Time_Label.caption:= 'ScreenTime: ' + floattostr(WaitTimer.Interval/1000)+ 'S';
-          waittimer.Enabled:= True;
+          WaitTimer.Enabled:= True;
         end;
 
       end else if ('LIGHT' = cmd) then begin
@@ -1829,6 +1827,7 @@ end;
 
 procedure TMainForm.ExtraTimerTimer(Sender: TObject);
 begin
+
   if (Length(FTheMatrix.Drops) > 0) then begin
     UpdateMatrixDrops;
     Inc(FTheMatrix.CycleCounter);
