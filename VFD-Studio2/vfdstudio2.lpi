@@ -76,9 +76,8 @@
         <UnitName Value="StudioLanguages"/>
       </Unit>
       <Unit>
-        <Filename Value="studiocommon.pas"/>
+        <Filename Value="StudioCommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="StudioCommon"/>
       </Unit>
     </Units>
   </ProjectOptions>
