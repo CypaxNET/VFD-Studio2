@@ -1850,6 +1850,13 @@ begin
   TmpBitmap:= TBitmap.Create;
   TmpBitmap.LoadFromFile(FileName);
   //LogEvent(lvINFO, 'Loading bitmap. Size ' + IntToStr(TmpBitmap.Width) + 'x' + IntToStr(TmpBitmap.Height), Now);
+
+  // clip bitmap to display if needed
+  if (TmpBitmap.Height + Y >= FStudioConfig.DisplayConfig.ResY) then
+    TmpBitmap.Height:= TmpBitmap.Height - (TmpBitmap.Height + Y - FStudioConfig.DisplayConfig.ResY);
+  if (TmpBitmap.Width + X >= FStudioConfig.DisplayConfig.ResX) then
+    TmpBitmap.Width:= TmpBitmap.Width - (TmpBitmap.Width + X - FStudioConfig.DisplayConfig.ResX);
+
   if(nil <> FDisplay) then
     FDisplay.PaintBitmap(TmpBitmap, X, Y);
   FVirtualLayer0.Canvas.Draw(X, Y, TmpBitmap);
@@ -1920,7 +1927,14 @@ begin
     TmpBitmap.Canvas.AntialiasingMode:= amOff;
     TmpBitmap.Canvas.TextOut(0, 0, AText);
     //TrimBitmap(TmpBitmap);
-    if(nil <> FDisplay) then
+
+    // clip bitmap to display if needed
+    if (TmpBitmap.Height + Y >= FStudioConfig.DisplayConfig.ResY) then
+      TmpBitmap.Height:= TmpBitmap.Height - (TmpBitmap.Height + Y - FStudioConfig.DisplayConfig.ResY);
+    if (TmpBitmap.Width + X >= FStudioConfig.DisplayConfig.ResX) then
+      TmpBitmap.Width:= TmpBitmap.Width - (TmpBitmap.Width + X - FStudioConfig.DisplayConfig.ResX);
+
+    if (nil <> FDisplay) then
       FDisplay.PaintBitmap(TmpBitmap, X, Y);
     FVirtualLayer0.Canvas.Draw(X, Y, TmpBitmap);
     CombineVirtualLayers(Self);
