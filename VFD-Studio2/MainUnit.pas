@@ -551,13 +551,12 @@ var
   I: Integer;
   S: string;
   Sec: string;  //Seconds (Winamp)
-  SMBios: TSMBios;
   CurrentDateTime: TDateTime;
   DoW: Word;
   Year, Month, Day: Word;
   Hour, Minute, Second, MilliSecond: Word;
 begin
-  SMBios:= TSMBios.Create;
+
   S:= AText;
   CurrentDateTime:= Now;
   DecodeDateTime(CurrentDateTime, Year, Month, Day, Hour, Minute, Second, MilliSecond);
