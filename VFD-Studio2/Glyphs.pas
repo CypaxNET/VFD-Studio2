@@ -163,7 +163,7 @@ charMap8x6: array[0..255, 0..5] of byte =
 ($FF, $FF, $FF, $00, $00, $00),  // 8A (3x8 px)
 ($FF, $FF, $FF, $FF, $00, $00),  // 8B (4x8 px)
 ($FF, $FF, $FF, $FF, $FF, $00),  // 8C (5x8 px)
-($55, $2A, $55, $2A, $55, $00),  // 8D (50% pattern)
+($55, $AA, $55, $AA, $55, $AA),  // 8D (50% pattern)
 ($AA, $55, $AA, $55, $AA, $55),  // 8E (50% pattern, inverse)
 ($10, $10, $10, $FF, $10, $10),  // 8F (+ lines)
 ($10, $10, $10, $1F, $10, $10),  // 90 (upside down T lines)
