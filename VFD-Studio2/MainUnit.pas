@@ -197,13 +197,11 @@ type
     procedure ListBoxDblClick(Sender: TObject);
     procedure Listeladen1Click(Sender: TObject);
     procedure ListTestButtonClick(Sender: TObject);
-    procedure LoadListButtonClick(Sender: TObject);
     procedure MenuItem1Click(Sender: TObject);
     procedure NchsterScreen1Click(Sender: TObject);
     procedure NextButtonClick(Sender: TObject);
     procedure OKButtonClick(Sender: TObject);
     procedure OnlyOnIdleBoxChange(Sender: TObject);
-    procedure Panel3Click(Sender: TObject);
     procedure PopupStopButtonClick(Sender: TObject);
     procedure ReloadButtonClick(Sender: TObject);
     procedure SaveLogButtonClick(Sender: TObject);
@@ -211,93 +209,89 @@ type
     procedure StopButtonClick(Sender: TObject);
     procedure TrayIcon1Click(Sender: TObject);
     procedure UsageTimerTimer(Sender: TObject);
-    procedure ViewListPanelClick(Sender: TObject);
     procedure LoadList(ListFileName: TFileName);
-    procedure CreateScreen;
-    function InterpreteListCommand(S:string): Integer;
-    procedure VirtualDisplayLayer0Paint(Sender: TObject);
     procedure WaitTimerStartTimer(Sender: TObject);
     procedure WaitTimerStopTimer(Sender: TObject);
     procedure WaitTimerTimer(Sender: TObject);
-    procedure ClearInfoStrings;
-
-    function SeekTo(StartIndex: Integer; SearchDirection: TSearchDirection; Cmd: string): Integer;
+    
+    
+    // methods related to processing lists
+    procedure CreateScreen;
+    function InterpreteListCommand(S: string): Integer;
     procedure StopProcessing;
-
-    procedure HandleTextOutput(AText: string; X, Y: Byte; FontName: string; FontSize: Integer);
-    procedure RefreshTextOutputs;
-    procedure BitmapToVFD(FileName: string; X, Y: Word);
-    function DrawFontedText(AText: string; X, Y: Byte; FontName: string; FontSize: Integer): TPoint;
+    function SeekTo(StartIndex: Integer; SearchDirection: TSearchDirection; Cmd: string): Integer;
     procedure UpdateTimeLabel;
-    procedure Animate(FileName: TFilename; AnimationSpeed, XPosition, YPosition, fWidth: Word);
-    procedure DrawAnimationFrame(ABitmap: TBitmap; X, Y, Frame, FrameWidth: Word);
-    procedure PauseAnimation;
-    procedure StopAnimation;
-    procedure AddClock(Offset: Integer; X, Y, HourHandLength, MinuteHandLength, SecondsHandLength: Word);
-    procedure DisableClocks;
-    procedure RefreshClocks;
-    procedure TrimBitmap(var Bmp: TBitmap);
-
-    procedure LogEvent(const LogLevel: TLogLevel; const AText: string; const Timestamp: TDateTime);
-    procedure RepaintVirtualDisplay;
-    procedure PaintStringOnVirtualDisplay(AText: string; Col, Row: Integer);
-    procedure CombineVirtualLayers(Sender: TObject);
-
-    procedure LoadConfig(const AFilePath: string);
-    procedure SaveConfig(const AFilePath: string);
-
+    
+    // methods related to text output
+    procedure ClearInfoStrings;
     function SubstituteStaticInfo(AText: string): string;
     function SubstituteVariableInfo(AText: string): string;
     function AddVariableInfo(AText: string; X, Y: Byte; FontName: string; FontSize: Integer): Boolean;
+    procedure HandleTextOutput(AText: string; X, Y: Byte; FontName: string; FontSize: Integer);
+    procedure RefreshTextOutputs;
+    function DrawFontedText(AText: string; X, Y: Byte; FontName: string; FontSize: Integer): TPoint;
+    
+    // Bitmaps and animations
+    procedure BitmapToVFD(FileName: string; X, Y: Word);
+    procedure TrimBitmap(var Bmp: TBitmap);
+    procedure Animate(FileName: TFilename; AnimationSpeed, XPosition, YPosition, FrameWidth: Word);
+    procedure DrawAnimationFrame(ABitmap: TBitmap; X, Y, Frame, FrameWidth: Word);
+    procedure PauseAnimation;
+    procedure StopAnimation;
+    
+    // methods related to the preview display
+    procedure RepaintVirtualDisplay;
+    procedure PaintStringOnVirtualDisplay(AText: string; Col, Row: Integer);
+    procedure CombineVirtualLayers(Sender: TObject);
+    
 
+    // special display feature stuff
+    procedure InitTheMatrix;
     procedure AddMatrixDrop(const AText: string; MaxTextLen, Row: Integer; SlownessFactor: Byte);
     procedure UpdateMatrixDrops;
-    procedure InitTheMatrix;
-
     procedure UpdateCpuMonitor;
     procedure UpdateMemMonitor;
-
+    procedure AddClock(Offset: Integer; X, Y, HourHandLength, MinuteHandLength, SecondsHandLength: Word);
+    procedure DisableClocks;
+    procedure RefreshClocks;
+    
+    // settings
+    procedure LoadConfig(const AFilePath: string);
+    procedure SaveConfig(const AFilePath: string);
+    
+    // logging
+    procedure LogEvent(const LogLevel: TLogLevel; const AText: string; const Timestamp: TDateTime);
 
 
   private
   protected
 
-    FSMBios: TSMBios;
-
-    FVirtualLayer0: TBitmap;
-    FVirtualLayer1: TBitmap;
-
+    // settings
     FStudioConfig: TStudioConfig;
-    FDisplay: TVFDisplay;
+
+    // display stuff
+    FDisplay: TVFDisplay;     // display object; might be nil
+    FVirtualLayer0: TBitmap;  // graphics layer of preview display
+    FVirtualLayer1: TBitmap;  // text layer of preview display
+    FLayerMode: TLayerMode;   // OR, AND or XOR combination of the layers
+
+    // objects to gather system information from
     FSysInfo: TSysInfo;
+    FSMBios: TSMBios;
     FWinampControl: TWinampControl;
 
-    FListIndex: Integer;   // position in ListBox
+    FListIndex: Integer;           // position in ListBox
+    FScrollStringIndex: Word;      // used for scolling texts
+    FRemainingSeconds: Integer;    // remaining number of seconds the current screen is shown
+    FIsCurrentScreenShownOnce: Boolean; // is the currently displayed screen to be shown only once?
 
     FVariableInfo: Array[0..(MAX_VARIABLE_INFO - 1)] of TVariableInfo;  // holds textual information to be refreshed periodically
-
     FClocks: Array[0..(MAX_CLOCKS - 1)] of TClockData; // holds data of analog clocks
+    FAnimationData: TAnimationData; // holds animation data
+    FCpuUsageData: TCpuUsageData;   // hold information about current and average CPU load and a history of recent CPU usage
+    FMemUsageData: TMemUsageData;   // hold information about current and average RAM load and a history of recent RAM usage
+    FTheMatrix: TMatrixData; // holds the string drops used to display a Matrix like effect
 
-    //Für Extratimer
-    ShowTime, OverviewTime: Integer;
-
-    FAnimationData: TAnimationData;
-
-    FLayerMode: TLayerMode;
-
-    FIsCurrentScreenShownOnce: Boolean;
-    FRemainingSeconds: Integer; // remaining number of seconds the current screen is shown
-
-    FScrollStringIndex: Word;
-
-    FCpuUsageData: TCpuUsageData;
-    FMemUsageData: TMemUsageData;
-
-    FTheMatrix: TMatrixData;
-
-    //ExtraScreens
-    RAMMONITORenabled: Boolean;
-    RAMMONITORcharEnabled: Boolean;
 
   public
   end;
@@ -346,7 +340,7 @@ procedure TMainForm.ClearInfoStrings;
 var
   I: Integer;
 begin
-  for I:= 0 to (MAX_VARIABLE_INFO-1) do begin
+  for I:= 0 to (MAX_VARIABLE_INFO - 1) do begin
     FVariableInfo[I].Text:= '';
     FVariableInfo[I].SubsText:= '';
     FVariableInfo[I].PrevWidth:= 0;
@@ -805,7 +799,7 @@ begin
       LogEvent(lvERROR, 'No more free slots to handle variable information. Text will be displayed as static text.', Now);
 
       if (FontName = '') or (FontSize = 0) then begin
-        if(nil <> FDisplay) then
+        if (nil <> FDisplay) then
           FDisplay.PaintString(S, X, Y);
         PaintStringOnVirtualDisplay(S, X, Y);
       end else begin
@@ -832,80 +826,80 @@ end;
 //Infos, die sich ständig ändern
 procedure TMainForm.RefreshTextOutputs;
 var
-  z: Integer;
+  I: Integer;
   OldText: string;
   S: string;
-  tWidth: Integer;
-  overlength: Integer;
-  subs: string;
+  TextWidth: Integer;
+  Overlength: Integer;
+  Subs: string;
   p0: Integer;
   BmpDimensions: TPoint;
 begin
 
-  for z:= 0 to (MAX_VARIABLE_INFO - 1) do begin
-    S:= FVariableInfo[z].Text;
+  for I:= 0 to (MAX_VARIABLE_INFO - 1) do begin
+    S:= FVariableInfo[I].Text;
 
     if ('' = S) then
       Continue;
 
-    OldText:= FVariableInfo[z].SubsText;
+    OldText:= FVariableInfo[I].SubsText;
     S:= SubstituteVariableInfo(S);
-    if(nil <> FDisplay) then
-      tWidth:= FDisplay.TextWidth // get number of characters one line can show
+    if (nil <> FDisplay) then
+      TextWidth:= FDisplay.TextWidth // get number of characters one line can show
     else
-      tWidth:= FStudioConfig.DisplayConfig.ResX div (GLYPH_W + GLYPH_GAP);
+      TextWidth:= FStudioConfig.DisplayConfig.ResX div (GLYPH_W + GLYPH_GAP);
 
-    tWidth:= tWidth - FVariableInfo[z].x;
-    overlength:= Length(S) - tWidth;
+    TextWidth:= TextWidth - FVariableInfo[I].X;
+    Overlength:= Length(S) - TextWidth;
 
-    if ((Trim(S) <> Trim(OldText)) or (overlength > 0)) then begin    // repainting is only required if the text has changed or if it has overlength
+    if ((Trim(S) <> Trim(OldText)) or (Overlength > 0)) then begin    // repainting is only required if the text has changed or if it has overlength
 
       //while (Length(S)<43 ) do S:= S + ' ';   // string bis Displayende mit Leerstellen füllen
-      if (FVariableInfo[z].FontName = '') or (FVariableInfo[z].FontSize = 0) then begin
-        if (overlength > 0) then begin  // the text is to long to be displayed
+      if (FVariableInfo[I].FontName = '') or (FVariableInfo[I].FontSize = 0) then begin
+        if (Overlength > 0) then begin  // the text is to long to be displayed
 
-          overlength:= overlength + 6; // we add 6 'virtual' character to the overlength to stay a little longer at the start and the end
+          Overlength:= Overlength + 6; // we add 6 'virtual' character to the overlength to stay a little longer at the start and the end
 
-          p0:= FScrollStringIndex mod Word(overlength);
-          if p0 <3 then
-            p0:=0
+          P0:= FScrollStringIndex mod Word(Overlength);
+          if (P0 < 3) then
+            P0:= 0
           else
-            p0:= p0-3;
+            P0:= P0 - 3;
 
-          if (p0 >= overlength-6) then
-            p0:= overlength-6;
+          if (P0 >= Overlength - 6) then
+            P0:= Overlength - 6;
 
-          subs:= S.Substring(p0, tWidth);
-          FVariableInfo[z].PrevWidth:= Length(subs);
-          if(nil <> FDisplay) then
-            FDisplay.PaintString(subs, FVariableInfo[z].x, FVariableInfo[z].y);
-          PaintStringOnVirtualDisplay(subs, FVariableInfo[z].x, FVariableInfo[z].y);
+          Subs:= S.Substring(P0, TextWidth);
+          FVariableInfo[I].PrevWidth:= Length(Subs);
+          if (nil <> FDisplay) then
+            FDisplay.PaintString(Subs, FVariableInfo[I].X, FVariableInfo[I].Y);
+          PaintStringOnVirtualDisplay(Subs, FVariableInfo[I].X, FVariableInfo[I].Y);
         end else begin
-          while (FVariableInfo[z].PrevWidth > Length(S) ) do begin
+          while (FVariableInfo[I].PrevWidth > Length(S)) do begin
            S:= S + ' '; // if the text was longer previously, we need to add whitespaces to clear the remainings of the previous text
           end;
-          FVariableInfo[z].PrevWidth:= Length(S);
-          if(nil <> FDisplay) then
-            FDisplay.PaintString(S, FVariableInfo[z].x, FVariableInfo[z].y);
-          PaintStringOnVirtualDisplay(S, FVariableInfo[z].x, FVariableInfo[z].y);
+          FVariableInfo[I].PrevWidth:= Length(S);
+          if (nil <> FDisplay) then
+            FDisplay.PaintString(S, FVariableInfo[I].X, FVariableInfo[I].Y);
+          PaintStringOnVirtualDisplay(S, FVariableInfo[I].X, FVariableInfo[I].Y);
         end;
       end else begin // it is text with font
-        BmpDimensions:= DrawFontedText(S, FVariableInfo[z].x, FVariableInfo[z].y, FVariableInfo[z].FontName, FVariableInfo[z].FontSize);
-        if (BmpDimensions.X < FVariableInfo[z].PrevWidth) then begin
+        BmpDimensions:= DrawFontedText(S, FVariableInfo[I].X, FVariableInfo[I].Y, FVariableInfo[I].FontName, FVariableInfo[I].FontSize);
+        if (BmpDimensions.X < FVariableInfo[I].PrevWidth) then begin
           // the previous text was longer
           // TODO
         end;
-        if (BmpDimensions.Y < FVariableInfo[z].PrevHeight) then begin
+        if (BmpDimensions.Y < FVariableInfo[I].PrevHeight) then begin
           // the previous text was higher
           // TODO
         end;
-        FVariableInfo[z].PrevWidth:= BmpDimensions.X;
-        FVariableInfo[z].PrevHeight:= BmpDimensions.Y;
+        FVariableInfo[I].PrevWidth:= BmpDimensions.X;
+        FVariableInfo[I].PrevHeight:= BmpDimensions.Y;
       end;
     end;
 
-    FVariableInfo[Z].SubsText:= S;
-  end;  //for z
+    FVariableInfo[I].SubsText:= S;
+  end;  //for I
 
   Inc(FScrollStringIndex);
 
@@ -914,37 +908,36 @@ end;
 
 procedure TMainForm.LoadList(ListFileName: TFileName);
 var
-   I: Integer;
-   S: string;
-   hs: string; //Hilfsstring
-   z: Integer; //Hilfszähler
+  I: Integer;
+  S: string;
+  FileName: string; // file name of other list
+  J: Integer;
 begin
   StopProcessing;
   FListIndex:= 0;
 
   ListNameLabel.Caption:= RsCurrentlyDisplayed + ': ' + ExtractFileName(ListFileName);
 
-  //Liste laden
+  //load list
   ListBox.Items.LoadFromFile(ListFileName);
 
-  //externe Listen einfügen
+  //insert external lists
   I:= 0;
   while (I < ListBox.Items.Count) do begin
     S:= ListBox.items[I];
     if (Pos('LOADSCREEN', S) = 1) then begin
-      hs:= Copy(S, 12, Length(S) - 11);
-      ExtListBox.Items.loadfromfile(hs);
+      FileName:= Copy(S, 12, Length(S) - 11);
+      ExtListBox.Items.LoadFromFile(FileName);
       ListBox.Items.Delete(I);
-      // an [I] die Strings aus ExtListBox einfügen
-      for z:= ExtListBox.Items.Count - 1 downto 0 do begin
-        ListBox.Items.Insert(I, ExtListBox.Items[z]);
+      // insert content from other list at position I
+      for J:= (ExtListBox.Items.Count - 1) downto 0 do begin
+        ListBox.Items.Insert(I, ExtListBox.Items[J]);
       end;
     end;
     Inc(I);
   end;
 
-
-  //Kommentare und Leerzeilen aus Liste entfernen
+  // remove all comment lines and empty lines
   I:= 0;
   while (I<= ListBox.items.count - 1 ) do begin
     S:= ListBox.items[I];
@@ -1020,8 +1013,8 @@ end;
 // Reads FListIndex; does not modify FListIndex.
 function TMainForm.InterpreteListCommand(S: string): Integer;
 var
-  cmdparts: TStringList;
-  cmd: string;
+  CmdParts: TStringList;
+  Cmd: string;
   n, ITmp: Integer;
   X, Y: Integer;
   P1, P2, P3, P4, P5, P6: Integer;
@@ -1033,40 +1026,40 @@ var
 begin
   Res:= -1;
 
-  cmdparts:= TStringList.Create;
+  CmdParts:= TStringList.Create;
   try
-    cmdparts.Delimiter:= ' ';
-    cmdparts.QuoteChar:= '''';
-    cmdparts.DelimitedText:= S;
+    CmdParts.Delimiter:= ' ';
+    CmdParts.QuoteChar:= '''';
+    CmdParts.DelimitedText:= S;
 
-    if (cmdparts.Count > 0) then begin
-      cmd:= cmdparts[0];
+    if (CmdParts.Count > 0) then begin
+      Cmd:= CmdParts[0];
 
-      if ('NEWSCREEN' = cmd) then begin
+      if ('NEWSCREEN' = Cmd) then begin
 
         FIsCurrentScreenShownOnce:= False; // by default this screen will be shown again then the list loops
         DoContinueScreen:= False;          // by default, NEWSCREEN will stop animations, clear/reset variable information, etc.
 
-        if (cmdparts.Count >= 2) then begin
+        if (CmdParts.Count >= 2) then begin
           // p1 = screen limitations
-          if ('ONCE' = cmdparts[1]) then begin
+          if ('ONCE' = CmdParts[1]) then begin
             // display this screen only once
             FIsCurrentScreenShownOnce:= True;
-          end else if ('CONTINUE' = cmdparts[1]) then begin
+          end else if ('CONTINUE' = CmdParts[1]) then begin
             // do not stop animations, do not clear/reset variable infomration, etc.
             DoContinueScreen:= True;
-          end else if (cmdparts[1].StartsWith('REQUIRE')) then begin
+          end else if (CmdParts[1].StartsWith('REQUIRE')) then begin
             // this screen shall only be shown if a requirement is met
             IsRequirementMet:= False; // False by default, must be set to True in code below
 
-            if ('REQUIREWINAMP' = cmdparts[1]) then begin
+            if ('REQUIREWINAMP' = CmdParts[1]) then begin
               // check if Winamp is running
               if (FWinampControl.IsWinampRunning) then
                 IsRequirementMet:= True;
             end;
 
             if (not IsRequirementMet) then begin
-              //LogEvent(lvINFO, 'Requirment ' + cmdparts[1] + ' is not met -> skip to next screen', Now);
+              //LogEvent(lvINFO, 'Requirment ' + CmdParts[1] + ' is not met -> skip to next screen', Now);
 
               // seek next 'NEWSCREEN' line; starting with next line
               ITmp:= FListIndex + 1;
@@ -1085,14 +1078,14 @@ begin
           StopProcessing;
         end;
 
-        if(nil <> FDisplay) then begin
+        if (nil <> FDisplay) then begin
           FDisplay.ShowScreen(BOTH_LAYERS);
           FLayerMode:= lmXOR;
           FDisplay.SetLayerMode(FLayerMode);
         end;
 
 
-      end else if ('SCREENEND' = cmd) then begin
+      end else if ('SCREENEND' = Cmd) then begin
         if (True = FIsCurrentScreenShownOnce) then begin
           // remove this screen from the list
 
@@ -1117,36 +1110,36 @@ begin
           end;
         end;
 
-      end else if ('DSPINIT' = cmd) then begin
-        if(nil <> FDisplay) then
+      end else if ('DSPINIT' = Cmd) then begin
+        if (nil <> FDisplay) then
           FDisplay.DspInit(FStudioConfig.DisplayConfig.ResX, FStudioConfig.DisplayConfig.ResY);
 
-      end else if ('ORMODE' = cmd) then begin
-        if(nil <> FDisplay) then begin
+      end else if ('ORMODE' = Cmd) then begin
+        if (nil <> FDisplay) then begin
           FLayerMode:= lmOR;
           FDisplay.SetLayerMode(FLayerMode);
         end;
 
-      end else if ('XORMODE' = cmd) then begin
-        if(nil <> FDisplay) then begin
+      end else if ('XORMODE' = Cmd) then begin
+        if (nil <> FDisplay) then begin
           FLayerMode:= lmXOR;
           FDisplay.SetLayerMode(FLayerMode);
         end;
 
-      end else if ('ANDMODE' = cmd) then begin
-        if(nil <> FDisplay) then begin
+      end else if ('ANDMODE' = Cmd) then begin
+        if (nil <> FDisplay) then begin
           FLayerMode:= lmAND;
           FDisplay.SetLayerMode(FLayerMode);
         end;
 
-      end else if ('STOP' = cmd) then begin
+      end else if ('STOP' = Cmd) then begin
          WaitTimer.Enabled:= False;
          StopButton.caption:= RsBtnGo;
          Popupstopbutton.caption:= RsBtnGo;
          StopButton.ImageIndex:= 1;
 
-      end else if ('CLEARSCREEN' = cmd) then begin
-        if(nil <> FDisplay) then
+      end else if ('CLEARSCREEN' = Cmd) then begin
+        if (nil <> FDisplay) then
           FDisplay.ClearScreen;
         FVirtualLayer0.Canvas.Brush.Color:= clWhite;;
         FVirtualLayer0.Canvas.FillRect(0, 0, FStudioConfig.DisplayConfig.ResX, FStudioConfig.DisplayConfig.ResY);
@@ -1154,28 +1147,28 @@ begin
         FVirtualLayer1.Canvas.FillRect(0, 0, FStudioConfig.DisplayConfig.ResX, FStudioConfig.DisplayConfig.ResY);
         CombineVirtualLayers(Self);
 
-      end else if ('SCREENTIME' = cmd) then begin
+      end else if ('SCREENTIME' = Cmd) then begin
         // p1 = screen time in seconds
-        if (cmdparts.Count >= 2) then begin
-          P1:= strtoint(cmdparts[1]);
+        if (CmdParts.Count >= 2) then begin
+          P1:= StrToInt(CmdParts[1]);
           WaitTimer.Interval:= P1 * 1000;
           //SCR_Time_Label.caption:= 'ScreenTime: ' + floattostr(WaitTimer.Interval/1000)+ 'S';
           WaitTimer.Enabled:= True;
         end;
 
-      end else if ('LIGHT' = cmd) then begin
+      end else if ('LIGHT' = Cmd) then begin
         // p1 = brightness level
-       if (cmdparts.Count >= 2) then begin
-         P1:= strtoint(cmdparts[1]);
-         if(nil <> FDisplay) then
+       if (CmdParts.Count >= 2) then begin
+         P1:= StrToInt(CmdParts[1]);
+         if (nil <> FDisplay) then
            FDisplay.SetBrightness(P1);
        end;
 
-      end else if ('NOISE' = cmd) then begin
+      end else if ('NOISE' = Cmd) then begin
         // p1 = amount of pixels, p2 = inverted or not [optional]
-         if (cmdparts.Count >= 2) then begin
-           P1:= strtoint(cmdparts[1]);
-           if ((cmdparts.Count >= 3) and ((cmdparts[2].ToUpper = 'TRUE') or (cmdparts[2] = '1'))) then begin
+         if (CmdParts.Count >= 2) then begin
+           P1:= StrToInt(CmdParts[1]);
+           if ((CmdParts.Count >= 3) and ((CmdParts[2].ToUpper = 'TRUE') or (CmdParts[2] = '1'))) then begin
              IsInverted:= True;
              AColor:= clWhite;
            end else begin
@@ -1186,43 +1179,43 @@ begin
            for ITmp:= 1 to P1 do begin
              X:= Random(FStudioConfig.DisplayConfig.ResX);
              Y:= Random(FStudioConfig.DisplayConfig.ResY);
-             if(nil <> FDisplay) then
+             if (nil <> FDisplay) then
                FDisplay.PaintPixel(X, Y, IsInverted);
              FVirtualLayer0.Canvas.Pixels[X, Y]:= AColor;
            end;
            CombineVirtualLayers(Self);
          end;
 
-      end else if ('PIXEL' = cmd) then begin
+      end else if ('PIXEL' = Cmd) then begin
         // p1 = x, p2 = y, p3 = inverted or not [optional]
-        if (cmdparts.Count >= 3) then begin
-          P1:= strtoint(cmdparts[1]);
-          P2:= strtoint(cmdparts[2]);
-          if ((cmdparts.Count >= 4) and ((cmdparts[3].ToUpper = 'TRUE') or (cmdparts[3] = '1'))) then begin
-            if(nil <> FDisplay) then
+        if (CmdParts.Count >= 3) then begin
+          P1:= StrToInt(CmdParts[1]);
+          P2:= StrToInt(CmdParts[2]);
+          if ((CmdParts.Count >= 4) and ((CmdParts[3].ToUpper = 'TRUE') or (CmdParts[3] = '1'))) then begin
+            if (nil <> FDisplay) then
               FDisplay.PaintPixel(P1, P2, True);
             FVirtualLayer0.Canvas.Pixels[P1, P2]:= clWhite;
           end else begin
-            if(nil <> FDisplay) then
+            if (nil <> FDisplay) then
               FDisplay.PaintPixel(P1, P2, False);
             FVirtualLayer0.Canvas.Pixels[P1, P2]:= clBlack;
           end;
           CombineVirtualLayers(Self);
         end;
 
-      end else if ('LINE' = cmd) then begin
+      end else if ('LINE' = Cmd) then begin
         // p1 = x0, p2 = y0, p3 = x1, p4 = y1, p5 = inverted or not [optional]
-        if (cmdparts.Count >= 5) then begin
-          P1:= strtoint(cmdparts[1]);
-          P2:= strtoint(cmdparts[2]);
-          P3:= strtoint(cmdparts[3]);
-          P4:= strtoint(cmdparts[4]);
-          if ((cmdparts.Count >= 6) and ((cmdparts[5].ToUpper = 'TRUE') or (cmdparts[5] = '1'))) then begin
-            if(nil <> FDisplay) then
+        if (CmdParts.Count >= 5) then begin
+          P1:= StrToInt(CmdParts[1]);
+          P2:= StrToInt(CmdParts[2]);
+          P3:= StrToInt(CmdParts[3]);
+          P4:= StrToInt(CmdParts[4]);
+          if ((CmdParts.Count >= 6) and ((CmdParts[5].ToUpper = 'TRUE') or (CmdParts[5] = '1'))) then begin
+            if (nil <> FDisplay) then
               FDisplay.PaintLine(P1, P2, P3, P4, True);
             FVirtualLayer0.Canvas.Pen.Color:= clWhite;
           end else begin
-            if(nil <> FDisplay) then
+            if (nil <> FDisplay) then
               FDisplay.PaintLine(P1, P2, P3, P4, False);
             FVirtualLayer0.Canvas.Pen.Color:= clBlack;
           end;
@@ -1231,19 +1224,19 @@ begin
           CombineVirtualLayers(Self);
         end;
 
-      end else if ('FRAME' = cmd) then begin
+      end else if ('FRAME' = Cmd) then begin
         // p1 = x0, p2 = y0, p3 = x1, p4 = y1, p5 = inverted or not [optional]
-        if (cmdparts.Count >= 5) then begin
-          P1:= strtoint(cmdparts[1]);
-          P2:= strtoint(cmdparts[2]);
-          P3:= strtoint(cmdparts[3]);
-          P4:= strtoint(cmdparts[4]);
-          if ((cmdparts.Count >= 6) and ((cmdparts[5].ToUpper = 'TRUE') or (cmdparts[5] = '1'))) then begin
-            if(nil <> FDisplay) then
+        if (CmdParts.Count >= 5) then begin
+          P1:= StrToInt(CmdParts[1]);
+          P2:= StrToInt(CmdParts[2]);
+          P3:= StrToInt(CmdParts[3]);
+          P4:= StrToInt(CmdParts[4]);
+          if ((CmdParts.Count >= 6) and ((CmdParts[5].ToUpper = 'TRUE') or (CmdParts[5] = '1'))) then begin
+            if (nil <> FDisplay) then
               FDisplay.PaintFrame(P1, P2, P3, P4, True);
             FVirtualLayer0.Canvas.Pen.Color:= clWhite;
           end else begin
-            if(nil <> FDisplay) then
+            if (nil <> FDisplay) then
               FDisplay.PaintFrame(P1, P2, P3, P4, False);
             FVirtualLayer0.Canvas.Pen.Color:= clBlack;
           end;
@@ -1251,73 +1244,73 @@ begin
           CombineVirtualLayers(Self);
         end;
 
-      end else if ('PLAINTEXT' = cmd) then begin
+      end else if ('PLAINTEXT' = Cmd) then begin
         // p1 = text, p2 = x, p3 = y
-        if (cmdparts.Count >= 4) then begin
-          P2:= strtoint(cmdparts[2]);
-          P3:= strtoint(cmdparts[3]);
+        if (CmdParts.Count >= 4) then begin
+          P2:= StrToInt(CmdParts[2]);
+          P3:= StrToInt(CmdParts[3]);
           // does the text to be displayed include any '$' characters?
-          if (cmdparts[1].Contains('$') ) then begin
-            HandleTextOutput(cmdparts[1], P2, P3, '', 0);
+          if (CmdParts[1].Contains('$') ) then begin
+            HandleTextOutput(CmdParts[1], P2, P3, '', 0);
           end else begin
-            if(nil <> FDisplay) then
-              FDisplay.PaintString(cmdparts[1], P2, P3);
-            PaintStringOnVirtualDisplay(cmdparts[1], P2, P3);
+            if (nil <> FDisplay) then
+              FDisplay.PaintString(CmdParts[1], P2, P3);
+            PaintStringOnVirtualDisplay(CmdParts[1], P2, P3);
           end;
         end;
 
-      end else if ('TEXTOUT' = cmd) then begin
+      end else if ('TEXTOUT' = Cmd) then begin
         // p1 = text, p2 = x, p3 = y, p4 = font size, p5 = font name
-        if (cmdparts.Count >= 6) then begin
-          P2:= strtoint(cmdparts[2]);
-          P3:= strtoint(cmdparts[3]);
-          P4:= strtoint(cmdparts[4]);
+        if (CmdParts.Count >= 6) then begin
+          P2:= StrToInt(CmdParts[2]);
+          P3:= StrToInt(CmdParts[3]);
+          P4:= StrToInt(CmdParts[4]);
           // does the text to be displayed include any '$' characters?
-          if (cmdparts[1].Contains('$') ) then begin
-            HandleTextOutput(cmdparts[1], P2, P3, cmdparts[5], P4);
+          if (CmdParts[1].Contains('$') ) then begin
+            HandleTextOutput(CmdParts[1], P2, P3, CmdParts[5], P4);
           end else begin
-            DrawFontedText(cmdparts[1], P2, P3, cmdparts[5], P4);
+            DrawFontedText(CmdParts[1], P2, P3, CmdParts[5], P4);
           end;
         end;
 
-      end else if ('ANIMATE' = cmd) then begin
+      end else if ('ANIMATE' = Cmd) then begin
         // p1 = file name, p2 = animation speed, p3 = x, p4 = y, p5 = frame width
         if (False = FAnimationData.IsAnimationDisplayed) then begin
           // only one animation per screen is supported
-          if (cmdparts.Count >= 6) then begin
-            P2:= strtoint(cmdparts[2]);
-            P3:= strtoint(cmdparts[3]);
-            P4:= strtoint(cmdparts[4]);
-            P5:= strtoint(cmdparts[5]);
-            Animate(cmdparts[1], P2, P3, P4, P5);
+          if (CmdParts.Count >= 6) then begin
+            P2:= StrToInt(CmdParts[2]);
+            P3:= StrToInt(CmdParts[3]);
+            P4:= StrToInt(CmdParts[4]);
+            P5:= StrToInt(CmdParts[5]);
+            Animate(CmdParts[1], P2, P3, P4, P5);
             FAnimationData.IsAnimationDisplayed:= True;
           end;
         end;
 
-      end else if ('BITMAP' = cmd) then begin
+      end else if ('BITMAP' = Cmd) then begin
         // p1 = file path, p2 = x, p3 = y
-        if (cmdparts.Count >= 4) then begin
-          P2:= strtoint(cmdparts[2]);
-          P3:= strtoint(cmdparts[3]);
-          BitmapToVFD(cmdparts[1], P2, P3);
+        if (CmdParts.Count >= 4) then begin
+          P2:= StrToInt(CmdParts[2]);
+          P3:= StrToInt(CmdParts[3]);
+          BitmapToVFD(CmdParts[1], P2, P3);
         end;
 
-      end else if ('CLOCK' = cmd) then begin
+      end else if ('CLOCK' = Cmd) then begin
         // p1 = offset in minutes, p2 = x, p3 = y, p4 = hour hand length, p5 = minute hand length, p6 = seconds hand length
-        if (cmdparts.Count >= 7) then begin
-          P1:= strtoint(cmdparts[1]);
-          P2:= strtoint(cmdparts[2]);
-          P3:= strtoint(cmdparts[3]);
-          P4:= strtoint(cmdparts[4]);
-          P5:= strtoint(cmdparts[5]);
-          P6:= strtoint(cmdparts[6]);
+        if (CmdParts.Count >= 7) then begin
+          P1:= StrToInt(CmdParts[1]);
+          P2:= StrToInt(CmdParts[2]);
+          P3:= StrToInt(CmdParts[3]);
+          P4:= StrToInt(CmdParts[4]);
+          P5:= StrToInt(CmdParts[5]);
+          P6:= StrToInt(CmdParts[6]);
           AddClock(P1, P2, P3, P4, P5, P6);
         end;
 
-      end else if ('THEMATRIX' = cmd) then begin
+      end else if ('THEMATRIX' = Cmd) then begin
         // p1 = speed
-        if (cmdparts.Count >= 2) then begin
-          P1:= strtoint(cmdparts[1]);
+        if (CmdParts.Count >= 2) then begin
+          P1:= StrToInt(CmdParts[1]);
 
           // Setting up the drops
           InitTheMatrix;
@@ -1326,24 +1319,24 @@ begin
 
         end;
 
-      end else if ('CPUMONITOR' = cmd) then begin
+      end else if ('CPUMONITOR' = Cmd) then begin
         // p1 = number of rows to use, p2 = bottom-most row
-          if (cmdparts.Count >= 3) then begin
+          if (CmdParts.Count >= 3) then begin
             if (False = FCpuUsageData.IsUsageMonitorDisplayed) then begin
-              P1:= strtoint(cmdparts[1]);
-              P2:= strtoint(cmdparts[2]);
+              P1:= StrToInt(CmdParts[1]);
+              P2:= StrToInt(CmdParts[2]);
               FCpuUsageData.NumRows:= P1;
               FCpuUsageData.BottomRow:= P2;
               FCpuUsageData.IsUsageMonitorDisplayed:= True;
             end;
           end;
 
-      end else if ('RAMMONITOR' = cmd) then begin
+      end else if ('RAMMONITOR' = Cmd) then begin
         // p1 = number of rows to use, p2 = bottom-most row
-          if (cmdparts.Count >= 3) then begin
+          if (CmdParts.Count >= 3) then begin
             if (False = FMemUsageData.IsUsageMonitorDisplayed) then begin
-              P1:= strtoint(cmdparts[1]);
-              P2:= strtoint(cmdparts[2]);
+              P1:= StrToInt(CmdParts[1]);
+              P2:= StrToInt(CmdParts[2]);
               FMemUsageData.NumRows:= P1;
               FMemUsageData.BottomRow:= P2;
               FMemUsageData.IsUsageMonitorDisplayed:= True;
@@ -1353,10 +1346,10 @@ begin
       end;
 
 
-    end; // endif (cmdparts.Count > 0)
+    end; // endif (CmdParts.Count > 0)
 
   finally
-    cmdparts.Free;
+    CmdParts.Free;
   end;
 
   {
@@ -1373,20 +1366,20 @@ begin
      end
      else if (Pos('SELECTSCREEN', S)= 1 ) then begin
       p1:= Copy(S, 14, 1); // Screennummer ermitteln
-      vfd.SelectScreen(strtoint(p1));
+      vfd.SelectScreen(StrToInt(p1));
      end
      else if (Pos('CLEARSCREEN', S)= 1 ) then begin
       p1:= Copy(S, 13, 1); // Screennummer ermitteln
-      vfd.ClearScreen(strtoint(p1));
+      vfd.ClearScreen(StrToInt(p1));
       if (p1='1' ) then vfd.ClearBitmap; //wenn GFX_Screen gelöscht wurde, auch Bitmapobjekt löschen
      end
      else if (Pos('FADEOUT', S)= 1 ) then begin
       p1:= Copy(S, 9, l - 8); // Geschwindigkeit ermitteln
-      vfd.Fade(True, strtoint(p1));
+      vfd.Fade(True, StrToInt(p1));
      end
      else if (Pos('FADEIN', S)= 1 ) then begin
       p1:= Copy(S, 8, l - 7); // Geschwindigkeit ermitteln
-      vfd.Fade(False, strtoint(p1));
+      vfd.Fade(False, StrToInt(p1));
      end
      else if (Pos('CPUMONITOR', S)= 1 ) then begin
       CPUMONITORenabled:= True;
@@ -1423,7 +1416,7 @@ begin
        p3:= Copy(S, l - 3, 4);  //Speed in ms ermitteln
        p2:= Copy(S, l - 7, 3);  //X - Position
        p1:= Copy(S, 9, l - 17); //Filename
-       vfd.Animate(p1, strtoint(p2), strtoint(p3));
+       vfd.Animate(p1, StrToInt(p2), StrToInt(p3));
       if (not PlayOnlyOnIdle) or isIdle then begin  //nur wenn isIdle oder PlayOnlyOnIdle abgeschaltet - andernfalls Befehl ignorieren
        AnimationPaused:= False;
       end else begin
@@ -1436,13 +1429,13 @@ begin
       p3:= Copy(S, l, 1);  //Letztes Zeichen= Y - Position (einstellig[0..7])
       p2:= Copy(S, l - 4, 3);  //X - Position (dreistellig)
       p1:= Copy(S, l - 8, 3); //Pixelbyte (dreistellig)
-      vfd.SetPixelbyte(strtoint(p1), strtoint(p2), strtoint(p3));
+      vfd.SetPixelbyte(StrToInt(p1), StrToInt(p2), StrToInt(p3));
      end
      else if (Pos('TIME', S)= 1 ) then begin
       p2:= Copy(S, l - 3, 4);  //Position
       p1:= Copy(S, 6, l - 9); //Analog oder Digital?
-      if (p1= 'ANALOG' ) then vfd.Time(True, strtoint(p2))
-      else vfd.time(False, strtoint(p2));
+      if (p1= 'ANALOG' ) then vfd.Time(True, StrToInt(p2))
+      else vfd.time(False, StrToInt(p2));
      end
      else if (Pos('PAINTBITMAP', S)= 1 ) then begin
         p6:= Copy(S, 13, l - 11);  //'PAINTBITMAP ' aus S entfernen
@@ -1453,15 +1446,10 @@ begin
       p4:= Copy(S, 21 + Length(p1), 3);          // Breite in Pixeln
       p5:= Copy(S, 25 + Length(p1), 3);          // X - Position im Bild
       p6:= Copy(S, 29 + Length(p1), l - 28 + Length(p1)); //MalFarbe
-      BitmapToVFD(p1, strtoint(p2), strtoint(p3), strtoint(p4), strtoint(p5), stringtocolor(p6));
+      BitmapToVFD(p1, StrToInt(p2), StrToInt(p3), StrToInt(p4), StrToInt(p5), stringtocolor(p6));
      end;
 }
   Result:= Res;
-end;
-
-procedure TMainForm.VirtualDisplayLayer0Paint(Sender: TObject);
-begin
-
 end;
 
 
@@ -1577,7 +1565,7 @@ begin
 
   LogEvent(lvINFO, 'Application started. Version ' + VERSION_STR , Now);
 
-  IniFilePath:= extractfilepath(application.ExeName) + 'vfdstudio.ini';
+  IniFilePath:= ExtractFilePath(application.ExeName) + 'vfdstudio.ini';
 
   LoadConfig(IniFilePath);
 
@@ -1618,8 +1606,8 @@ begin
   FVirtualLayer1.Height:= FStudioConfig.DisplayConfig.ResY;
 
 
-  FSysInfo:= TSysInfo.Create(self);
-  FWinampControl:= TWinampControl.Create(self);
+  FSysInfo:= TSysInfo.Create(Self);
+  FWinampControl:= TWinampControl.Create(Self);
 
   FAnimationData.AnimationBitmap:= TBitmap.create;
 
@@ -1639,19 +1627,19 @@ var
 begin
   LogEvent(lvINFO, 'Application closed.', Now);
 
-  IniFilePath:= extractfilepath(application.ExeName) + 'vfdstudio.ini';
+  IniFilePath:= ExtractFilePath(application.ExeName) + 'vfdstudio.ini';
   SaveConfig(IniFilePath);
 
   AStringList:= TStringList.Create;
   try
     AStringList.Add('#;Time;Level;Message');
-    for I := 0 to (LogListView.Items.Count - 1) do
+    for I:= 0 to (LogListView.Items.Count - 1) do
       AStringList.Add(LogListView.Items[I].Caption + ',' + // #
         LogListView.Items[i].SubItems[0] + ';' +           // Time
         LogListView.Items[i].SubItems[1] + ';' +           // Level
         '"' + LogListView.Items[i].SubItems[2] + '"');     // Message
     try
-      AStringList.SaveToFile(extractfilepath(application.ExeName) + 'vfdstudio.log');
+      AStringList.SaveToFile(ExtractFilePath(application.ExeName) + 'vfdstudio.log');
     finally
     end;
   finally
@@ -1690,10 +1678,10 @@ procedure TMainForm.HideTimerTimer(Sender: TObject);
 begin
   //TODO: Hide;
 
-  HideTimer.Enabled:= False; // self - disabling
+  HideTimer.Enabled:= False; // self-disabling
 
   // load last list as specified in ini file
-  Mainform.LoadList(extractfilepath(application.ExeName) + 'Lists\' + FStudioConfig.ListConfig.ListName);
+  Mainform.LoadList(ExtractFilePath(Application.ExeName) + 'Lists\' + FStudioConfig.ListConfig.ListName);
 end;
 
 procedure TMainForm.InfoButtonClick(Sender: TObject);
@@ -1703,13 +1691,13 @@ end;
 
 procedure TMainForm.UpdateTimeLabel;
 var
-  h, m, S: Integer;
+  H, M, S: Integer;
 begin
   if (WaitTimer.Enabled) then begin
-    h:= Trunc(FRemainingSeconds / 3600);
-    m:= Trunc((FRemainingSeconds mod 3600) / 60);
+    H:= Trunc(FRemainingSeconds / 3600);
+    M:= Trunc((FRemainingSeconds mod 3600) / 60);
     S:= FRemainingSeconds mod 60;
-    SCR_Time_Label.caption:= RsNextScreenText + Format(' %d:%.02d:%.02d', [h, m, S]);
+    SCR_Time_Label.caption:= RsNextScreenText + Format(' %d:%.02d:%.02d', [H, M, S]);
   end else begin
     SCR_Time_Label.caption:= RsNextScreenText + ' -: - -: - -';
   end;
@@ -1801,10 +1789,6 @@ begin
   end;
 end;
 
-procedure TMainForm.LoadListButtonClick(Sender: TObject);
-begin
-end;
-
 procedure TMainForm.MenuItem1Click(Sender: TObject);
 begin
   ReloadButtonClick(Self);
@@ -1841,11 +1825,6 @@ begin
   FStudioConfig.AnimationConfig.PlayOnlyOnIdle:= OnlyOnIdleBox.Checked;
 end;
 
-procedure TMainForm.Panel3Click(Sender: TObject);
-begin
-
-end;
-
 procedure TMainForm.PopupStopButtonClick(Sender: TObject);
 begin
   StopButtonClick(Sender);
@@ -1853,7 +1832,7 @@ end;
 
 procedure TMainForm.ReloadButtonClick(Sender: TObject);
 begin
-  Mainform.LoadList(extractfilepath(application.ExeName) + 'Lists\' + FStudioConfig.ListConfig.ListName);
+  Mainform.LoadList(ExtractFilePath(application.ExeName) + 'Lists\' + FStudioConfig.ListConfig.ListName);
 end;
 
 procedure TMainForm.SaveLogButtonClick(Sender: TObject);
@@ -1861,12 +1840,12 @@ var
   AStringList: TStringList;
   I: Integer;
 begin
-  if SaveDialog.Execute then begin
+  if (SaveDialog.Execute) then begin
 
     AStringList:= TStringList.Create;
     try
       AStringList.Add('#;Time;Level;Message');
-      for I := 0 to (LogListView.Items.Count - 1) do
+      for I:= 0 to (LogListView.Items.Count - 1) do
         AStringList.Add(LogListView.Items[I].Caption + ',' + // #
           LogListView.Items[i].SubItems[0] + ';' +           // Time
           LogListView.Items[i].SubItems[1] + ';' +           // Level
@@ -1897,13 +1876,13 @@ begin
     StopButton.caption:= RsBtnStop;
     StopButton.ImageIndex:= 0;
     Popupstopbutton.caption:= RsBtnStop;
-    PopupStopButton.ImageIndex:=0;
+    PopupStopButton.ImageIndex:= 0;
   end
   else begin
     StopButton.caption:= RsBtnGo;
     StopButton.ImageIndex:= 1;
     PopupStopButton.caption:= RsBtnGo;
-    PopupStopButton.ImageIndex:=1;
+    PopupStopButton.ImageIndex:= 1;
   end;
 end;
 
@@ -1923,8 +1902,11 @@ var
 begin
   if (nil <> FSysInfo) then begin
 
-    TextWidth:= (FStudioConfig.DisplayConfig.ResX div (GLYPH_W + GLYPH_GAP));
-
+    if (nil <> FDisplay) then
+      TextWidth:= FDisplay.TextWidth // get number of characters one line can show
+    else
+      TextWidth:= FStudioConfig.DisplayConfig.ResX div (GLYPH_W + GLYPH_GAP);
+  
     // ---- CPU usage ------
 
     FSysInfo.UpdateCpuUsage;
@@ -1938,8 +1920,8 @@ begin
       SetLength(FCpuUsageData.UsageHistory, Length(FCpuUsageData.UsageHistory) + 1);
     end else begin
       // otherwise shift all values left by one
-      for I := 0 to High(FCpuUsageData.UsageHistory) - 1 do
-        FCpuUsageData.UsageHistory[I] := FCpuUsageData.UsageHistory[I + 1];
+      for I:= 0 to High(FCpuUsageData.UsageHistory) - 1 do
+        FCpuUsageData.UsageHistory[I]:= FCpuUsageData.UsageHistory[I + 1];
     end;
 
     // write the new value to the last index
@@ -1947,7 +1929,7 @@ begin
 
     // calculate new average
     AvgValue:= 0.0;
-    for I := 0 to High(FCpuUsageData.UsageHistory) do
+    for I:= 0 to High(FCpuUsageData.UsageHistory) do
       AvgValue:= AvgValue + FCpuUsageData.UsageHistory[I] / Length(FCpuUsageData.UsageHistory);
     FCpuUsageData.AverageCpuUsage:= Round(AvgValue);
 
@@ -1962,15 +1944,15 @@ begin
 
     FMemUsageData.CurrentMemUsage:= MemUsage;
     FMemUsageData.FreeMemory:= FreeMem;
-    FMemUsageData.PhysicalMemory:=PhysMem;
+    FMemUsageData.PhysicalMemory:= PhysMem;
 
     if (Length(FMemUsageData.UsageHistory) < TextWidth) then begin
       // if the array length is < than the text width of the display, then add a new array element
       SetLength(FMemUsageData.UsageHistory, Length(FMemUsageData.UsageHistory) + 1);
     end else begin
       // otherwise shift all values left by one
-      for I := 0 to High(FMemUsageData.UsageHistory) - 1 do
-        FMemUsageData.UsageHistory[I] := FMemUsageData.UsageHistory[I + 1];
+      for I:= 0 to High(FMemUsageData.UsageHistory) - 1 do
+        FMemUsageData.UsageHistory[I]:= FMemUsageData.UsageHistory[I + 1];
     end;
 
     // write the new value to the last index
@@ -1978,7 +1960,7 @@ begin
 
     // calculate new average
     AvgValue:= 0.0;
-    for I := 0 to High(FMemUsageData.UsageHistory) do
+    for I:= 0 to High(FMemUsageData.UsageHistory) do
       AvgValue:= AvgValue + FMemUsageData.UsageHistory[I] / Length(FMemUsageData.UsageHistory);
     FMemUsageData.AverageMemUsage:= Round(AvgValue);
 
@@ -1988,10 +1970,6 @@ begin
 
 
   end; // FSysInfo not nil
-end;
-
-procedure TMainForm.ViewListPanelClick(Sender: TObject);
-begin
 end;
 
 procedure TMainForm.ExitButtonClick(Sender: TObject);
@@ -2017,7 +1995,7 @@ begin
   MainForm.close;
 end;
 
-procedure TMainForm.BitmapToVFD(FileName: string; X, Y: word);
+procedure TMainForm.BitmapToVFD(FileName: string; X, Y: Word);
 var
   TmpBitmap: TBitmap;
 begin
@@ -2031,7 +2009,7 @@ begin
   if (TmpBitmap.Width + X >= FStudioConfig.DisplayConfig.ResX) then
     TmpBitmap.Width:= TmpBitmap.Width - (TmpBitmap.Width + X - FStudioConfig.DisplayConfig.ResX);
 
-  if(nil <> FDisplay) then
+  if (nil <> FDisplay) then
     FDisplay.PaintBitmap(TmpBitmap, X, Y);
   FVirtualLayer0.Canvas.Draw(X, Y, TmpBitmap);
   CombineVirtualLayers(Self);
@@ -2047,10 +2025,10 @@ begin
   // trim bottom
   // start from bottom and count all horizontal lines which are completely white
   NumberOfWhiteLines:= 0;
-  for Y := Bmp.Height - 1 downto 1 do begin // 'downto 1' and not 'downto 0' because the reaining image should be at least 1 pixel in height
+  for Y:= Bmp.Height - 1 downto 1 do begin // 'downto 1' and not 'downto 0' because the reaining image should be at least 1 pixel in height
     IsNonWhitePixelFound:= False;
-    for X := 0 to (Bmp.Width - 1) do begin
-      if Bmp.Canvas.Pixels[X, Y] <> clWhite then begin
+    for X:= 0 to (Bmp.Width - 1) do begin
+      if (Bmp.Canvas.Pixels[X, Y] <> clWhite) then begin
         IsNonWhitePixelFound:= True;
         Break; // abort X loop
       end;
@@ -2066,10 +2044,10 @@ begin
   // trim right
   // start from right and count all vertical lines which are completely white
   NumberOfWhiteLines:= 0;
-  for X := Bmp.Width - 1 downto 1 do begin // 'downto 1' and not 'downto 0' because the reaining image should be at least 1 pixel in width
+  for X:= Bmp.Width - 1 downto 1 do begin // 'downto 1' and not 'downto 0' because the reaining image should be at least 1 pixel in width
     IsNonWhitePixelFound:= False;
-    for Y := 0 to (Bmp.Height - 1) do begin
-      if Bmp.Canvas.Pixels[X, Y] <> clWhite then begin
+    for Y:= 0 to (Bmp.Height - 1) do begin
+      if (Bmp.Canvas.Pixels[X, Y] <> clWhite) then begin
         IsNonWhitePixelFound:= True;
         Break; // abort Y loop
       end;
@@ -2090,7 +2068,7 @@ var
 begin
   ResultPoint:= Point(0 ,0);
 
-  TmpBitmap := TBitmap.Create;
+  TmpBitmap:= TBitmap.Create;
   try
     TmpBitmap.Monochrome:= True;
     TmpBitmap.Canvas.Font.Color:= clblack;
@@ -2125,7 +2103,7 @@ end;
 
 
 
-procedure TMainForm.Animate(FileName: TFilename; AnimationSpeed, XPosition, YPosition, fWidth: Word);
+procedure TMainForm.Animate(FileName: TFilename; AnimationSpeed, XPosition, YPosition, FrameWidth: Word);
 begin
   try
     AnimateTimer.Enabled:= False;
@@ -2133,8 +2111,8 @@ begin
     FAnimationData.AnimationBitmap.LoadFromFile(FileName);
 
     FAnimationData.FrameIndex:=  0;
-    FAnimationData.FrameCount:= (FAnimationData.AnimationBitmap.Width div fWidth);
-    FAnimationData.FrameWidth:=  fWidth;
+    FAnimationData.FrameCount:= (FAnimationData.AnimationBitmap.Width div FrameWidth);
+    FAnimationData.FrameWidth:=  FrameWidth;
     FAnimationData.XPos:=        XPosition;
     FAnimationData.YPos:=        YPosition;
     AnimateTimer.Interval:=      AnimationSpeed;
@@ -2204,12 +2182,12 @@ var
 begin
   try
     TmpBitmap:= TBitmap.Create;
-    TmpBitmap.Height := ABitmap.Height;
+    TmpBitmap.Height:= ABitmap.Height;
     TmpBitmap.Width:= FrameWidth;
     sRect:= Rect(Frame * FrameWidth, 0, Frame * FrameWidth + FrameWidth, ABitmap.Height);
     dRect:= Rect(0, 0, FrameWidth, ABitmap.Height);
     TmpBitmap.Canvas.CopyRect(dRect, ABitmap.Canvas, sRect);
-    if(nil <> FDisplay) then
+    if (nil <> FDisplay) then
       FDisplay.PaintBitmap(TmpBitmap, X, Y);
     FVirtualLayer0.Canvas.Draw(X, Y, TmpBitmap);
     CombineVirtualLayers(Self);
@@ -2226,7 +2204,7 @@ var
 begin
   DecodeDateTime(Timestamp, AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond);
 
-  Item := LogListView.Items.Add;
+  Item:= LogListView.Items.Add;
   Item.Caption:= IntToStr(LogListView.Items.Count);
   Item.Subitems.Add(Format('%.04d-%.02d-%.02d %.02d:%.02d:%.02d.%.03d', [AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond]));
   case LogLevel of
@@ -2288,7 +2266,7 @@ end;
 
 procedure TMainForm.ColorPanelClick(Sender: TObject);
 begin
-  if ColorDialog.Execute then begin
+  if (ColorDialog.Execute) then begin
     ColorPanel.Color:= ColorDialog.Color;
     FStudioConfig.ApplicationConfig.PreviewDisplayColor:= ColorDialog.Color;
   end;
@@ -2377,13 +2355,13 @@ begin
         if ((X1 <> FClocks[I].SecondsPoint.X) or (Y1 <> FClocks[I].SecondsPoint.Y)) then begin
           // clear previous hand
           if (FClocks[I].SecondsPoint.X <> -1) then begin
-            if(nil <> FDisplay) then
+            if (nil <> FDisplay) then
               FDisplay.PaintLine(X0, Y0, FClocks[I].SecondsPoint.X, FClocks[I].SecondsPoint.Y, True);
             FVirtualLayer0.Canvas.Pen.Color:= clWhite;
             FVirtualLayer0.Canvas.Line(X0, Y0, FClocks[I].SecondsPoint.X, FClocks[I].SecondsPoint.Y);
           end;
           // draw new hand
-          if(nil <> FDisplay) then
+          if (nil <> FDisplay) then
             FDisplay.PaintLine(X0, Y0, X1, Y1, False);
           FVirtualLayer0.Canvas.Pen.Color:= clBlack;
           FVirtualLayer0.Canvas.Line(X0, Y0, X1, Y1);
@@ -2419,13 +2397,13 @@ begin
         if ((X1 <> FClocks[I].MinutePoint.X) or (Y1 <> FClocks[I].MinutePoint.Y) or (Distance < MIN_DISTANCE)) then begin
           // clear previous hand
           if (FClocks[I].MinutePoint.X <> -1) then begin
-            if(nil <> FDisplay) then
+            if (nil <> FDisplay) then
               FDisplay.PaintLine(X0, Y0, FClocks[I].MinutePoint.X, FClocks[I].MinutePoint.Y, True);
             FVirtualLayer0.Canvas.Pen.Color:= clWhite;
             FVirtualLayer0.Canvas.Line(X0, Y0, FClocks[I].MinutePoint.X, FClocks[I].MinutePoint.Y);
           end;
           // draw new hand
-          if(nil <> FDisplay) then
+          if (nil <> FDisplay) then
             FDisplay.PaintLine(X0, Y0, X1, Y1, False);
           FVirtualLayer0.Canvas.Pen.Color:= clBlack;
           FVirtualLayer0.Canvas.Line(X0, Y0, X1, Y1);
@@ -2468,13 +2446,13 @@ begin
         if ((X1 <> FClocks[I].HourPoint.X) or (Y1 <> FClocks[I].HourPoint.Y) or (Distance < MIN_DISTANCE)) then begin
           // clear previous hand
           if (FClocks[I].HourPoint.X <> -1) then begin
-            if(nil <> FDisplay) then
+            if (nil <> FDisplay) then
               FDisplay.PaintLine(X0, Y0, FClocks[I].HourPoint.X, FClocks[I].HourPoint.Y, True);
             FVirtualLayer0.Canvas.Pen.Color:= clWhite;
             FVirtualLayer0.Canvas.Line(X0, Y0, FClocks[I].HourPoint.X, FClocks[I].HourPoint.Y);
           end;
           // draw new hand
-          if(nil <> FDisplay) then
+          if (nil <> FDisplay) then
             FDisplay.PaintLine(X0, Y0, X1, Y1, False);
           FVirtualLayer0.Canvas.Pen.Color:= clBlack;
           FVirtualLayer0.Canvas.Line(X0, Y0, X1, Y1);
@@ -2570,10 +2548,10 @@ var
 begin
   SetLength(FTheMatrix.Drops, Length(FTheMatrix.Drops) + 1);
 
-  Drop.Text := AText;
-  Drop.MaxTextLen := MaxTextLen;
-  Drop.Row := Row;
-  Drop.SlownessFactor := SlownessFactor;
+  Drop.Text:= AText;
+  Drop.MaxTextLen:= MaxTextLen;
+  Drop.Row:= Row;
+  Drop.SlownessFactor:= SlownessFactor;
 
   FTheMatrix.Drops[High(FTheMatrix.Drops)]:= Drop;
 end;
@@ -2709,7 +2687,7 @@ var
   Row: Integer;
   IntervalSize, LowerBound, UpperBound: Byte;
 begin
-  if Length(FCpuUsageData.UsageHistory) > 0 then begin
+  if (Length(FCpuUsageData.UsageHistory) > 0) then begin
     for I:= High(FCpuUsageData.UsageHistory) downto 0 do begin
       CpuUsage:= FCpuUsageData.UsageHistory[I];
 
@@ -2721,9 +2699,9 @@ begin
         UpperBound:= LowerBound + IntervalSize - 1;
 
         // compare boundaries with CpuUsage
-        if CpuUsage < LowerBound then
+        if (CpuUsage < LowerBound) then
           C:= ' '
-        else if CpuUsage > UpperBound then
+        else if (CpuUsage > UpperBound) then
           C:= Chr($87)
         else begin
           Tmp:= Trunc((CpuUsage - LowerBound) / IntervalSize * 8.0);
@@ -2751,7 +2729,7 @@ var
   Row: Integer;
   IntervalSize, LowerBound, UpperBound: Byte;
 begin
-  if Length(FMemUsageData.UsageHistory) > 0 then begin
+  if (Length(FMemUsageData.UsageHistory) > 0) then begin
     for I:= High(FMemUsageData.UsageHistory) downto 0 do begin
       MemUsage:= FMemUsageData.UsageHistory[I];
 
@@ -2763,9 +2741,9 @@ begin
         UpperBound:= LowerBound + IntervalSize - 1;
 
         // compare boundaries with MemUsage
-        if MemUsage < LowerBound then
+        if (MemUsage < LowerBound) then
           C:= ' '
-        else if MemUsage > UpperBound then
+        else if (MemUsage > UpperBound) then
           C:= Chr($87)
         else begin
           Tmp:= Trunc((MemUsage - LowerBound) / IntervalSize * 8.0);

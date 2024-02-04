@@ -218,7 +218,6 @@ object MainForm: TMainForm
     ClientWidth = 400
     TabOrder = 2
     Visible = False
-    OnClick = Panel3Click
     object ExtListBox: TListBox
       AnchorSideLeft.Control = Panel3
       AnchorSideTop.Control = ListNameLabel
