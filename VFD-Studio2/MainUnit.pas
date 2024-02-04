@@ -107,8 +107,8 @@ type
   TMemUsageData = record
     CurrentMemUsage: Byte;       // current memory usage in percent; basically the youngest entry in the history
     AverageMemUsage: Byte;       // average memory usage in percent
-    PhysicalMemory: LongWord;    // total physical memory size in bytes
-    FreeMemory: LongWord;        // free physical memory size in bytes
+    PhysicalMemory: QWord;       // total physical memory size in bytes
+    FreeMemory: QWord;           // free physical memory size in bytes
     UsageHistory: array of Byte; // history of memory usage
     NumRows: Integer;            // number of rows the usage graph shall use
     BottomRow: Integer;          // bottom-most row the usage graph shall use
@@ -378,12 +378,6 @@ begin
     Insert(FSysInfo.GetCurrentUserName, S, I);
   end;
 
-  while (Pos('$MEMORY$', S) <> 0 ) do begin
-    I:= Pos('$MEMORY$', S);
-    Delete(S, I, Length('$MEMORY$'));
-    Insert(IntToStr(FSysInfo.GetTotalMemory div 1048576), S, I);
-  end;
-
   while (Pos('$OS$', S) <> 0 ) do begin
     I:= Pos('$OS$', S);
     Delete(S, I, Length('$OS$'));
@@ -561,10 +555,17 @@ begin
   CurrentDateTime:= Now;
   DecodeDateTime(CurrentDateTime, Year, Month, Day, Hour, Minute, Second, MilliSecond);
 
+
+  while (Pos('$MEMORY$', S) <> 0 ) do begin
+    I:= Pos('$MEMORY$', S);
+    Delete(S, I, Length('$MEMORY$'));
+    Insert(IntToStr(FMemUsageData.PhysicalMemory div 1048576), S, I);
+  end;
+
   while (Pos('$FREEMEM$', S) <> 0 ) do begin
     I:= Pos('$FREEMEM$', S);
     Delete(S, I, Length('$FREEMEM$'));
-    Insert(IntToStr(FSysInfo.GetFreeMemory div 1048576), S, I);
+    Insert(IntToStr(FMemUsageData.FreeMemory div 1048576), S, I);
   end;
 
   while (Pos('$MEMUSAGE$', S) <> 0 ) do begin
@@ -600,8 +601,8 @@ begin
   while (Pos('$CPUSPEED$', S) <> 0 ) do begin
     I:= Pos('$CPUSPEED$', S);
     Delete(S, I, Length('$CPUSPEED$'));
-    if (SMBios.HasProcessorInfo) then begin
-      Insert(IntToStr(SMBios.ProcessorInfo[0].RAWProcessorInformation^.CurrentSpeed), S, I);
+    if (FSMBios.HasProcessorInfo) then begin
+      Insert(IntToStr(FSMBios.ProcessorInfo[0].RAWProcessorInformation^.CurrentSpeed), S, I);
     end else begin
       Insert(FSysInfo.GetCPUSpeed, S, I);
     end;
@@ -1905,7 +1906,7 @@ begin
       TextWidth:= FDisplay.TextWidth // get number of characters one line can show
     else
       TextWidth:= FStudioConfig.DisplayConfig.ResX div (GLYPH_W + GLYPH_GAP);
-  
+
     // ---- CPU usage ------
 
     FSysInfo.UpdateCpuUsage;
@@ -1966,7 +1967,6 @@ begin
     if (FMemUsageData.IsUsageMonitorDisplayed) then begin
       UpdateMemMonitor;
     end;
-
 
   end; // FSysInfo not nil
 end;
