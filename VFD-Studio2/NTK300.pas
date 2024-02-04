@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, VFDisplay, Graphics, Math, synaser, GraphUtil,
-  StudioCommon;
+  StudioCommon, Glyphs;
 
 type
   { NTK300 }
@@ -43,11 +43,12 @@ type
     procedure PaintPixel(X, Y: Word; IsInverted: Boolean); override;
     procedure PaintLine(X0, Y0, X1, Y1: Word; IsInverted: Boolean); override;
     procedure SetBrightness(Percent: Byte); override;
+    procedure SetLayerMode(LayerMode: TLayerMode); override;
     procedure Dbg(Value: Byte); override;
 
     { General display funtionality }
     procedure VFDInit();
-    procedure VFDLayerConfig(IsL0On, IsL1On: Boolean; Comb: TLayerCombination);
+    procedure VFDLayerConfig(IsL0On, IsL1On: Boolean; Comb: TLayerMode);
     { Positioning / addressing }
     procedure VFDSetAddress(Addr: Word; ALayer: Byte);
     procedure VFDAddressInc(DoInc: Boolean);
@@ -256,7 +257,7 @@ begin
   L0:= (ALayer and LAYER_0) = LAYER_0;
   L1:= (ALayer and LAYER_1) = LAYER_1;
 
-  VFDLayerConfig(L0, L1, lcXOR);
+  VFDLayerConfig(L0, L1, lmXOR);
 end;
 
 
@@ -264,6 +265,8 @@ procedure TNTK300.PaintString(Text: string; X, Y: Integer);
 var
   Character: Char;
 begin
+  Text:= TGlyphs.Adapt2Charmap(Text);
+
   SelectScreen(1);
   VFDSetCoord(X, Y);
 
@@ -555,6 +558,12 @@ begin
   VFDWriteCommand(Cmd);
 end;
 
+
+procedure TNTK300.SetLayerMode(LayerMode: TLayerMode);
+begin
+  VFDLayerConfig(True, True, LayerMode);
+end;
+
 procedure TNTK300.Connect(AInterface: string);
 const
   THIS_METHOD_NAME: string = 'Connect';
@@ -809,7 +818,7 @@ end;
 {
   Configuration of display layers
 }
-procedure TNTK300.VFDLayerConfig(IsL0On, IsL1On: Boolean; Comb: TLayerCombination);
+procedure TNTK300.VFDLayerConfig(IsL0On, IsL1On: Boolean; Comb: TLayerMode);
 var
   Cmd: Byte;
 begin
@@ -822,11 +831,11 @@ begin
 
   VFDWriteCommand(Cmd);
 
-  if (lcOR = Comb) then
+  if (lmOR = Comb) then
     Cmd:= CMD_OR_MODE
-  else if (lcAND = Comb) then
+  else if (lmAND = Comb) then
     Cmd:= CMD_AND_MODE
-  else if (lcXOR = Comb) then
+  else if (lmXOR = Comb) then
     Cmd:= CMD_XOR_MODE
   else
     Exit;
@@ -883,7 +892,7 @@ begin
 
   ClearScreen;
 
-  VFDLayerConfig(true, false, lcXOR);
+  VFDLayerConfig(true, false, lmXOR);
 
   VFDWriteCommand(CMD_CUR_HOLD); // auto increment off
 

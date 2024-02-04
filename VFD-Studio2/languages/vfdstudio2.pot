@@ -10,6 +10,10 @@ msgctxt "mainunit.rsbtnstop"
 msgid "Stop"
 msgstr ""
 
+#: mainunit.rscurrentlydisplayed
+msgid "Currently displayed"
+msgstr ""
+
 #: mainunit.rsdowfriday
 msgid "Friday"
 msgstr ""
@@ -103,10 +107,6 @@ msgstr ""
 msgid "Info"
 msgstr ""
 
-#: tmainform.label1.caption
-msgid "Currently displayed:"
-msgstr ""
-
 #: tmainform.label2.caption
 msgid "Log file:"
 msgstr ""
@@ -133,6 +133,11 @@ msgstr ""
 
 #: tmainform.listeladen1.caption
 msgid "&Load list..."
+msgstr ""
+
+#: tmainform.listnamelabel.caption
+msgctxt "tmainform.listnamelabel.caption"
+msgid "Currently displayed:"
 msgstr ""
 
 #: tmainform.listtestbutton.caption

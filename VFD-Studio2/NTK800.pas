@@ -56,6 +56,7 @@ type
     procedure PaintPixel(X, Y: Word; IsInverted: Boolean); override;
     procedure PaintLine(X0, Y0, X1, Y1: Word; IsInverted: Boolean); override;
     procedure SetBrightness(Percent: Byte); override;
+    procedure SetLayerMode(LayerMode: TLayerMode); override;
     procedure Dbg(Value: Byte); override;
 
     { Text related methods }
@@ -67,7 +68,7 @@ type
 
     { General display funtionality }
     procedure VFDInit();
-    procedure VFDLayerConfig(IsL0On, IsL1On, IsInverted: Boolean; Comb: TLayerCombination);
+    procedure VFDLayerConfig(IsL0On, IsL1On, IsInverted: Boolean; Comb: TLayerMode);
     { Positioning / addressing }
     procedure VFDAddressInc(DoIncX, DoIncY: Boolean);
     procedure VFDSetXCoord(X: Byte);
@@ -212,12 +213,14 @@ begin
  L0:= (ALayer and LAYER_0) = LAYER_0;
  L1:= (ALayer and LAYER_1) = LAYER_1;
 
-  VFDLayerConfig(L0, L1, false, lcXOR);
+  VFDLayerConfig(L0, L1, false, lmXOR);
 end;
 
 
 procedure TNTK800.PaintString(Text: string; X, Y: Integer);
 begin
+  Text:= TGlyphs.Adapt2Charmap(Text);
+
   SelectScreen(1);
 
   FGlyphConfig.currentCol:= X;
@@ -531,6 +534,12 @@ begin
   Mask:= Trunc(Single(Bits) / 6.666) and $0F;
   VFDWriteCommand(CMD_BRIGHTNESS or Mask);
 end;
+
+procedure TNTK800.SetLayerMode(LayerMode: TLayerMode);
+begin
+  VFDLayerConfig(True, True, False, LayerMode);
+end;
+
 
 procedure TNTK800.Connect(AInterface: string);
 const
@@ -870,7 +879,7 @@ end;
 {
   Configuration of display layers
 }
-procedure TNTK800.VFDLayerConfig(IsL0On, IsL1On, IsInverted: Boolean; Comb: TLayerCombination);
+procedure TNTK800.VFDLayerConfig(IsL0On, IsL1On, IsInverted: Boolean; Comb: TLayerMode);
 var
   Cmd: Byte;
 begin
@@ -884,8 +893,8 @@ begin
   // 2nd command Byte
   Cmd:= BITS_GS; // GRAM always on
   if (true = IsInverted) then Cmd:= Cmd or BITS_GRV;
-  if (lcAND = Comb) then Cmd:= Cmd or BITS_AND_MODE;
-  if (lcXOR = Comb) then Cmd:= Cmd or BITS_XOR_MODE;
+  if (lmAND = Comb) then Cmd:= Cmd or BITS_AND_MODE;
+  if (lmXOR = Comb) then Cmd:= Cmd or BITS_XOR_MODE;
   VFDWriteCommand(Cmd);
 
 end;
@@ -938,7 +947,7 @@ begin
   end;
 
 
-  VFDLayerConfig(true, false, false, lcXOR);
+  VFDLayerConfig(true, false, false, lmXOR);
 
   VFDWriteCommand(CMD_HSHIFT);  // set horizontal shift to
   VFDWriteCommand($00);         // no shift

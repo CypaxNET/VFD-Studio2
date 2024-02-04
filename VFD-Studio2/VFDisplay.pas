@@ -9,7 +9,7 @@ uses
 
 
 type
-  TLayerCombination = (lcOR, lcAND, lcXOR);
+  TLayerMode = (lmOR, lmAND, lmXOR);
 
   TIntferfaceType = (itNONE, itCOM);
 
@@ -83,6 +83,7 @@ type
     procedure PaintLine(X0, Y0, X1, Y1: Word; IsInverted: Boolean); virtual; abstract;
     procedure PaintFrame(X0, Y0, X1, Y1: Word; IsInverted: Boolean);
     procedure SetBrightness(Percent: Byte); virtual; abstract;
+    procedure SetLayerMode(LayerMode: TLayerMode); virtual abstract;
 
     procedure Dbg(Value: Byte); virtual; abstract;
 

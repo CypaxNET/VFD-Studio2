@@ -1,7 +1,7 @@
 object MainForm: TMainForm
-  Left = 1349
+  Left = 1449
   Height = 635
-  Top = 652
+  Top = 732
   Width = 1073
   AutoSize = True
   BorderIcons = [biSystemMenu, biMinimize]
@@ -221,7 +221,7 @@ object MainForm: TMainForm
     OnClick = Panel3Click
     object ExtListBox: TListBox
       AnchorSideLeft.Control = Panel3
-      AnchorSideTop.Control = Label1
+      AnchorSideTop.Control = ListNameLabel
       AnchorSideTop.Side = asrBottom
       Left = 8
       Height = 41
@@ -235,7 +235,7 @@ object MainForm: TMainForm
     end
     object ListBox: TListBox
       AnchorSideLeft.Control = Panel3
-      AnchorSideTop.Control = Label1
+      AnchorSideTop.Control = ListNameLabel
       AnchorSideTop.Side = asrBottom
       AnchorSideRight.Control = Panel3
       AnchorSideRight.Side = asrBottom
@@ -294,7 +294,7 @@ object MainForm: TMainForm
       TabOrder = 2
       ViewStyle = vsReport
     end
-    object Label1: TLabel
+    object ListNameLabel: TLabel
       AnchorSideLeft.Control = Panel3
       AnchorSideTop.Control = Panel3
       Left = 8
@@ -973,6 +973,7 @@ object MainForm: TMainForm
       0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
       FFFF
     }
+    Hint = 'VFD-Studio 2'
     Visible = True
     OnClick = TrayIcon1Click
     Left = 1016
@@ -1041,7 +1042,6 @@ object MainForm: TMainForm
     Top = 40
   end
   object UsageTimer: TTimer
-    Interval = 2000
     OnTimer = UsageTimerTimer
     Left = 944
     Top = 360

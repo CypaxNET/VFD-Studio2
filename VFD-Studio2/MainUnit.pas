@@ -95,6 +95,26 @@ type
     YPos: Word;                    // y position in display
   end;
 
+  TCpuUsageData = record
+    CurrentCpuUsage: Byte;       // current CPU usage in percent; basically the youngest entry in the history
+    AverageCpuUsage: Byte;       // average CPU usage in percent
+    UsageHistory: array of Byte; // history of CPU usage
+    NumRows: Integer;            // number of rows the usage graph shall use
+    BottomRow: Integer;          // bottom-most row the usage graph shall use
+    IsUsageMonitorDisplayed: Boolean; // is the CPU usage monitor currently displayed?
+  end;
+
+  TMemUsageData = record
+    CurrentMemUsage: Byte;       // current memory usage in percent; basically the youngest entry in the history
+    AverageMemUsage: Byte;       // average memory usage in percent
+    PhysicalMemory: LongWord;    // total physical memory size in bytes
+    FreeMemory: LongWord;        // free physical memory size in bytes
+    UsageHistory: array of Byte; // history of memory usage
+    NumRows: Integer;            // number of rows the usage graph shall use
+    BottomRow: Integer;          // bottom-most row the usage graph shall use
+    IsUsageMonitorDisplayed: Boolean; // is the memory usage monitor currently displayed?
+  end;
+
 
   { TMainForm }
   TMainForm = class(TForm)
@@ -122,7 +142,7 @@ type
     ExitButton: TBitBtn;
     ExtListBox: TListBox;
     InfoButton: TBitBtn;
-    Label1: TLabel;
+    ListNameLabel: TLabel;
     Label2: TLabel;
     ListBox: TListBox;
     ListTestButton: TBitBtn;
@@ -234,6 +254,11 @@ type
     procedure UpdateMatrixDrops;
     procedure InitTheMatrix;
 
+    procedure UpdateCpuMonitor;
+    procedure UpdateMemMonitor;
+
+
+
   private
   protected
 
@@ -258,16 +283,19 @@ type
 
     FAnimationData: TAnimationData;
 
+    FLayerMode: TLayerMode;
+
     FIsCurrentScreenShownOnce: Boolean;
     FRemainingSeconds: Integer; // remaining number of seconds the current screen is shown
 
     FScrollStringIndex: Word;
 
+    FCpuUsageData: TCpuUsageData;
+    FMemUsageData: TMemUsageData;
+
     FTheMatrix: TMatrixData;
 
     //ExtraScreens
-    CPUMONITORenabled: Boolean;
-    CPUMONITORcharEnabled: Boolean;
     RAMMONITORenabled: Boolean;
     RAMMONITORcharEnabled: Boolean;
 
@@ -304,8 +332,11 @@ resourcestring
   RsModeViewExpert = 'Expert view';
   RsModeViewNormal = 'Normal view';
 
-  {Next screen announcement }
+  { Next screen announcement }
   RsNextScreenText = 'Next screen in';
+
+  { Showing the list name }
+  RsCurrentlyDisplayed = 'Currently displayed';
 
 { TMainForm }
 
@@ -356,7 +387,7 @@ begin
   while (Pos('$MEMORY$', S) <> 0 ) do begin
     I:= Pos('$MEMORY$', S);
     Delete(S, I, Length('$MEMORY$'));
-    Insert(IntToStr(Round(FSysInfo.GetTotalMemory / 1048576)), S, I);
+    Insert(IntToStr(FSysInfo.GetTotalMemory div 1048576), S, I);
   end;
 
   while (Pos('$OS$', S) <> 0 ) do begin
@@ -540,21 +571,25 @@ begin
   while (Pos('$FREEMEM$', S) <> 0 ) do begin
     I:= Pos('$FREEMEM$', S);
     Delete(S, I, Length('$FREEMEM$'));
-    Insert(IntToStr(Round(FSysInfo.GetFreeVirtualMemory / 1048576)), S, I);
+    Insert(IntToStr(FSysInfo.GetFreeMemory div 1048576), S, I);
   end;
 
-  {
+  while (Pos('$MEMUSAGE$', S) <> 0 ) do begin
+    I:= Pos('$MEMUSAGE$', S);
+    Delete(S, I, Length('$MEMUSAGE$'));
+    Insert(IntToStr(FMemUsageData.CurrentMemUsage), S, I);
+  end;
+
   while (Pos('$AVERAGECPU$', S) <> 0 ) do begin
     I:= Pos('$AVERAGECPU$', S);
     Delete(S, I, Length('$AVERAGECPU$'));
-    Insert(format('%f', [averageCPUusage]), S, I);
+    Insert(IntToStr(FCpuUsageData.AverageCpuUsage), S, I);
   end;
-  }
 
   while (Pos('$CPUUSAGE$', S) <> 0 ) do begin
     I:= Pos('$CPUUSAGE$', S);
     Delete(S, I, Length('$CPUUSAGE$'));
-    Insert(IntToStr(Round(FSysInfo.GetCpuUsage*100.0)), S, I);
+    Insert(IntToStr(FCpuUsageData.CurrentCpuUsage), S, I);
   end;
 
   while (Pos('$IP$', S) <> 0 ) do begin
@@ -887,6 +922,8 @@ begin
   StopProcessing;
   FListIndex:= 0;
 
+  ListNameLabel.Caption:= RsCurrentlyDisplayed + ': ' + ExtractFileName(ListFileName);
+
   //Liste laden
   ListBox.Items.LoadFromFile(ListFileName);
 
@@ -992,6 +1029,7 @@ var
   IsRequirementMet: Boolean;
   AColor: TColor;
   Res: Integer;
+  DoContinueScreen: Boolean;
 begin
   Res:= -1;
 
@@ -1005,16 +1043,18 @@ begin
       cmd:= cmdparts[0];
 
       if ('NEWSCREEN' = cmd) then begin
-        StopProcessing;
-        if(nil <> FDisplay) then
-          FDisplay.ShowScreen(BOTH_LAYERS);
 
         FIsCurrentScreenShownOnce:= False; // by default this screen will be shown again then the list loops
+        DoContinueScreen:= False;          // by default, NEWSCREEN will stop animations, clear/reset variable information, etc.
+
         if (cmdparts.Count >= 2) then begin
           // p1 = screen limitations
           if ('ONCE' = cmdparts[1]) then begin
             // display this screen only once
             FIsCurrentScreenShownOnce:= True;
+          end else if ('CONTINUE' = cmdparts[1]) then begin
+            // do not stop animations, do not clear/reset variable infomration, etc.
+            DoContinueScreen:= True;
           end else if (cmdparts[1].StartsWith('REQUIRE')) then begin
             // this screen shall only be shown if a requirement is met
             IsRequirementMet:= False; // False by default, must be set to True in code below
@@ -1040,6 +1080,17 @@ begin
             end; // if requirement not met
           end; // if something required
         end; // if 2nd parameter with screen limitations given
+
+        if (not DoContinueScreen) then begin
+          StopProcessing;
+        end;
+
+        if(nil <> FDisplay) then begin
+          FDisplay.ShowScreen(BOTH_LAYERS);
+          FLayerMode:= lmXOR;
+          FDisplay.SetLayerMode(FLayerMode);
+        end;
+
 
       end else if ('SCREENEND' = cmd) then begin
         if (True = FIsCurrentScreenShownOnce) then begin
@@ -1067,8 +1118,26 @@ begin
         end;
 
       end else if ('DSPINIT' = cmd) then begin
-         if(nil <> FDisplay) then
-           FDisplay.DspInit(FStudioConfig.DisplayConfig.ResX, FStudioConfig.DisplayConfig.ResY);
+        if(nil <> FDisplay) then
+          FDisplay.DspInit(FStudioConfig.DisplayConfig.ResX, FStudioConfig.DisplayConfig.ResY);
+
+      end else if ('ORMODE' = cmd) then begin
+        if(nil <> FDisplay) then begin
+          FLayerMode:= lmOR;
+          FDisplay.SetLayerMode(FLayerMode);
+        end;
+
+      end else if ('XORMODE' = cmd) then begin
+        if(nil <> FDisplay) then begin
+          FLayerMode:= lmXOR;
+          FDisplay.SetLayerMode(FLayerMode);
+        end;
+
+      end else if ('ANDMODE' = cmd) then begin
+        if(nil <> FDisplay) then begin
+          FLayerMode:= lmAND;
+          FDisplay.SetLayerMode(FLayerMode);
+        end;
 
       end else if ('STOP' = cmd) then begin
          WaitTimer.Enabled:= False;
@@ -1157,7 +1226,8 @@ begin
               FDisplay.PaintLine(P1, P2, P3, P4, False);
             FVirtualLayer0.Canvas.Pen.Color:= clBlack;
           end;
-          FVirtualLayer0.Canvas.Line(P1, P2, P3 + 1, P4 + 1);
+          FVirtualLayer0.Canvas.Line(P1, P2, P3, P4);
+          FVirtualLayer0.Canvas.Pixels[P3, P4]:= FVirtualLayer0.Canvas.Pen.Color;
           CombineVirtualLayers(Self);
         end;
 
@@ -1255,6 +1325,30 @@ begin
           ExtraTimer.Enabled:= True;
 
         end;
+
+      end else if ('CPUMONITOR' = cmd) then begin
+        // p1 = number of rows to use, p2 = bottom-most row
+          if (cmdparts.Count >= 3) then begin
+            if (False = FCpuUsageData.IsUsageMonitorDisplayed) then begin
+              P1:= strtoint(cmdparts[1]);
+              P2:= strtoint(cmdparts[2]);
+              FCpuUsageData.NumRows:= P1;
+              FCpuUsageData.BottomRow:= P2;
+              FCpuUsageData.IsUsageMonitorDisplayed:= True;
+            end;
+          end;
+
+      end else if ('RAMMONITOR' = cmd) then begin
+        // p1 = number of rows to use, p2 = bottom-most row
+          if (cmdparts.Count >= 3) then begin
+            if (False = FMemUsageData.IsUsageMonitorDisplayed) then begin
+              P1:= strtoint(cmdparts[1]);
+              P2:= strtoint(cmdparts[2]);
+              FMemUsageData.NumRows:= P1;
+              FMemUsageData.BottomRow:= P2;
+              FMemUsageData.IsUsageMonitorDisplayed:= True;
+            end;
+          end;
 
       end;
 
@@ -1386,13 +1480,17 @@ end;
 procedure TMainForm.WaitTimerTimer(Sender: TObject);
 begin
   WaitTimer.Enabled:= False;
+
+  (*
   // Bei ListEnde wieder zum ListAnfang springen
   if (FListIndex < ListBox.Items.Count - 1) then
     Inc(FListIndex)
   else
     FListIndex:= 0;
+  *)
 
   CreateScreen;
+
 end;
 
 
@@ -1470,8 +1568,12 @@ begin
   Randomize;
   FSMBios:= TSMBios.Create;
 
+  FLayerMode:= lmXOR;
+
   FVirtualLayer0:= TBitmap.Create;
   FVirtualLayer1:= TBitmap.Create;
+  FVirtualLayer0.Monochrome:= True;
+  FVirtualLayer1.Monochrome:= True;
 
   LogEvent(lvINFO, 'Application started. Version ' + VERSION_STR , Now);
 
@@ -1519,18 +1621,13 @@ begin
   FSysInfo:= TSysInfo.Create(self);
   FWinampControl:= TWinampControl.Create(self);
 
-  AnimateTimer.Enabled:= False;
+  FAnimationData.AnimationBitmap:= TBitmap.create;
 
-  try
-    FAnimationData.AnimationBitmap:= TBitmap.create;
-  except
-    FAnimationData.AnimationBitmap.Free;
-  end;
-
-
-  HideTimer.Enabled:= True;
+  TrayIcon1.Hint:= 'VFD-Studio 2: ' + FStudioConfig.DisplayConfig.DisplayType + '@' + FStudioConfig.DisplayConfig.IntName;
 
   VersionLabel.Caption:= 'v' + VERSION_STR;
+
+  HideTimer.Enabled:= True;
 
 end;
 
@@ -1574,6 +1671,8 @@ begin
   FVirtualLayer0.Free;
   FVirtualLayer1.Free;
   SetLength(FTheMatrix.Drops, 0);
+  SetLength(FCpuUsageData.UsageHistory, 0);
+  SetLength(FMemUsageData.UsageHistory, 0);
 end;
 
 procedure TMainForm.FormWindowStateChange(Sender: TObject);
@@ -1686,6 +1785,8 @@ begin
   StopAnimation; // this also disables the animation timer
   DisableClocks;
   ClearInfoStrings;
+  FCpuUsageData.IsUsageMonitorDisplayed:= False;
+  FMemUsageData.IsUsageMonitorDisplayed:= False;
   StopButton.Caption:= RsBtnStop;
   PopupStopButton.Caption:= RsBtnStop;
 end;
@@ -1812,9 +1913,81 @@ begin
 end;
 
 procedure TMainForm.UsageTimerTimer(Sender: TObject);
+var
+  CpuUsage: Byte;
+  I: Integer;
+  AvgValue: Single;
+  TextWidth: Integer;
+  PhysMem, FreeMem: QWord;
+  MemUsage: DWord;
 begin
-  if (nil <> FSysInfo) then
+  if (nil <> FSysInfo) then begin
+
+    TextWidth:= (FStudioConfig.DisplayConfig.ResX div (GLYPH_W + GLYPH_GAP));
+
+    // ---- CPU usage ------
+
     FSysInfo.UpdateCpuUsage;
+    CpuUsage:= Round(FSysInfo.GetCpuUsage * 100.0);
+    FCpuUsageData.CurrentCpuUsage:= CpuUsage;
+
+    // for testing: CPUUsage:= Random(101);
+
+    if (Length(FCpuUsageData.UsageHistory) < TextWidth) then begin
+      // if the array length is < than the text width of the display, then add a new array element
+      SetLength(FCpuUsageData.UsageHistory, Length(FCpuUsageData.UsageHistory) + 1);
+    end else begin
+      // otherwise shift all values left by one
+      for I := 0 to High(FCpuUsageData.UsageHistory) - 1 do
+        FCpuUsageData.UsageHistory[I] := FCpuUsageData.UsageHistory[I + 1];
+    end;
+
+    // write the new value to the last index
+    FCpuUsageData.UsageHistory[High(FCpuUsageData.UsageHistory)]:= CpuUsage;
+
+    // calculate new average
+    AvgValue:= 0.0;
+    for I := 0 to High(FCpuUsageData.UsageHistory) do
+      AvgValue:= AvgValue + FCpuUsageData.UsageHistory[I] / Length(FCpuUsageData.UsageHistory);
+    FCpuUsageData.AverageCpuUsage:= Round(AvgValue);
+
+    if (FCpuUsageData.IsUsageMonitorDisplayed) then begin
+      UpdateCpuMonitor;
+    end;
+
+    // ---- Memory usage ------
+    PhysMem:= FSysInfo.GetTotalMemory;
+    FreeMem:= FSysInfo.GetFreeMemory;
+    MemUsage:= Min(100, FSysInfo.GetMemoryUsage);
+
+    FMemUsageData.CurrentMemUsage:= MemUsage;
+    FMemUsageData.FreeMemory:= FreeMem;
+    FMemUsageData.PhysicalMemory:=PhysMem;
+
+    if (Length(FMemUsageData.UsageHistory) < TextWidth) then begin
+      // if the array length is < than the text width of the display, then add a new array element
+      SetLength(FMemUsageData.UsageHistory, Length(FMemUsageData.UsageHistory) + 1);
+    end else begin
+      // otherwise shift all values left by one
+      for I := 0 to High(FMemUsageData.UsageHistory) - 1 do
+        FMemUsageData.UsageHistory[I] := FMemUsageData.UsageHistory[I + 1];
+    end;
+
+    // write the new value to the last index
+    FMemUsageData.UsageHistory[High(FMemUsageData.UsageHistory)]:= MemUsage;
+
+    // calculate new average
+    AvgValue:= 0.0;
+    for I := 0 to High(FMemUsageData.UsageHistory) do
+      AvgValue:= AvgValue + FMemUsageData.UsageHistory[I] / Length(FMemUsageData.UsageHistory);
+    FMemUsageData.AverageMemUsage:= Round(AvgValue);
+
+    if (FMemUsageData.IsUsageMonitorDisplayed) then begin
+      UpdateMemMonitor;
+    end;
+
+
+  end; // FSysInfo not nil
 end;
 
 procedure TMainForm.ViewListPanelClick(Sender: TObject);
@@ -1827,6 +2000,7 @@ begin
 end;
 
 procedure TMainForm.ExtraTimerTimer(Sender: TObject);
+
 begin
 
   if (Length(FTheMatrix.Drops) > 0) then begin
@@ -1918,6 +2092,7 @@ begin
 
   TmpBitmap := TBitmap.Create;
   try
+    TmpBitmap.Monochrome:= True;
     TmpBitmap.Canvas.Font.Color:= clblack;
     TmpBitmap.Canvas.Font.Name:= FontName;
     TmpBitmap.Canvas.Font.Size:= FontSize;
@@ -2328,6 +2503,8 @@ var
   CurrentCol: Integer;  // current column
   CValue: Byte;         // Ord(C)
 begin
+  AText:= TGlyphs.Adapt2Charmap(AText);
+
   CurrentCol:= Col;
   for C in AText do begin
     if (CurrentCol >= (FStudioConfig.DisplayConfig.ResX div (GLYPH_W + GLYPH_GAP))) then
@@ -2356,11 +2533,27 @@ procedure TMainForm.CombineVirtualLayers(Sender: TObject);
 var
   TmpBitmap: TBitmap;
 begin
-  CombinedImage.Picture.Bitmap.Canvas.CopyMode:= cmSrcCopy;
-  CombinedImage.Picture.Bitmap.Canvas.Draw(0, 0, FVirtualLayer0);
-  CombinedImage.Picture.Bitmap.Canvas.CopyMode:= cmSrcInvert;
-  CombinedImage.Picture.Bitmap.Canvas.Draw(0, 0, FVirtualLayer1);
   TmpBitmap:= TBitmap.Create;
+  TmpBitmap.Width:= CombinedImage.Picture.Bitmap.Width;
+  TmpBitmap.Height:= CombinedImage.Picture.Bitmap.Height;
+
+  CombinedImage.Picture.Bitmap.Canvas.CopyMode:= cmNotSrcCopy;
+  CombinedImage.Picture.Bitmap.Canvas.Draw(0, 0, FVirtualLayer0);
+
+  TmpBitmap.Canvas.CopyMode:= cmNotSrcCopy;
+  TmpBitmap.Canvas.Draw(0, 0, FVirtualLayer1);
+
+  if (lmOR = FLayerMode) then
+    CombinedImage.Picture.Bitmap.Canvas.CopyMode:= cmSrcPaint
+  else if (lmXOR = FLayerMode) then
+    CombinedImage.Picture.Bitmap.Canvas.CopyMode:= cmSrcInvert
+  else
+    CombinedImage.Picture.Bitmap.Canvas.CopyMode:= cmSrcAnd;
+
+  CombinedImage.Picture.Bitmap.Canvas.Draw(0, 0, TmpBitmap);
+
+  // ink the combined black&white image
+  TmpBitmap.Canvas.CopyMode:= cmSrcCopy;
   TmpBitmap.Width:= CombinedImage.Picture.Bitmap.Width;
   TmpBitmap.Height:= CombinedImage.Picture.Bitmap.Height;
   TmpBitmap.Canvas.Brush.Color:= ColorPanel.Color;
@@ -2368,6 +2561,7 @@ begin
   CombinedImage.Picture.Bitmap.Canvas.CopyMode:= cmSrcAnd;
   CombinedImage.Picture.Bitmap.Canvas.Draw(0, 0, TmpBitmap);
   TmpBitmap.Free;
+
 end;
 
 procedure TMainForm.AddMatrixDrop(const AText: string; MaxTextLen, Row: Integer; SlownessFactor: Byte);
@@ -2505,6 +2699,89 @@ begin
   end;
 end;
 
+
+procedure TMainForm.UpdateCpuMonitor;
+var
+  I: Integer;
+  Tmp: Integer;
+  CpuUsage: Byte;
+  C: Char;
+  Row: Integer;
+  IntervalSize, LowerBound, UpperBound: Byte;
+begin
+  if Length(FCpuUsageData.UsageHistory) > 0 then begin
+    for I:= High(FCpuUsageData.UsageHistory) downto 0 do begin
+      CpuUsage:= FCpuUsageData.UsageHistory[I];
+
+      IntervalSize:= 100 div FCpuUsageData.NumRows;
+
+      for Row:= 0 to (FCpuUsageData.NumRows - 1) do begin
+        // specify boundaries of this row
+        LowerBound:= IntervalSize * Row;
+        UpperBound:= LowerBound + IntervalSize - 1;
+
+        // compare boundaries with CpuUsage
+        if CpuUsage < LowerBound then
+          C:= ' '
+        else if CpuUsage > UpperBound then
+          C:= Chr($87)
+        else begin
+          Tmp:= Trunc((CpuUsage - LowerBound) / IntervalSize * 8.0);
+          Tmp:= $80 + Tmp;
+          C:= Chr(Tmp);
+        end;
+
+        PaintStringOnVirtualDisplay(C, I, FCpuUsageData.BottomRow - Row);
+        if (nil <> FDisplay) then
+          FDisplay.PaintString(C, I, FCpuUsageData.BottomRow - Row);
+
+      end; // for Row
+
+    end; // end for loop
+  end;
+end;
+
+
+procedure TMainForm.UpdateMemMonitor;
+var
+  I: Integer;
+  Tmp: Integer;
+  MemUsage: Byte;
+  C: Char;
+  Row: Integer;
+  IntervalSize, LowerBound, UpperBound: Byte;
+begin
+  if Length(FMemUsageData.UsageHistory) > 0 then begin
+    for I:= High(FMemUsageData.UsageHistory) downto 0 do begin
+      MemUsage:= FMemUsageData.UsageHistory[I];
+
+      IntervalSize:= 100 div FMemUsageData.NumRows;
+
+      for Row:= 0 to (FMemUsageData.NumRows - 1) do begin
+        // specify boundaries of this row
+        LowerBound:= IntervalSize * Row;
+        UpperBound:= LowerBound + IntervalSize - 1;
+
+        // compare boundaries with MemUsage
+        if MemUsage < LowerBound then
+          C:= ' '
+        else if MemUsage > UpperBound then
+          C:= Chr($87)
+        else begin
+          Tmp:= Trunc((MemUsage - LowerBound) / IntervalSize * 8.0);
+          Tmp:= $80 + Tmp;
+          C:= Chr(Tmp);
+        end;
+
+        PaintStringOnVirtualDisplay(C, I, FMemUsageData.BottomRow - Row);
+        if (nil <> FDisplay) then
+          FDisplay.PaintString(C, I, FMemUsageData.BottomRow - Row);
+
+      end; // for Row
+
+    end; // end for loop
+  end;
+end;
 
 end.
 

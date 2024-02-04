@@ -21,11 +21,11 @@ type
     function ComputerName: string;
     function GetIPAdress: string;
 
-    function GetTotalMemory: longint;  //physikalischer Speicher
-    function GetFreeMemory: longint;
-    function GetTotalVirtualMemory: longint;  //virtueller Speicher
-    function GetFreeVirtualMemory: longint;
-    function GetMemoryUsage: longint;   //RAM-Nutzung
+    function GetTotalMemory: QWord;  //physikalischer Speicher
+    function GetFreeMemory: QWord;
+    function GetTotalVirtualMemory: QWord;  //virtueller Speicher
+    function GetFreeVirtualMemory: QWord;
+    function GetMemoryUsage: DWord;   //RAM-Nutzung
 
     function GetCpuUsage: Single;
     procedure UpdateCpuUsage;
@@ -167,49 +167,49 @@ begin
      WSACleanup;
 end;
 
-function TSysInfo.GetMemoryUsage: longint;
+function TSysInfo.GetMemoryUsage: DWord;
 var
-   memory: TMemoryStatus;
+  memory: TMemoryStatus;
 begin
-     memory.dwLength:=SizeOf(memory);
-     GlobalMemoryStatus(memory);
-     result:=memory.dwMemoryLoad;
+  memory.dwLength:=SizeOf(memory);
+  GlobalMemoryStatus(memory);
+  result:=memory.dwMemoryLoad;
 end;
 
-function TSysInfo.GetTotalMemory: longint;
+function TSysInfo.GetTotalMemory: QWord;
 var
-   memory: TMemoryStatus;
+  memory: TMemoryStatus;
 begin
-     memory.dwLength:=SizeOf(memory);
-     GlobalMemoryStatus(memory);
-     result:=memory.dwTotalPhys;
+  memory.dwLength:=SizeOf(memory);
+  GlobalMemoryStatus(memory);
+  result:=memory.dwTotalPhys;
 end;
 
-function TSysInfo.GetFreeVirtualMemory: longint;
+function TSysInfo.GetFreeVirtualMemory: QWord;
 var
-   memory: TMemoryStatus;
+  memory: TMemoryStatus;
 begin
-     memory.dwLength:=SizeOf(memory);
-     GlobalMemoryStatus(memory);
-     result:=memory.dwAvailVirtual;
+  memory.dwLength:=SizeOf(memory);
+  GlobalMemoryStatus(memory);
+  result:=memory.dwAvailVirtual;
 end;
 
-function TSysInfo.GetTotalVirtualMemory: longint;
+function TSysInfo.GetTotalVirtualMemory: QWord;
 var
    memory: TMemoryStatus;
 begin
-     memory.dwLength:=SizeOf(memory);
-     GlobalMemoryStatus(memory);
-     result:=memory.dwTotalVirtual;
+  memory.dwLength:=SizeOf(memory);
+  GlobalMemoryStatus(memory);
+  result:=memory.dwTotalVirtual;
 end;
 
-function TSysInfo.GetFreeMemory: longint;
+function TSysInfo.GetFreeMemory: QWord;
 var
    memory: TMemoryStatus;
 begin
-     memory.dwLength:=SizeOf(memory);
-     GlobalMemoryStatus(memory);
-     result:=memory.dwAvailPhys;
+  memory.dwLength:=SizeOf(memory);
+  GlobalMemoryStatus(memory);
+  result:=memory.dwAvailPhys;
 end;
 
 
