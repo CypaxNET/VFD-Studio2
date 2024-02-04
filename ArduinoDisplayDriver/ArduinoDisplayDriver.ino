@@ -1,6 +1,7 @@
 #define SER_BUFFERSIZE 1024
 #define MAX_CMD_LEN 4
 
+const char idStr[] = "Arduino Display Driver";
 const char verStr[] = "v0.1.0.0";
 const char helpStr[] = "V = Get SW version\nCxy = send command with xy = hex code\nDxy = send data with xy = hex code\n? = this help text";
 const char errorStr[] = "ERR";
