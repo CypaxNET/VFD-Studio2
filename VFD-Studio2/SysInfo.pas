@@ -43,6 +43,8 @@ type
 
     function GetPartitionName(const ADrive: Char): String;
     function GetDriveTyp(Drive: Char): string;
+    function GetDiskSpace(Drive: Char): QWord;
+    function GetFreeDiskSpace(Drive: Char): QWord;
 
     function GetDesktopResolution: string;
     function GetDesktopColors: string;
@@ -386,12 +388,11 @@ begin
      Rs.free;
 end;
 
-function TSysInfo.GetPartitionName(const ADrive: Char): String;
+function TSysInfo.GetPartitionName(const ADrive: Char): string;
 var
-  tmp: Integer;
+  tmp: LongWord;
   buffer: array[0..19] of Char;
 begin
-     {
   GetVolumeInformation(PChar(ADrive+':\'),
                        @buffer[0], SizeOf(buffer),
                        nil,
@@ -400,8 +401,6 @@ begin
                        nil,
                        0);
   Result := buffer;
-  }
-  Result:= '';
 end;
 
 function TSysInfo.GetDriveTyp(Drive: Char): string;
@@ -508,12 +507,38 @@ begin
 end;
 
 
-
   //Betriebssystem
 function TSysInfo.GetOperatingSystem: String;
 begin
   Result := 'unbekannt';
   // TODO
+end;
+
+
+function TSysInfo.GetFreeDiskSpace(Drive: Char): QWord;
+var
+ FtCBytes: ULARGE_INTEGER;
+ TotalBytes: ULARGE_INTEGER;
+ FreeBytes: ULARGE_INTEGER;
+
+begin
+ if GetDiskFreeSpaceEx(PChar(Drive+':\'), FtCBytes, TotalBytes, @FreeBytes) then
+  GetFreeDiskSpace := FreeBytes.QuadPart
+ else
+  GetFreeDiskSpace := 0;
+end;
+
+
+function TSysInfo.GetDiskSpace(Drive: Char): QWord;
+var
+ FtCBytes: ULARGE_INTEGER;
+ TotalBytes: ULARGE_INTEGER;
+ FreeBytes: ULARGE_INTEGER;
+begin
+ if GetDiskFreeSpaceEx(PChar(Drive+':\'), FtCBytes, TotalBytes, @FreeBytes) then
+  GetDiskSpace := TotalBytes.QuadPart
+ else
+  GetDiskSpace := 0;
 end;
 
 

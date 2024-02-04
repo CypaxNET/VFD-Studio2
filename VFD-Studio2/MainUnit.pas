@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
   NTK300, NTK800, VFDisplay, IniFiles, Menus, ExtCtrls, InfoUnit, uSMBIOS,
   SysInfo, WinampControl, LCLTranslator, ComCtrls, DateUtils, Math,
-  StudioCommon, Glyphs, lclintf;
+  StudioCommon, Glyphs, lclintf, RegExpr;
 
 const MAX_VARIABLE_INFO = 10;
 const MAX_CLOCKS = 4;
@@ -244,7 +244,6 @@ type
     procedure PaintStringOnVirtualDisplay(AText: string; Col, Row: Integer);
     procedure CombineVirtualLayers(Sender: TObject);
     
-
     // special display feature stuff
     procedure InitTheMatrix;
     procedure AddMatrixDrop(const AText: string; MaxTextLen, Row: Integer; SlownessFactor: Byte);
@@ -254,6 +253,7 @@ type
     procedure AddClock(Offset: Integer; X, Y, HourHandLength, MinuteHandLength, SecondsHandLength: Word);
     procedure DisableClocks;
     procedure RefreshClocks;
+    procedure DrawDriveUsage(DriveLetter: Char; Col, Row, BarWidth: Integer);
     
     // settings
     procedure LoadConfig(const AFilePath: string);
@@ -549,12 +549,38 @@ var
   DoW: Word;
   Year, Month, Day: Word;
   Hour, Minute, Second, MilliSecond: Word;
+  RegEx: TRegExpr;
+  Match: string;
 begin
 
+  RegEx := TRegExpr.Create;
   S:= AText;
   CurrentDateTime:= Now;
   DecodeDateTime(CurrentDateTime, Year, Month, Day, Hour, Minute, Second, MilliSecond);
 
+  if (Pos('$TOTALDRIVE', S) <> 0 ) then begin
+    RegEx.Expression:= '\$TOTALDRIVE(\w)\$';
+    if (RegEx.Exec(S)) then begin
+      Match:=RegEx.Match[1];
+      S:= RegEx.Replace(S, IntToStr(Round(FSysInfo.GetDiskSpace(Match[1]) / 1073741824)), False);
+    end;
+  end;
+
+  if (Pos('$FREEDRIVE', S) <> 0 ) then begin
+    RegEx.Expression:= '\$FREEDRIVE(\w)\$';
+    if (RegEx.Exec(S)) then begin
+      Match:=RegEx.Match[1];
+      S:= RegEx.Replace(S, IntToStr(Round(FSysInfo.GetFreeDiskSpace(Match[1]) / 1073741824)), False);
+    end;
+  end;
+
+  if (Pos('$NAMEDRIVE', S) <> 0 ) then begin
+    RegEx.Expression:= '\$NAMEDRIVE(\w)\$';
+    if (RegEx.Exec(S)) then begin
+      Match:=RegEx.Match[1];
+      S:= RegEx.Replace(S, FSysInfo.GetPartitionName(Match[1]),  False);
+    end;
+  end;
 
   while (Pos('$MEMORY$', S) <> 0 ) do begin
     I:= Pos('$MEMORY$', S);
@@ -739,6 +765,8 @@ begin
     else
       Insert(':', S, I);
   end;
+
+  RegEx.Free;
 
   Result:= S;
 end;
@@ -1293,6 +1321,16 @@ begin
           P2:= StrToInt(CmdParts[2]);
           P3:= StrToInt(CmdParts[3]);
           BitmapToVFD(CmdParts[1], P2, P3);
+        end;
+
+      end else if ('DRIVEUSAGE' = Cmd) then begin
+        // p1 = drive letter, P2 = x, P3 = y, P4 = width (in characters)
+        if (CmdParts.Count >= 5) then begin
+          P2:= StrToInt(CmdParts[2]);
+          P3:= StrToInt(CmdParts[3]);
+          P4:= StrToInt(CmdParts[4]);
+          DrawDriveUsage(CmdParts[1][1], P2, P3, P4);
+
         end;
 
       end else if ('CLOCK' = Cmd) then begin
@@ -2757,6 +2795,42 @@ begin
       end; // for Row
 
     end; // end for loop
+  end;
+end;
+
+procedure TMainForm.DrawDriveUsage(DriveLetter: Char; Col, Row, BarWidth: Integer);
+var
+  TotalMem: QWord;
+  FreeMem: QWord;
+  TextWidth: Integer;
+  PercentFree: Double;
+  X: Integer;
+  C: Char;
+  UsedNum: Integer;
+begin
+  if (nil <> FDisplay) then
+    TextWidth:= FDisplay.TextWidth // get number of characters one line can show
+  else
+    TextWidth:= FStudioConfig.DisplayConfig.ResX div (GLYPH_W + GLYPH_GAP);
+
+  // get drive information
+  TotalMem:= FSysInfo.GetDiskSpace(DriveLetter);
+  FreeMem:= FSysInfo.GetFreeDiskSpace(DriveLetter);
+
+  // calculate percentage of free bytes
+  PercentFree:= FreeMem / TotalMem;
+
+  // calculate number of characters in bar which are used
+  UsedNum:= Round(BarWidth * (1.0 - PercentFree));
+
+  for X:= 0 to (BarWidth - 1) do begin
+    if (X < UsedNum) then
+      C:= Chr($87)
+    else
+      C:= Chr($8D);
+    if (nil <> FDisplay) then
+      FDisplay.PaintString(C, X + Col, Row);
+    PaintStringOnVirtualDisplay(C, X + Col, Row);
   end;
 end;
 
