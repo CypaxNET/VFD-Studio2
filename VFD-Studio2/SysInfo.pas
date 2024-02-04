@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, registry, winsock, ExtCtrls, JwaWinBase;
+  StdCtrls, registry, winsock, ExtCtrls, JwaWinBase, Win32Proc;
 type
   TSysInfo = class(TComponent)
   private
@@ -53,7 +53,10 @@ type
     function GetMostRecentDirectDraw: string;
     function GetMostRecentDirect3D: string;
 
-    function GetOperatingSystem: String;
+    function GetOperatingSystem: string;
+    function GetOperatingSystemFullName: string;
+
+    function GetRegistryString(Path, Key: string): string;
 
   published
     { Published-Deklarationen }
@@ -507,13 +510,64 @@ begin
 end;
 
 
-  //Betriebssystem
-function TSysInfo.GetOperatingSystem: String;
+function TSysInfo.GetOperatingSystemFullName: string;
+var
+  Reg: TRegistry;
 begin
-  Result := 'unbekannt';
-  // TODO
+  Result:='';
+  Reg := TRegistry.Create;
+  try
+    Reg.RootKey := HKEY_LOCAL_MACHINE;
+    if Reg.OpenKeyReadOnly('Software\Microsoft\Windows NT\CurrentVersion') then
+    begin
+      Result := Reg.ReadString('ProductName');
+      Reg.CloseKey;
+    end;
+  except
+  end;
+  Reg.Free;
 end;
 
+// Operating system short name
+function TSysInfo.GetOperatingSystem: string;
+var
+  OSVersion: string;
+begin
+  if  WindowsVersion = wv95 then OSVersion := 'Windows 95'
+  else if WindowsVersion = wvNT4 then OSVersion := 'Windows NT v.4'
+  else if WindowsVersion = wv98 then OSVersion := 'Windows 98'
+  else if WindowsVersion = wvMe then OSVersion := 'Windows ME'
+  else if WindowsVersion = wv2000 then OSVersion := 'Windows 2000'
+  else if WindowsVersion = wvXP then OSVersion := 'Windows XP'
+  else if WindowsVersion = wvServer2003 then OSVersion := 'Windows Server 2003'
+  else if WindowsVersion = wvVista then OSVersion := 'Windows Vista'
+  else if WindowsVersion = wv7 then OSVersion := 'Windows 7'
+  else if WindowsVersion = wv8 then OSVersion := 'Windows 8'
+  else if WindowsVersion = wv8_1 then OSVersion := 'Windows 8.1'
+  else if WindowsVersion = wv10 then OSVersion := 'Windows 10'
+  else if WindowsVersion = wv11 then OSVersion := 'Windows 11'
+  else OSVersion:= 'Windows';
+
+  Result:= OSVersion;
+end;
+
+function TSysInfo.GetRegistryString(Path, Key: string): string;
+var
+  Reg: TRegistry;
+begin
+  Result:='';
+  Reg := TRegistry.Create;
+  try
+    Reg.RootKey := HKEY_LOCAL_MACHINE;
+    if Reg.OpenKeyReadOnly(Path) then
+    begin
+      Result:= Reg.ReadString(Key);
+      Reg.CloseKey;
+    end;
+  except
+  end;
+  Reg.Free;
+end;
 
 function TSysInfo.GetFreeDiskSpace(Drive: Char): QWord;
 var

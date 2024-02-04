@@ -357,8 +357,22 @@ var
   I: Integer;
   Tmp: string;
   S: string;
+  RegEx: TRegExpr;
+  Match1: string;
+  Match2: string;
 begin
+
+  RegEx:= TRegExpr.Create;
   S:= AText;
+
+  if (Pos('$REGKEY_', S) <> 0 ) then begin
+    RegEx.Expression:= '\$REGKEY_(.+)\/(.+)\$';
+    if (RegEx.Exec(S)) then begin
+      Match1:=RegEx.Match[1];
+      Match2:=RegEx.Match[2];
+      S:= RegEx.Replace(S, FSysInfo.GetRegistryString(Match1, Match2), False);
+    end;
+  end;
 
   while (Pos('$VERSION$', S) <> 0 ) do begin
     I:= Pos('$VERSION$', S);
@@ -382,6 +396,12 @@ begin
     I:= Pos('$OS$', S);
     Delete(S, I, Length('$OS$'));
     Insert(FSysInfo.GetOperatingSystem, S, I);
+  end;
+
+  while (Pos('$OSNAME$', S) <> 0 ) do begin
+    I:= Pos('$OSNAME$', S);
+    Delete(S, I, Length('$OSNAME$'));
+    Insert(FSysInfo.GetOperatingSystemFullName, S, I);
   end;
 
   while (Pos('$CPUCORES$', S) <> 0 ) do begin
@@ -536,6 +556,8 @@ begin
   end;
   *)
 
+  RegEx.Free;
+
   Result:= S;
 end;
 
@@ -553,7 +575,7 @@ var
   Match: string;
 begin
 
-  RegEx := TRegExpr.Create;
+  RegEx:= TRegExpr.Create;
   S:= AText;
   CurrentDateTime:= Now;
   DecodeDateTime(CurrentDateTime, Year, Month, Day, Hour, Minute, Second, MilliSecond);
