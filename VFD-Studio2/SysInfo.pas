@@ -372,9 +372,9 @@ begin
         s:='System\CurrentControlSet\Control\Print\Printers'+'\'+Printers[i-1];
         reg.OpenKeyReadOnly(s);
         rs.add(reg.ReadString('Name'));
-        rs.add('Anschluss: '+reg.ReadString('Port'));
-        rs.add('Freigabename: '+reg.ReadString('Share Name'));
-        rs.add('------------------------------------------');
+        rs.add(reg.ReadString('Port'));
+        rs.add(reg.ReadString('Share Name'));
+        rs.add(reg.ReadString('Printer Driver'));
         reg.CloseKey;
         reg.free;
        end;  // end for

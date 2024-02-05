@@ -21,6 +21,7 @@ type
   TApplicationConfig = record
     Language: string;
     PreviewDisplayColor: TColor; // color of the pixels in the preview display
+    DoStartMinimized: Boolean;   // start VFD-Studio2 minimized in system tray?
   end;
 
   TDisplayConfig = record
@@ -29,6 +30,9 @@ type
     ResY: Word;          // display resolution in y direction
     IntName: string;     // interface name (e.g. 'COM5')
     Baudrate: Cardinal;  // baudrate for serial display connection
+    IsBrightnessControlledByList: Boolean; // display brightness is controlled by list commands (otherwise by following setting)
+    DisplayBrightness: Byte; // display brightness in percent, unless brightness is controlled by list commands
+    DoClearOnExit: Boolean; // clear the display when closing the application (otherwise it is left as it is)
   end;
 
   TListConfig = record
@@ -38,12 +42,6 @@ type
   TAnimationConfig = record
     PlayOnlyOnIdle: Boolean; // play animations only then the CPU is idle?
     IdlePercent: Byte;       // which percentage of CPU usage still counts as idle?
-    IdleTime: Word;          // number of seconds the CPU must have been idle?
-  end;
-
-  TExtraConfig = record
-    ShowTime: Word;
-    OVerviewTime: Word;
   end;
 
   TStudioConfig = record
@@ -118,55 +116,67 @@ type
 
   { TMainForm }
   TMainForm = class(TForm)
-    BitBtn1: TBitBtn;
+    AnimationsGroupBox: TGroupBox;
+    ApplicationGroupBox: TGroupBox;
+    BrightListRadioButton: TRadioButton;
+    BrightnessControlLabel: TLabel;
+    BrightnessPercentLabel: TLabel;
+    BrightnessTrackBar: TTrackBar;
+    BrightSettingsRadioButton: TRadioButton;
+    ClearLogButton: TBitBtn;
+    ClearOnCloseCheckBox: TCheckBox;
+    ColorButton: TColorButton;
+    DisplayGroupBox: TGroupBox;
     ExpertViewButton: TBitBtn;
-    ImageList1: TImageList;
-    HyperlinkLabel: TLabel;
-    Label4: TLabel;
-    Label5: TLabel;
-    MenuItem1: TMenuItem;
-    Panel6: TPanel;
-    SaveDialog: TSaveDialog;
-    VersionLabel: TLabel;
+    ExtListBox: TListBox;
+    IdleLevelLabel: TLabel;
+    IdlePercentageLabel: TLabel;
+    IdleTrackBar: TTrackBar;
     LangDeButton: TBitBtn;
     LangEnButton: TBitBtn;
-    ColorPanel: TPanel;
-    GroupBox1: TGroupBox;
-    Label3: TLabel;
+    LangItButton: TBitBtn;
+    LanguageGroupBox: TGroupBox;
     OnlyOnIdleBox: TCheckBox;
-    Panel5: TPanel;
-    GroupBox2: TGroupBox;
-    Panel4: TPanel;
-    SaveLogButton: TBitBtn;
-    ClearLogButton: TBitBtn;
-    ExitButton: TBitBtn;
-    ExtListBox: TListBox;
-    InfoButton: TBitBtn;
-    ListNameLabel: TLabel;
-    Label2: TLabel;
+    PreviewColorLabel: TLabel;
+    SettingsGroupBox: TGroupBox;
+    LogfileGroupBox: TGroupBox;
     ListBox: TListBox;
+    ListGroupBox: TGroupBox;
+    ImageList1: TImageList;
+    HyperlinkLabel: TLabel;
+    DevelopmentYearsLabel: TLabel;
+    byLabel: TLabel;
+    LogListView: TListView;
+    MenuItem1: TMenuItem;
+    SettingsScrollBox: TScrollBox;
+    SpacerPanel: TPanel;
+    SaveDialog: TSaveDialog;
+    SaveLogButton: TBitBtn;
+    StartMinimizedCheckBox: TCheckBox;
+    VersionLabel: TLabel;
+    BottomButtonsPanel: TPanel;
+    ExitButton: TBitBtn;
+    InfoButton: TBitBtn;
     ListTestButton: TBitBtn;
     ColorDialog: TColorDialog;
     CombinedImage: TImage;
-    LogListView: TListView;
     NextButton: TBitBtn;
     OKButton: TBitBtn;
-    Panel1: TPanel;
+    LoadListPanel: TPanel;
     Exit1: TMenuItem;
     ExtraTimer: TTimer;
-    HideTimer: TTimer;
+    LoadListTimer: TTimer;
     InfoTimer: TTimer;
     Listeladen1: TMenuItem;
     N1: TMenuItem;
     N2: TMenuItem;
     NchsterScreen1: TMenuItem;
     OpenDialog: TOpenDialog;
-    Panel2: TPanel;
-    Panel3: TPanel;
+    OkButtonPanel: TPanel;
     PopupMenu1: TPopupMenu;
     PopupStopButton: TMenuItem;
     ReloadButton: TBitBtn;
-    SCR_Time_Label: TLabel;
+    ScreenTimeLabel: TLabel;
     Show1: TMenuItem;
     AnimateTimer: TTimer;
     StopButton: TBitBtn;
@@ -174,7 +184,13 @@ type
     UsageTimer: TTimer;
     WaitTimer: TTimer;
     procedure AnimateTimerTimer(Sender: TObject);
-    procedure BitBtn1Click(Sender: TObject);
+    procedure BrightListRadioButtonChange(Sender: TObject);
+    procedure BrightnessTrackBarChange(Sender: TObject);
+    procedure ClearOnCloseCheckBoxChange(Sender: TObject);
+    procedure ColorButtonClick(Sender: TObject);
+    procedure ColorButtonColorChanged(Sender: TObject);
+    procedure IdleTrackBarChange(Sender: TObject);
+    procedure LangItButtonClick(Sender: TObject);
     procedure ExpertViewButtonClick(Sender: TObject);
     procedure ClearLogButtonClick(Sender: TObject);
     procedure Button2Click(Sender: TObject);
@@ -187,8 +203,8 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormWindowStateChange(Sender: TObject);
-    procedure GroupBox1Resize(Sender: TObject);
-    procedure HideTimerTimer(Sender: TObject);
+    procedure LanguageGroupBoxResize(Sender: TObject);
+    procedure LoadListTimerTimer(Sender: TObject);
     procedure InfoButtonClick(Sender: TObject);
     procedure InfoTimerTimer(Sender: TObject);
     procedure HyperlinkLabelClick(Sender: TObject);
@@ -206,6 +222,7 @@ type
     procedure ReloadButtonClick(Sender: TObject);
     procedure SaveLogButtonClick(Sender: TObject);
     procedure Show1Click(Sender: TObject);
+    procedure StartMinimizedCheckBoxChange(Sender: TObject);
     procedure StopButtonClick(Sender: TObject);
     procedure TrayIcon1Click(Sender: TObject);
     procedure UsageTimerTimer(Sender: TObject);
@@ -371,6 +388,54 @@ begin
       Match1:=RegEx.Match[1];
       Match2:=RegEx.Match[2];
       S:= RegEx.Replace(S, FSysInfo.GetRegistryString(Match1, Match2), False);
+    end;
+  end;
+
+  if (Pos('$SLOTUSAGE', S) <> 0 ) then begin
+    RegEx.Expression:= '\$SLOTUSAGE(\w)\$';
+    if (RegEx.Exec(S)) then begin
+      Match1:=RegEx.Match[1];
+      try
+        if (FSMBios.HasProcessorInfo) then begin
+          S:= RegEx.Replace(S, FSMBios.SystemSlotInfo[StrToInt(Match1)].GetCurrentUsage, False);
+        end else begin
+          S:= RegEx.Replace(S, RsInformationUnknown, False);
+        end;
+      except
+        S:= RegEx.Replace(S, RsInformationUnknown, False);
+      end;
+    end;
+  end;
+
+  if (Pos('$SLOTTYPE', S) <> 0 ) then begin
+    RegEx.Expression:= '\$SLOTTYPE(\w)\$';
+    if (RegEx.Exec(S)) then begin
+      Match1:=RegEx.Match[1];
+      try
+        if (FSMBios.HasProcessorInfo) then begin
+          S:= RegEx.Replace(S, FSMBios.SystemSlotInfo[StrToInt(Match1)].GetSlotType, False);
+        end else begin
+          S:= RegEx.Replace(S, RsInformationUnknown, False);
+        end;
+      except
+        S:= RegEx.Replace(S, RsInformationUnknown, False);
+      end;
+    end;
+  end;
+
+  if (Pos('$SLOTINFO', S) <> 0 ) then begin
+    RegEx.Expression:= '\$SLOTINFO(\w)\$';
+    if (RegEx.Exec(S)) then begin
+      Match1:=RegEx.Match[1];
+      try
+        if (FSMBios.HasProcessorInfo) then begin
+          S:= RegEx.Replace(S, FSMBios.SystemSlotInfo[StrToInt(Match1)].SlotDesignationStr, False);
+        end else begin
+          S:= RegEx.Replace(S, RsInformationUnknown, False);
+        end;
+      except
+        S:= RegEx.Replace(S, RsInformationUnknown, False);
+      end;
     end;
   end;
 
@@ -542,19 +607,6 @@ begin
       Insert(RsInformationUnknown, S, I);
     end;
   end;
-
-
-  (* usefull?
-  while (Pos('$SLOT$', S) <> 0 ) do begin
-    I:= Pos('$SLOT$', S);
-    Delete(S, I, Length('$SLOT$'));
-    if (SMBios.HasProcessorInfo) then begin
-      Insert(SMBios.SystemSlotInfo[0].GetCurrentUsage, S, I);
-    end else begin
-      Insert(RsInformationUnknown, S, I);
-    end;
-  end;
-  *)
 
   RegEx.Free;
 
@@ -966,7 +1018,7 @@ begin
   StopProcessing;
   FListIndex:= 0;
 
-  ListNameLabel.Caption:= RsCurrentlyDisplayed + ': ' + ExtractFileName(ListFileName);
+  ListGroupBox.Caption:= RsCurrentlyDisplayed + ': ' + ExtractFileName(ListFileName);
 
   //load list
   ListBox.Items.LoadFromFile(ListFileName);
@@ -1132,6 +1184,10 @@ begin
           FDisplay.ShowScreen(BOTH_LAYERS);
           FLayerMode:= lmXOR;
           FDisplay.SetLayerMode(FLayerMode);
+          if (not FStudioConfig.DisplayConfig.IsBrightnessControlledByList) then begin
+            if (nil <> FDisplay) then
+              FDisplay.SetBrightness(FStudioConfig.DisplayConfig.DisplayBrightness);
+          end;
         end;
 
 
@@ -1202,17 +1258,19 @@ begin
         if (CmdParts.Count >= 2) then begin
           P1:= StrToInt(CmdParts[1]);
           WaitTimer.Interval:= P1 * 1000;
-          //SCR_Time_Label.caption:= 'ScreenTime: ' + floattostr(WaitTimer.Interval/1000)+ 'S';
+          //ScreenTimeLabel.caption:= 'ScreenTime: ' + floattostr(WaitTimer.Interval/1000)+ 'S';
           WaitTimer.Enabled:= True;
         end;
 
       end else if ('LIGHT' = Cmd) then begin
         // p1 = brightness level
-       if (CmdParts.Count >= 2) then begin
-         P1:= StrToInt(CmdParts[1]);
-         if (nil <> FDisplay) then
-           FDisplay.SetBrightness(P1);
-       end;
+        if (FStudioConfig.DisplayConfig.IsBrightnessControlledByList) then begin
+          if (CmdParts.Count >= 2) then begin
+            P1:= StrToInt(CmdParts[1]);
+            if (nil <> FDisplay) then
+              FDisplay.SetBrightness(P1);
+          end;
+        end;
 
       end else if ('NOISE' = Cmd) then begin
         // p1 = amount of pixels, p2 = inverted or not [optional]
@@ -1529,16 +1587,7 @@ procedure TMainForm.WaitTimerTimer(Sender: TObject);
 begin
   WaitTimer.Enabled:= False;
 
-  (*
-  // Bei ListEnde wieder zum ListAnfang springen
-  if (FListIndex < ListBox.Items.Count - 1) then
-    Inc(FListIndex)
-  else
-    FListIndex:= 0;
-  *)
-
   CreateScreen;
-
 end;
 
 
@@ -1555,21 +1604,24 @@ begin
     ColorString:= IniFile.ReadString('APPLICATION', 'DspColor', '$FFFFFF');
     ColorString:= ColorString.Replace('#', '$');
     FStudioConfig.ApplicationConfig.PreviewDisplayColor:= StringToColor(ColorString);
+    FStudioConfig.ApplicationConfig.DoStartMinimized:= IniFile.ReadBool('APPLICATION', 'StartMinimized', False);
 
     { display section }
-    FStudioConfig.DisplayConfig.DisplayType:= IniFile.ReadString( 'DISPLAY', 'Type',      '');
-    FStudioConfig.DisplayConfig.ResX:=        IniFile.ReadInteger('DISPLAY', 'ResX',      128);
-    FStudioConfig.DisplayConfig.ResY:=        IniFile.ReadInteger('DISPLAY', 'ResY',      64);
-    FStudioConfig.DisplayConfig.IntName:=     IniFile.ReadString( 'DISPLAY', 'Interface', 'COM1');
-    FStudioConfig.DisplayConfig.Baudrate:=    IniFile.ReadInteger('DISPLAY', 'Baud',      115200);
+    FStudioConfig.DisplayConfig.DisplayType:=   IniFile.ReadString( 'DISPLAY', 'Type',        '');
+    FStudioConfig.DisplayConfig.ResX:=          IniFile.ReadInteger('DISPLAY', 'ResX',        128);
+    FStudioConfig.DisplayConfig.ResY:=          IniFile.ReadInteger('DISPLAY', 'ResY',        64);
+    FStudioConfig.DisplayConfig.IntName:=       IniFile.ReadString( 'DISPLAY', 'Interface',   'COM1');
+    FStudioConfig.DisplayConfig.Baudrate:=      IniFile.ReadInteger('DISPLAY', 'Baud',        115200);
+    FStudioConfig.DisplayConfig.DoClearOnExit:= IniFile.ReadBool(   'DISPLAY', 'ClearOnExit', False);
+    FStudioConfig.DisplayConfig.IsBrightnessControlledByList:= IniFile.ReadBool('DISPLAY', 'BrightnessByList', True);
+    FStudioConfig.DisplayConfig.DisplayBrightness:= Min(100, IniFile.ReadInteger('DISPLAY', 'Brightness', 100));
 
     { list section }
     FStudioConfig.ListConfig.ListName:= IniFile.ReadString('LIST', 'Listname', 'Default.lst');
 
     { animations section }
-    FStudioConfig.AnimationConfig.PlayOnlyOnIdle:= IniFile.ReadBool(   'ANIMATIONS', 'PlayOnlyOnIdle', False);
-    FStudioConfig.AnimationConfig.IdlePercent:=    IniFile.ReadInteger('ANIMATIONS', 'IdleLevel',      20);
-    FStudioConfig.AnimationConfig.IdleTime:=       IniFile.ReadInteger('ANIMATIONS', 'IdleTime',       60);
+    FStudioConfig.AnimationConfig.PlayOnlyOnIdle:= IniFile.ReadBool(   'ANIMATIONS', 'PlayOnlyOnIdle', True);
+    FStudioConfig.AnimationConfig.IdlePercent:=    Min(100, IniFile.ReadInteger('ANIMATIONS', 'IdleLevel', 50));
 
   finally
     IniFile.Free;
@@ -1588,13 +1640,17 @@ begin
     IniFile.WriteString('APPLICATION', 'Language', FStudioConfig.ApplicationConfig.Language);
     ColorString:= Format('$%.6x', [FStudioConfig.ApplicationConfig.PreviewDisplayColor]);
     IniFile.WriteString('APPLICATION', 'DspColor', ColorString);
+    IniFile.WriteBool('APPLICATION', 'StartMinimized', FStudioConfig.ApplicationConfig.DoStartMinimized);
 
     { display section }
-    IniFile.WriteString( 'DISPLAY', 'Type',      FStudioConfig.DisplayConfig.DisplayType);
-    IniFile.WriteInteger('DISPLAY', 'ResX',      FStudioConfig.DisplayConfig.ResX);
-    IniFile.WriteInteger('DISPLAY', 'ResY',      FStudioConfig.DisplayConfig.ResY);
-    IniFile.WriteString( 'DISPLAY', 'Interface', FStudioConfig.DisplayConfig.IntName);
-    IniFile.WriteInteger('DISPLAY', 'Baud',      FStudioConfig.DisplayConfig.Baudrate);
+    IniFile.WriteString( 'DISPLAY', 'Type',          FStudioConfig.DisplayConfig.DisplayType);
+    IniFile.WriteInteger('DISPLAY', 'ResX',          FStudioConfig.DisplayConfig.ResX);
+    IniFile.WriteInteger('DISPLAY', 'ResY',          FStudioConfig.DisplayConfig.ResY);
+    IniFile.WriteString( 'DISPLAY', 'Interface',     FStudioConfig.DisplayConfig.IntName);
+    IniFile.WriteInteger('DISPLAY', 'Baud',          FStudioConfig.DisplayConfig.Baudrate);
+    IniFile.WriteBool('DISPLAY', 'ClearOnExit',      FStudioConfig.DisplayConfig.DoClearOnExit);
+    IniFile.WriteBool('DISPLAY', 'BrightnessByList', FStudioConfig.DisplayConfig.IsBrightnessControlledByList);
+    IniFile.WriteInteger('DISPLAY', 'Brightness',    FStudioConfig.DisplayConfig.DisplayBrightness);
 
     { list section }
     IniFile.WriteString('LIST', 'Listname', FStudioConfig.ListConfig.ListName);
@@ -1602,7 +1658,6 @@ begin
     { animations section }
     IniFile.WriteBool(   'ANIMATIONS', 'PlayOnlyOnIdle', FStudioConfig.AnimationConfig.PlayOnlyOnIdle);
     IniFile.WriteInteger('ANIMATIONS', 'IdleLevel',      FStudioConfig.AnimationConfig.IdlePercent);
-    IniFile.WriteInteger('ANIMATIONS', 'IdleTime',       FStudioConfig.AnimationConfig.IdleTime);
 
   finally
     IniFile.Free;
@@ -1626,22 +1681,23 @@ begin
   LogEvent(lvINFO, 'Application started. Version ' + VERSION_STR , Now);
 
   IniFilePath:= ExtractFilePath(application.ExeName) + 'vfdstudio.ini';
-
   LoadConfig(IniFilePath);
 
-  ColorPanel.Color:= FStudioConfig.ApplicationConfig.PreviewDisplayColor;
-
+  // set controls accordingly to loaded settings
+  if (FStudioConfig.ApplicationConfig.DoStartMinimized) then
+    Hide;
+  ColorButton.ButtonColor:= FStudioConfig.ApplicationConfig.PreviewDisplayColor;
   SetDefaultLang(FStudioConfig.ApplicationConfig.Language);
+  StartMinimizedCheckBox.Checked:= FStudioConfig.ApplicationConfig.DoStartMinimized;
+  BrightListRadioButton.Checked:= FStudioConfig.DisplayConfig.IsBrightnessControlledByList;
+  BrightSettingsRadioButton.Checked:= not FStudioConfig.DisplayConfig.IsBrightnessControlledByList;
+  BrightnessTrackBar.Position:= FStudioConfig.DisplayConfig.DisplayBrightness;
+  BrightnessPercentLabel.Caption:= IntToStr(FStudioConfig.DisplayConfig.DisplayBrightness) + '%';
+  OnlyOnIdleBox.Checked:= FStudioConfig.AnimationConfig.PlayOnlyOnIdle;
+  IdleTrackBar.Position:= FStudioConfig.AnimationConfig.IdlePercent;
+  IdlePercentageLabel.Caption:= IntToStr(FStudioConfig.AnimationConfig.IdlePercent) + '%';
+  ClearOnCloseCheckBox.Checked:= FStudioConfig.DisplayConfig.DoClearOnExit;
 
-  (* obsolete
-  ShowTime:= VFDIni.ReadInteger('EXTRAS', 'ShowTime', 3000);
-  OverviewTime:= VFDIni.ReadInteger('EXTRAS', 'OverviewTime', 6000);
-  cfgDspType:= VFDIni.ReadString('SETTINGS', 'Display', '');
-  ToDoList:= VFDIni.ReadString('LIST', 'Listname', '');
-  PlayOnlyOnIdle:= VFDIni.ReadBool('ANIMATIONS', 'PlayOnlyOnIdle', False);
-  IdleTime:= VFDIni.ReadInteger('ANIMATIONS', 'IdleTime', 45);
-  IdleLevel:= VFDIni.ReadInteger('ANIMATIONS', 'IdleLevel', 25);
-  *)
 
   if ('NTK800' = FStudioConfig.DisplayConfig.DisplayType) then begin
     FDisplay:= TNTK800.Create(Self);
@@ -1675,7 +1731,11 @@ begin
 
   VersionLabel.Caption:= 'v' + VERSION_STR;
 
-  HideTimer.Enabled:= True;
+  // Starting the application might require quite some (CPU)time, so it's a good
+  // idea to give the system some time. That's why loading the list is moved
+  // to a timer which will add a small delay to this and which will disable
+  // itself afterwards.
+  LoadListTimer.Enabled:= True;
 
 end;
 
@@ -1685,6 +1745,13 @@ var
   AStringList: TStringList;
   I: Integer;
 begin
+
+  if (FStudioConfig.DisplayConfig.DoClearOnExit) then begin
+    if (nil <> FDisplay) then
+      FDisplay.ClearScreen;
+    // we might also clear the preview display, but since the application is about to close we skip that
+  end;
+
   LogEvent(lvINFO, 'Application closed.', Now);
 
   IniFilePath:= ExtractFilePath(application.ExeName) + 'vfdstudio.ini';
@@ -1692,12 +1759,12 @@ begin
 
   AStringList:= TStringList.Create;
   try
-    AStringList.Add('#;Time;Level;Message');
+    AStringList.Add('#;Message;Level;Time');
     for I:= 0 to (LogListView.Items.Count - 1) do
       AStringList.Add(LogListView.Items[I].Caption + ',' + // #
-        LogListView.Items[i].SubItems[0] + ';' +           // Time
+        '"' + LogListView.Items[i].SubItems[0] + '";' +    // Message
         LogListView.Items[i].SubItems[1] + ';' +           // Level
-        '"' + LogListView.Items[i].SubItems[2] + '"');     // Message
+        LogListView.Items[i].SubItems[2]);                 // Time
     try
       AStringList.SaveToFile(ExtractFilePath(application.ExeName) + 'vfdstudio.log');
     finally
@@ -1729,16 +1796,14 @@ begin
     Hide;
 end;
 
-procedure TMainForm.GroupBox1Resize(Sender: TObject);
+procedure TMainForm.LanguageGroupBoxResize(Sender: TObject);
 begin
-  GroupBox1.ChildSizing.ControlsPerLine:= GroupBox1.Width div (LangDeButton.Width + GroupBox1.ChildSizing.HorizontalSpacing);
+  LanguageGroupBox.ChildSizing.ControlsPerLine:= LanguageGroupBox.Width div (LangDeButton.Width + LanguageGroupBox.ChildSizing.HorizontalSpacing);
 end;
 
-procedure TMainForm.HideTimerTimer(Sender: TObject);
+procedure TMainForm.LoadListTimerTimer(Sender: TObject);
 begin
-  //TODO: Hide;
-
-  HideTimer.Enabled:= False; // self-disabling
+  LoadListTimer.Enabled:= False; // self-disabling
 
   // load last list as specified in ini file
   Mainform.LoadList(ExtractFilePath(Application.ExeName) + 'Lists\' + FStudioConfig.ListConfig.ListName);
@@ -1757,9 +1822,9 @@ begin
     H:= Trunc(FRemainingSeconds / 3600);
     M:= Trunc((FRemainingSeconds mod 3600) / 60);
     S:= FRemainingSeconds mod 60;
-    SCR_Time_Label.caption:= RsNextScreenText + Format(' %d:%.02d:%.02d', [H, M, S]);
+    ScreenTimeLabel.caption:= RsNextScreenText + Format(' %d:%.02d:%.02d', [H, M, S]);
   end else begin
-    SCR_Time_Label.caption:= RsNextScreenText + ' -: - -: - -';
+    ScreenTimeLabel.caption:= RsNextScreenText + ' -: - -: - -';
   end;
 end;
 
@@ -1793,17 +1858,24 @@ begin
   OpenURL('http://cypax.net');
 end;
 
+procedure TMainForm.LangEnButtonClick(Sender: TObject);
+begin
+  FStudioConfig.ApplicationConfig.Language:= 'en';
+  SetDefaultLang(FStudioConfig.ApplicationConfig.Language);
+end;
+
 procedure TMainForm.LangDeButtonClick(Sender: TObject);
 begin
   FStudioConfig.ApplicationConfig.Language:= 'de';
   SetDefaultLang(FStudioConfig.ApplicationConfig.Language);
 end;
 
-procedure TMainForm.LangEnButtonClick(Sender: TObject);
+procedure TMainForm.LangItButtonClick(Sender: TObject);
 begin
-  FStudioConfig.ApplicationConfig.Language:= 'en';
+  FStudioConfig.ApplicationConfig.Language:= 'it';
   SetDefaultLang(FStudioConfig.ApplicationConfig.Language);
 end;
+
 
 // User whishes to jump to a specific line
 procedure TMainForm.ListBoxDblClick(Sender: TObject);
@@ -1904,12 +1976,12 @@ begin
 
     AStringList:= TStringList.Create;
     try
-      AStringList.Add('#;Time;Level;Message');
+      AStringList.Add('#;Message;Level;Time');
       for I:= 0 to (LogListView.Items.Count - 1) do
         AStringList.Add(LogListView.Items[I].Caption + ',' + // #
-          LogListView.Items[i].SubItems[0] + ';' +           // Time
+          '"' + LogListView.Items[i].SubItems[0] + '";' +    // Message
           LogListView.Items[i].SubItems[1] + ';' +           // Level
-          '"' + LogListView.Items[i].SubItems[2] + '"');     // Message
+          LogListView.Items[i].SubItems[2]);                 // Time
       try
         AStringList.SaveToFile(SaveDialog.FileName);
       except
@@ -1927,6 +1999,11 @@ procedure TMainForm.Show1Click(Sender: TObject);
 begin
   WindowState:= wsNormal;
   Show;
+end;
+
+procedure TMainForm.StartMinimizedCheckBoxChange(Sender: TObject);
+begin
+  FStudioConfig.ApplicationConfig.DoStartMinimized:= StartMinimizedCheckBox.Checked;
 end;
 
 procedure TMainForm.StopButtonClick(Sender: TObject);
@@ -2200,31 +2277,61 @@ end;
 
 procedure TMainForm.AnimateTimerTimer(Sender: TObject);
 begin
-  DrawAnimationFrame(FAnimationData.AnimationBitmap, FAnimationData.XPos, FAnimationData.YPos, FAnimationData.FrameIndex, FAnimationData.FrameWidth);
+  if (not FStudioConfig.AnimationConfig.PlayOnlyOnIdle) or (FStudioConfig.AnimationConfig.IdlePercent > FCpuUsageData.AverageCpuUsage) then begin
 
-  Inc(FAnimationData.FrameIndex);
-  if (FAnimationData.FrameIndex >= FAnimationData.FrameCount) then
-    FAnimationData.FrameIndex:= 0;
+    DrawAnimationFrame(FAnimationData.AnimationBitmap, FAnimationData.XPos, FAnimationData.YPos, FAnimationData.FrameIndex, FAnimationData.FrameWidth);
+
+    Inc(FAnimationData.FrameIndex);
+    if (FAnimationData.FrameIndex >= FAnimationData.FrameCount) then
+      FAnimationData.FrameIndex:= 0;
+
+  end;
 end;
 
-procedure TMainForm.BitBtn1Click(Sender: TObject);
+procedure TMainForm.BrightListRadioButtonChange(Sender: TObject);
 begin
-  FStudioConfig.ApplicationConfig.Language:= 'it';
-  SetDefaultLang(FStudioConfig.ApplicationConfig.Language);
+  FStudioConfig.DisplayConfig.IsBrightnessControlledByList:= BrightListRadioButton.Checked;
+end;
+
+procedure TMainForm.BrightnessTrackBarChange(Sender: TObject);
+begin
+  BrightnessPercentLabel.Caption:= IntToStr(BrightnessTrackBar.Position) + '%';
+  FStudioConfig.DisplayConfig.DisplayBrightness:= BrightnessTrackBar.Position;
+end;
+
+procedure TMainForm.ClearOnCloseCheckBoxChange(Sender: TObject);
+begin
+  FStudioConfig.DisplayConfig.DoClearOnExit:= ClearOnCloseCheckBox.Checked;
+end;
+
+procedure TMainForm.ColorButtonClick(Sender: TObject);
+begin
+end;
+
+procedure TMainForm.ColorButtonColorChanged(Sender: TObject);
+begin
+  FStudioConfig.ApplicationConfig.PreviewDisplayColor:= ColorButton.ButtonColor;
+end;
+
+procedure TMainForm.IdleTrackBarChange(Sender: TObject);
+begin
+  IdlePercentageLabel.Caption:= IntTosTr(IdleTrackBar.Position) + '%';
+  FStudioConfig.AnimationConfig.IdlePercent:= IdleTrackBar.Position;
 end;
 
 procedure TMainForm.ExpertViewButtonClick(Sender: TObject);
 begin
-     Panel3.Visible:= not Panel3.Visible;
-     Panel5.Visible:= Panel3.Visible;
+  LogfileGroupBox.Visible:= not LogfileGroupBox.Visible;
+  SettingsScrollBox.Visible:= LogfileGroupBox.Visible;
+  ListGroupBox.Visible:= LogfileGroupBox.Visible;
 
-     if (Panel3.Visible) then begin
-       ExpertViewButton.Caption:= RsModeViewNormal;
-       ExpertViewButton.ImageIndex:= 2;
-     end else begin
-       ExpertViewButton.Caption:= RsModeViewExpert;
-       ExpertViewButton.ImageIndex:= 3;
-     end;
+  if (LogfileGroupBox.Visible) then begin
+    ExpertViewButton.Caption:= RsModeViewNormal;
+    ExpertViewButton.ImageIndex:= 2;
+  end else begin
+    ExpertViewButton.Caption:= RsModeViewExpert;
+    ExpertViewButton.ImageIndex:= 3;
+  end;
 
 end;
 
@@ -2265,14 +2372,14 @@ begin
 
   Item:= LogListView.Items.Add;
   Item.Caption:= IntToStr(LogListView.Items.Count);
-  Item.Subitems.Add(Format('%.04d-%.02d-%.02d %.02d:%.02d:%.02d.%.03d', [AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond]));
+  Item.Subitems.Add(AText);
   case LogLevel of
    lvINFO:    Item.Subitems.Add('INFO');
    lvWARNING: Item.Subitems.Add('WARNING');
    lvERROR:   Item.Subitems.Add('ERROR');
    else       Item.Subitems.Add('CRITICAL');
   end;
-  Item.Subitems.Add(AText);
+  Item.Subitems.Add(Format('%.04d-%.02d-%.02d %.02d:%.02d:%.02d.%.03d', [AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond]));
 end;
 
 // Starting at StartIndex this function seeks forward/backward to the next line in ListBox which starts with the questioned string.
@@ -2325,10 +2432,6 @@ end;
 
 procedure TMainForm.ColorPanelClick(Sender: TObject);
 begin
-  if (ColorDialog.Execute) then begin
-    ColorPanel.Color:= ColorDialog.Color;
-    FStudioConfig.ApplicationConfig.PreviewDisplayColor:= ColorDialog.Color;
-  end;
 end;
 
 procedure TMainForm.ColorShapeChangeBounds(Sender: TObject);
@@ -2539,7 +2642,10 @@ var
   Gx, Gy: Integer; // position within a glyph
   CurrentCol: Integer;  // current column
   CValue: Byte;         // Ord(C)
+  NumberOfRows: Integer; // number of visible text rows in the display
 begin
+  NumberOfRows:= FStudioConfig.DisplayConfig.ResY div GLYPH_H;
+
   AText:= TGlyphs.Adapt2Charmap(AText);
 
   CurrentCol:= Col;
@@ -2551,7 +2657,7 @@ begin
     for Gx:= 0 to (GLYPH_W - 1) do begin
       Pixels:= charMap8x6[CValue, Gx];
       X:= CurrentCol * (GLYPH_W + GLYPH_GAP) + Gx;
-      for Gy:= 0 to 7 do begin
+      for Gy:= 0 to (NumberOfRows - 1) do begin
         Y:= Row * GLYPH_H + Gy;
         if ((Pixels and (1 shl Gy)) <> 0) then begin
           FVirtualLayer1.Canvas.Pixels[X, Y]:= clBlack;
@@ -2593,7 +2699,7 @@ begin
   TmpBitmap.Canvas.CopyMode:= cmSrcCopy;
   TmpBitmap.Width:= CombinedImage.Picture.Bitmap.Width;
   TmpBitmap.Height:= CombinedImage.Picture.Bitmap.Height;
-  TmpBitmap.Canvas.Brush.Color:= ColorPanel.Color;
+  TmpBitmap.Canvas.Brush.Color:= ColorButton.ButtonColor;
   TmpBitmap.Canvas.FillRect(0, 0, TmpBitmap.Width, TmpBitmap.Height);
   CombinedImage.Picture.Bitmap.Canvas.CopyMode:= cmSrcAnd;
   CombinedImage.Picture.Bitmap.Canvas.Draw(0, 0, TmpBitmap);
@@ -2662,10 +2768,16 @@ begin
       DoRepaintFirstChar:= True;
 
       if (PDrop^.Row > (DspRowCount + Length(PDrop^.Text) + 1)) then begin
+        // restart drop at random position above the visible display area
         PDrop^.Row:= (Length(PDrop^.Text) + Random(20)) * -1;
         PDrop^.SlownessFactor:= Random(3) + 1;
         DoRepaintAll:= False;
         DoRepaintFirstChar:= False;
+        // replace drop characters with random content
+        for Pos:= 1 to (PDrop^.MaxTextLen - 1) do begin
+          C:= MATRIXLETTERS[Random(Length(MATRIXLETTERS)) + 1];
+          PDrop^.Text[Pos]:= C;
+        end;
       end;
     end;
 
@@ -2674,20 +2786,6 @@ begin
 
     // check if the drop is (at least partially) within the visible display area
     if ((BottomRow >= 0) and (TopRow < (DspRowCount - 1))) then begin
-
-      (*
-      // with a certain chance, randomly replace a character with a ranom character (not the first and not the last cahracter though)
-      if (Length(PDrop^.Text) > 3) then begin
-        Pos:= Random(8);
-        if (Pos = 0) then begin
-          Pos:= Random(Length(MATRIXLETTERS)) + 1;
-          C:= MATRIXLETTERS[Pos];
-          Pos:= Random(Length(PDrop^.Text) - 2) + 2;
-          PDrop^.Text[Pos]:= C;
-          DoRepaintAll:= True;
-        end;
-      end;
-      *)
 
       if (DoRepaintAll) then
         N:= Length(PDrop^.Text)
@@ -2763,7 +2861,7 @@ begin
         else if (CpuUsage > UpperBound) then
           C:= Chr($87)
         else begin
-          Tmp:= Trunc((CpuUsage - LowerBound) / IntervalSize * 8.0);
+          Tmp:= Trunc((CpuUsage - LowerBound) / IntervalSize * GLYPH_H);
           Tmp:= $80 + Tmp;
           C:= Chr(Tmp);
         end;
@@ -2805,7 +2903,7 @@ begin
         else if (MemUsage > UpperBound) then
           C:= Chr($87)
         else begin
-          Tmp:= Trunc((MemUsage - LowerBound) / IntervalSize * 8.0);
+          Tmp:= Trunc((MemUsage - LowerBound) / IntervalSize * GLYPH_H);
           Tmp:= $80 + Tmp;
           C:= Chr(Tmp);
         end;
@@ -2824,16 +2922,11 @@ procedure TMainForm.DrawDriveUsage(DriveLetter: Char; Col, Row, BarWidth: Intege
 var
   TotalMem: QWord;
   FreeMem: QWord;
-  TextWidth: Integer;
   PercentFree: Double;
   X: Integer;
   C: Char;
   UsedNum: Integer;
 begin
-  if (nil <> FDisplay) then
-    TextWidth:= FDisplay.TextWidth // get number of characters one line can show
-  else
-    TextWidth:= FStudioConfig.DisplayConfig.ResX div (GLYPH_W + GLYPH_GAP);
 
   // get drive information
   TotalMem:= FSysInfo.GetDiskSpace(DriveLetter);
@@ -2849,7 +2942,7 @@ begin
     if (X < UsedNum) then
       C:= Chr($87)
     else
-      C:= Chr($8D);
+      C:= Chr($8E);
     if (nil <> FDisplay) then
       FDisplay.PaintString(C, X + Col, Row);
     PaintStringOnVirtualDisplay(C, X + Col, Row);
