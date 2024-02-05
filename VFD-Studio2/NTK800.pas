@@ -182,15 +182,14 @@ begin
   Cmd:= Cmd or BITS_G0C;
   Cmd:= Cmd or BITS_G1C;
 
-  // TODO: 7 is magic number
-  for Row:= 0 to 7 do begin
-    for Col:= 0 to FGfxWidth - 1 do begin
+  for Row:= 0 to (FTxtHeight - 1) do begin
+    for Col:= 0 to (FGfxWidth - 1) do begin
       FShadowLayer0 [Col, Row]:= 0;
     end;
   end;
 
-  for Row:= 0 to 7 do begin
-    for Col:= 0 to FGfxWidth - 1 do begin
+  for Row:= 0 to (FTxtHeight - 1) do begin
+    for Col:= 0 to (FGfxWidth - 1) do begin
       FShadowLayer1 [Col, Row]:= 0;
     end;
   end;
@@ -804,8 +803,8 @@ end;
 
 
 {
-  X is a Pixel position 0..127,
-  Y is a Pixel position 0..63 but expected to match a Byte block address (0, 8, 16, ..)
+  X is a Pixel position 0..(FGfxWidth-1),
+  Y is a Pixel position 0..(FGfxHeight-1) but expected to match a Byte block address (0, 8, 16, ..)
 }
 procedure TNTK800.VFDSetCoord(X, Y: Byte);
 begin
@@ -814,7 +813,7 @@ begin
 end;
 
 {
-  X is a Pixel position 0..127,
+  X is a Pixel position 0..(FGfxWidth-1),
 }
 procedure TNTK800.VFDSetXCoord(X: Byte);
 begin
@@ -843,8 +842,8 @@ end;
 
 {
   Writes a Byte to the display GRAM.
-  X is a Pixel position 0..127,
-  Y is a Pixel position 0..63 but expected to match a Byte block address (0, 8, 16, ..)
+  X is a Pixel position 0..(FGfxWidth-1),
+  Y is a Pixel position 0..(FGfxHeight-1) but expected to match a Byte block address (0, 8, 16, ..)
 }
 procedure TNTK800.VFDWriteByteXY(Value, X, Y: Byte);
 begin
