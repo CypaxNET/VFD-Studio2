@@ -215,7 +215,8 @@ void setup()
   // put your setup code here, to run once:
   Serial.begin(115200);
   //Serial.begin(230400);
-  Serial.println(idStr);
+  Serial.print(idStr);
+  Serial.print(' ');
   Serial.println(verStr);
 
   randomSeed(analogRead(0)+analogRead(1));
