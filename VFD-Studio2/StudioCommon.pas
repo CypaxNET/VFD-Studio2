@@ -10,6 +10,10 @@ uses
 type
   TLogLevel = (lvINFO, lvWARNING, lvERROR, lvCRITICAL);
 
+type
+  TLayerMode = (lmOR, lmAND, lmXOR);
+
+
 implementation
 
 end.

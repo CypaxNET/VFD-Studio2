@@ -7,10 +7,7 @@ interface
 uses
   Classes, SysUtils, Forms, Graphics, Controls, ExtCtrls, StudioCommon;
 
-
 type
-  TLayerMode = (lmOR, lmAND, lmXOR);
-
   TIntferfaceType = (itNONE, itCOM);
 
   TInterfaceConfig = record

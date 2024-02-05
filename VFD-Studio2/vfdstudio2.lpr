@@ -11,7 +11,7 @@ uses
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, MainUnit, VFDisplay, NTK800, NTK300, SysInfo, uSMBIOS, WinampControl,
-  InfoUnit, Glyphs, StudioCommon;
+  InfoUnit, Glyphs, StudioCommon, PreviewDisplay;
 
 {$R *.res}
 

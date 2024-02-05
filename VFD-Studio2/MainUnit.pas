@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
   NTK300, NTK800, VFDisplay, IniFiles, Menus, ExtCtrls, InfoUnit, uSMBIOS,
   SysInfo, WinampControl, LCLTranslator, ComCtrls, DateUtils, Math,
-  StudioCommon, Glyphs, lclintf, RegExpr;
+  StudioCommon, Glyphs, lclintf, RegExpr, PreviewDisplay;
 
 const MAX_VARIABLE_INFO = 10;
 const MAX_CLOCKS = 4;
@@ -159,7 +159,7 @@ type
     InfoButton: TBitBtn;
     ListTestButton: TBitBtn;
     ColorDialog: TColorDialog;
-    CombinedImage: TImage;
+    PreviewImage: TImage;
     NextButton: TBitBtn;
     OKButton: TBitBtn;
     LoadListPanel: TPanel;
@@ -257,10 +257,7 @@ type
     procedure StopAnimation;
     
     // methods related to the preview display
-    procedure RepaintVirtualDisplay;
-    procedure PaintStringOnVirtualDisplay(AText: string; Col, Row: Integer);
-    procedure CombineVirtualLayers(Sender: TObject);
-    
+
     // special display feature stuff
     procedure InitTheMatrix;
     procedure AddMatrixDrop(const AText: string; MaxTextLen, Row: Integer; SlownessFactor: Byte);
@@ -288,9 +285,7 @@ type
 
     // display stuff
     FDisplay: TVFDisplay;     // display object; might be nil
-    FVirtualLayer0: TBitmap;  // graphics layer of preview display
-    FVirtualLayer1: TBitmap;  // text layer of preview display
-    FLayerMode: TLayerMode;   // OR, AND or XOR combination of the layers
+    FPreviewDisplay: TPreviewDisplay; // preview display object
 
     // objects to gather system information from
     FSysInfo: TSysInfo;
@@ -903,7 +898,8 @@ begin
       if (FontName = '') or (FontSize = 0) then begin
         if (nil <> FDisplay) then
           FDisplay.PaintString(S, X, Y);
-        PaintStringOnVirtualDisplay(S, X, Y);
+        FPreviewDisplay.PaintString(S, X, Y);
+        FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
       end else begin
         DrawFontedText(S, X, Y, FontName, FontSize);
       end;
@@ -914,7 +910,8 @@ begin
     if (FontName = '') or (FontSize = 0) then begin
       if (nil <> FDisplay ) then
         FDisplay.PaintString(S, X, Y);
-      PaintStringOnVirtualDisplay(S, X, Y);
+      FPreviewDisplay.PaintString(S, X, Y);
+      FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
     end else begin
       DrawFontedText(S, X, Y, FontName, FontSize);
     end;
@@ -975,7 +972,8 @@ begin
           FVariableInfo[I].PrevWidth:= Length(Subs);
           if (nil <> FDisplay) then
             FDisplay.PaintString(Subs, FVariableInfo[I].X, FVariableInfo[I].Y);
-          PaintStringOnVirtualDisplay(Subs, FVariableInfo[I].X, FVariableInfo[I].Y);
+          FPreviewDisplay.PaintString(Subs, FVariableInfo[I].X, FVariableInfo[I].Y);
+          FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
         end else begin
           while (FVariableInfo[I].PrevWidth > Length(S)) do begin
            S:= S + ' '; // if the text was longer previously, we need to add whitespaces to clear the remainings of the previous text
@@ -983,7 +981,8 @@ begin
           FVariableInfo[I].PrevWidth:= Length(S);
           if (nil <> FDisplay) then
             FDisplay.PaintString(S, FVariableInfo[I].X, FVariableInfo[I].Y);
-          PaintStringOnVirtualDisplay(S, FVariableInfo[I].X, FVariableInfo[I].Y);
+          FPreviewDisplay.PaintString(S, FVariableInfo[I].X, FVariableInfo[I].Y);
+          FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
         end;
       end else begin // it is text with font
         BmpDimensions:= DrawFontedText(S, FVariableInfo[I].X, FVariableInfo[I].Y, FVariableInfo[I].FontName, FVariableInfo[I].FontSize);
@@ -1182,8 +1181,8 @@ begin
 
         if (nil <> FDisplay) then begin
           FDisplay.ShowScreen(BOTH_LAYERS);
-          FLayerMode:= lmXOR;
-          FDisplay.SetLayerMode(FLayerMode);
+          FPreviewDisplay.LayerMode:= lmXOR;
+          FDisplay.SetLayerMode(FPreviewDisplay.LayerMode);
           if (not FStudioConfig.DisplayConfig.IsBrightnessControlledByList) then begin
             if (nil <> FDisplay) then
               FDisplay.SetBrightness(FStudioConfig.DisplayConfig.DisplayBrightness);
@@ -1222,20 +1221,20 @@ begin
 
       end else if ('ORMODE' = Cmd) then begin
         if (nil <> FDisplay) then begin
-          FLayerMode:= lmOR;
-          FDisplay.SetLayerMode(FLayerMode);
+          FPreviewDisplay.LayerMode:= lmOR;
+          FDisplay.SetLayerMode(FPreviewDisplay.LayerMode);
         end;
 
       end else if ('XORMODE' = Cmd) then begin
         if (nil <> FDisplay) then begin
-          FLayerMode:= lmXOR;
-          FDisplay.SetLayerMode(FLayerMode);
+          FPreviewDisplay.LayerMode:= lmXOR;
+          FDisplay.SetLayerMode(FPreviewDisplay.LayerMode);
         end;
 
       end else if ('ANDMODE' = Cmd) then begin
         if (nil <> FDisplay) then begin
-          FLayerMode:= lmAND;
-          FDisplay.SetLayerMode(FLayerMode);
+          FPreviewDisplay.LayerMode:= lmAND;
+          FDisplay.SetLayerMode(FPreviewDisplay.LayerMode);
         end;
 
       end else if ('STOP' = Cmd) then begin
@@ -1247,11 +1246,8 @@ begin
       end else if ('CLEARSCREEN' = Cmd) then begin
         if (nil <> FDisplay) then
           FDisplay.ClearScreen;
-        FVirtualLayer0.Canvas.Brush.Color:= clWhite;;
-        FVirtualLayer0.Canvas.FillRect(0, 0, FStudioConfig.DisplayConfig.ResX, FStudioConfig.DisplayConfig.ResY);
-        FVirtualLayer1.Canvas.Brush.Color:= clWhite;;
-        FVirtualLayer1.Canvas.FillRect(0, 0, FStudioConfig.DisplayConfig.ResX, FStudioConfig.DisplayConfig.ResY);
-        CombineVirtualLayers(Self);
+        FPreviewDisplay.ClearScreen;
+        FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
 
       end else if ('SCREENTIME' = Cmd) then begin
         // p1 = screen time in seconds
@@ -1289,9 +1285,9 @@ begin
              Y:= Random(FStudioConfig.DisplayConfig.ResY);
              if (nil <> FDisplay) then
                FDisplay.PaintPixel(X, Y, IsInverted);
-             FVirtualLayer0.Canvas.Pixels[X, Y]:= AColor;
+             FPreviewDisplay.GraphicsLayer.Canvas.Pixels[X, Y]:= AColor;
            end;
-           CombineVirtualLayers(Self);
+           FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
          end;
 
       end else if ('PIXEL' = Cmd) then begin
@@ -1302,13 +1298,13 @@ begin
           if ((CmdParts.Count >= 4) and ((CmdParts[3].ToUpper = 'TRUE') or (CmdParts[3] = '1'))) then begin
             if (nil <> FDisplay) then
               FDisplay.PaintPixel(P1, P2, True);
-            FVirtualLayer0.Canvas.Pixels[P1, P2]:= clWhite;
+            FPreviewDisplay.GraphicsLayer.Canvas.Pixels[P1, P2]:= clWhite;
           end else begin
             if (nil <> FDisplay) then
               FDisplay.PaintPixel(P1, P2, False);
-            FVirtualLayer0.Canvas.Pixels[P1, P2]:= clBlack;
+            FPreviewDisplay.GraphicsLayer.Canvas.Pixels[P1, P2]:= clBlack;
           end;
-          CombineVirtualLayers(Self);
+          FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
         end;
 
       end else if ('LINE' = Cmd) then begin
@@ -1321,15 +1317,15 @@ begin
           if ((CmdParts.Count >= 6) and ((CmdParts[5].ToUpper = 'TRUE') or (CmdParts[5] = '1'))) then begin
             if (nil <> FDisplay) then
               FDisplay.PaintLine(P1, P2, P3, P4, True);
-            FVirtualLayer0.Canvas.Pen.Color:= clWhite;
+            FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color:= clWhite;
           end else begin
             if (nil <> FDisplay) then
               FDisplay.PaintLine(P1, P2, P3, P4, False);
-            FVirtualLayer0.Canvas.Pen.Color:= clBlack;
+            FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color:= clBlack;
           end;
-          FVirtualLayer0.Canvas.Line(P1, P2, P3, P4);
-          FVirtualLayer0.Canvas.Pixels[P3, P4]:= FVirtualLayer0.Canvas.Pen.Color;
-          CombineVirtualLayers(Self);
+          FPreviewDisplay.GraphicsLayer.Canvas.Line(P1, P2, P3, P4);
+          FPreviewDisplay.GraphicsLayer.Canvas.Pixels[P3, P4]:= FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color;
+          FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
         end;
 
       end else if ('FRAME' = Cmd) then begin
@@ -1342,14 +1338,14 @@ begin
           if ((CmdParts.Count >= 6) and ((CmdParts[5].ToUpper = 'TRUE') or (CmdParts[5] = '1'))) then begin
             if (nil <> FDisplay) then
               FDisplay.PaintFrame(P1, P2, P3, P4, True);
-            FVirtualLayer0.Canvas.Pen.Color:= clWhite;
+            FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color:= clWhite;
           end else begin
             if (nil <> FDisplay) then
               FDisplay.PaintFrame(P1, P2, P3, P4, False);
-            FVirtualLayer0.Canvas.Pen.Color:= clBlack;
+            FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color:= clBlack;
           end;
-          FVirtualLayer0.Canvas.Frame(P1, P2, P3 + 1, P4 + 1);
-          CombineVirtualLayers(Self);
+          FPreviewDisplay.GraphicsLayer.Canvas.Frame(P1, P2, P3 + 1, P4 + 1);
+          FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
         end;
 
       end else if ('PLAINTEXT' = Cmd) then begin
@@ -1363,7 +1359,8 @@ begin
           end else begin
             if (nil <> FDisplay) then
               FDisplay.PaintString(CmdParts[1], P2, P3);
-            PaintStringOnVirtualDisplay(CmdParts[1], P2, P3);
+            FPreviewDisplay.PaintString(CmdParts[1], P2, P3);
+            FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
           end;
         end;
 
@@ -1671,12 +1668,9 @@ begin
   Randomize;
   FSMBios:= TSMBios.Create;
 
-  FLayerMode:= lmXOR;
 
-  FVirtualLayer0:= TBitmap.Create;
-  FVirtualLayer1:= TBitmap.Create;
-  FVirtualLayer0.Monochrome:= True;
-  FVirtualLayer1.Monochrome:= True;
+  FPreviewDisplay:= TPreviewDisplay.Create(Self);
+  FPreviewDisplay.LayerMode:= lmXOR;
 
   LogEvent(lvINFO, 'Application started. Version ' + VERSION_STR , Now);
 
@@ -1687,6 +1681,7 @@ begin
   if (FStudioConfig.ApplicationConfig.DoStartMinimized) then
     Hide;
   ColorButton.ButtonColor:= FStudioConfig.ApplicationConfig.PreviewDisplayColor;
+  FPreviewDisplay.DisplayColor:= FStudioConfig.ApplicationConfig.PreviewDisplayColor;;
   SetDefaultLang(FStudioConfig.ApplicationConfig.Language);
   StartMinimizedCheckBox.Checked:= FStudioConfig.ApplicationConfig.DoStartMinimized;
   BrightListRadioButton.Checked:= FStudioConfig.DisplayConfig.IsBrightnessControlledByList;
@@ -1706,21 +1701,17 @@ begin
   end;
 
   if (nil <> FDisplay) then begin
-    //VirtualDisplayLayer0.Width:= FStudioConfig.DisplayConfig.ResX;
-    //VirtualDisplayLayer0.Height:= FStudioConfig.DisplayConfig.ResY;
+    //VirtualDisplayGraphicsLayer.Width:= FStudioConfig.DisplayConfig.ResX;
+    //VirtualDisplayGraphicsLayer.Height:= FStudioConfig.DisplayConfig.ResY;
     FDisplay.OnDbgMessage:= @LogEvent;
     FDisplay.Connect(FStudioConfig.DisplayConfig.IntName);
     FDisplay.DspInit(FStudioConfig.DisplayConfig.ResX, FStudioConfig.DisplayConfig.ResY);
   end;
-  CombinedImage.Width:= FStudioConfig.DisplayConfig.ResX * 2;
-  CombinedImage.Height:= FStudioConfig.DisplayConfig.ResY * 2;
-  CombinedImage.Picture.Bitmap.Width:= FStudioConfig.DisplayConfig.ResX;
-  CombinedImage.Picture.Bitmap.Height:= FStudioConfig.DisplayConfig.ResY;
-  FVirtualLayer0.Width:= FStudioConfig.DisplayConfig.ResX;
-  FVirtualLayer0.Height:= FStudioConfig.DisplayConfig.ResY;
-  FVirtualLayer1.Width:= FStudioConfig.DisplayConfig.ResX;
-  FVirtualLayer1.Height:= FStudioConfig.DisplayConfig.ResY;
-
+  PreviewImage.Width:= FStudioConfig.DisplayConfig.ResX * 2;
+  PreviewImage.Height:= FStudioConfig.DisplayConfig.ResY * 2;
+  PreviewImage.Picture.Bitmap.Width:= FStudioConfig.DisplayConfig.ResX;
+  PreviewImage.Picture.Bitmap.Height:= FStudioConfig.DisplayConfig.ResY;
+  FPreviewDisplay.SetSize(FStudioConfig.DisplayConfig.ResX, FStudioConfig.DisplayConfig.ResY);
 
   FSysInfo:= TSysInfo.Create(Self);
   FWinampControl:= TWinampControl.Create(Self);
@@ -1783,11 +1774,10 @@ begin
   FWinampControl.Free;
   FDisplay.Free;
   FAnimationData.AnimationBitmap.Free;
-  FVirtualLayer0.Free;
-  FVirtualLayer1.Free;
   SetLength(FTheMatrix.Drops, 0);
   SetLength(FCpuUsageData.UsageHistory, 0);
   SetLength(FMemUsageData.UsageHistory, 0);
+  FPreviewDisplay.Free;
 end;
 
 procedure TMainForm.FormWindowStateChange(Sender: TObject);
@@ -2147,8 +2137,8 @@ begin
 
   if (nil <> FDisplay) then
     FDisplay.PaintBitmap(TmpBitmap, X, Y);
-  FVirtualLayer0.Canvas.Draw(X, Y, TmpBitmap);
-  CombineVirtualLayers(Self);
+  FPreviewDisplay.GraphicsLayer.Canvas.Draw(X, Y, TmpBitmap);
+  FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
   TmpBitmap.Free;
 end;
 
@@ -2225,8 +2215,8 @@ begin
 
     if (nil <> FDisplay) then
       FDisplay.PaintBitmap(TmpBitmap, X, Y);
-    FVirtualLayer0.Canvas.Draw(X, Y, TmpBitmap);
-    CombineVirtualLayers(Self);
+    FPreviewDisplay.GraphicsLayer.Canvas.Draw(X, Y, TmpBitmap);
+    FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
     TmpBitmap.Canvas.Pixels[0, 0]:= TmpBitmap.Canvas.Pixels[0, 0]; // this seems like nonsense but is required to actually load the bitmap in memory
     ResultPoint.X:= TmpBitmap.Width;
     ResultPoint.Y:= TmpBitmap.Height;
@@ -2311,6 +2301,7 @@ end;
 procedure TMainForm.ColorButtonColorChanged(Sender: TObject);
 begin
   FStudioConfig.ApplicationConfig.PreviewDisplayColor:= ColorButton.ButtonColor;
+  FPreviewDisplay.DisplayColor:= ColorButton.ButtonColor;
 end;
 
 procedure TMainForm.IdleTrackBarChange(Sender: TObject);
@@ -2355,8 +2346,8 @@ begin
     TmpBitmap.Canvas.CopyRect(dRect, ABitmap.Canvas, sRect);
     if (nil <> FDisplay) then
       FDisplay.PaintBitmap(TmpBitmap, X, Y);
-    FVirtualLayer0.Canvas.Draw(X, Y, TmpBitmap);
-    CombineVirtualLayers(Self);
+    FPreviewDisplay.GraphicsLayer.Canvas.Draw(X, Y, TmpBitmap);
+    FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
     TmpBitmap.Canvas.Pixels[0, 0]:= TmpBitmap.Canvas.Pixels[0, 0]; // this seems like nonsense but is required to actually load the bitmap in memory
   finally
     TmpBitmap.Free;
@@ -2519,15 +2510,15 @@ begin
           if (FClocks[I].SecondsPoint.X <> -1) then begin
             if (nil <> FDisplay) then
               FDisplay.PaintLine(X0, Y0, FClocks[I].SecondsPoint.X, FClocks[I].SecondsPoint.Y, True);
-            FVirtualLayer0.Canvas.Pen.Color:= clWhite;
-            FVirtualLayer0.Canvas.Line(X0, Y0, FClocks[I].SecondsPoint.X, FClocks[I].SecondsPoint.Y);
+            FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color:= clWhite;
+            FPreviewDisplay.GraphicsLayer.Canvas.Line(X0, Y0, FClocks[I].SecondsPoint.X, FClocks[I].SecondsPoint.Y);
           end;
           // draw new hand
           if (nil <> FDisplay) then
             FDisplay.PaintLine(X0, Y0, X1, Y1, False);
-          FVirtualLayer0.Canvas.Pen.Color:= clBlack;
-          FVirtualLayer0.Canvas.Line(X0, Y0, X1, Y1);
-          CombineVirtualLayers(Self);
+          FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color:= clBlack;
+          FPreviewDisplay.GraphicsLayer.Canvas.Line(X0, Y0, X1, Y1);
+          FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
           // remember coordinates
           FClocks[I].SecondsPoint.X:= X1;
           FClocks[I].SecondsPoint.Y:= Y1;
@@ -2561,15 +2552,15 @@ begin
           if (FClocks[I].MinutePoint.X <> -1) then begin
             if (nil <> FDisplay) then
               FDisplay.PaintLine(X0, Y0, FClocks[I].MinutePoint.X, FClocks[I].MinutePoint.Y, True);
-            FVirtualLayer0.Canvas.Pen.Color:= clWhite;
-            FVirtualLayer0.Canvas.Line(X0, Y0, FClocks[I].MinutePoint.X, FClocks[I].MinutePoint.Y);
+            FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color:= clWhite;
+            FPreviewDisplay.GraphicsLayer.Canvas.Line(X0, Y0, FClocks[I].MinutePoint.X, FClocks[I].MinutePoint.Y);
           end;
           // draw new hand
           if (nil <> FDisplay) then
             FDisplay.PaintLine(X0, Y0, X1, Y1, False);
-          FVirtualLayer0.Canvas.Pen.Color:= clBlack;
-          FVirtualLayer0.Canvas.Line(X0, Y0, X1, Y1);
-          CombineVirtualLayers(Self);
+          FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color:= clBlack;
+          FPreviewDisplay.GraphicsLayer.Canvas.Line(X0, Y0, X1, Y1);
+          FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
           // remember coordinates
           FClocks[I].MinutePoint.X:= X1;
           FClocks[I].MinutePoint.Y:= Y1;
@@ -2610,15 +2601,15 @@ begin
           if (FClocks[I].HourPoint.X <> -1) then begin
             if (nil <> FDisplay) then
               FDisplay.PaintLine(X0, Y0, FClocks[I].HourPoint.X, FClocks[I].HourPoint.Y, True);
-            FVirtualLayer0.Canvas.Pen.Color:= clWhite;
-            FVirtualLayer0.Canvas.Line(X0, Y0, FClocks[I].HourPoint.X, FClocks[I].HourPoint.Y);
+            FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color:= clWhite;
+            FPreviewDisplay.GraphicsLayer.Canvas.Line(X0, Y0, FClocks[I].HourPoint.X, FClocks[I].HourPoint.Y);
           end;
           // draw new hand
           if (nil <> FDisplay) then
             FDisplay.PaintLine(X0, Y0, X1, Y1, False);
-          FVirtualLayer0.Canvas.Pen.Color:= clBlack;
-          FVirtualLayer0.Canvas.Line(X0, Y0, X1, Y1);
-          CombineVirtualLayers(Self);
+          FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color:= clBlack;
+          FPreviewDisplay.GraphicsLayer.Canvas.Line(X0, Y0, X1, Y1);
+          FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
           // remember coordinates
           FClocks[I].HourPoint.X:= X1;
           FClocks[I].HourPoint.Y:= Y1;
@@ -2630,82 +2621,6 @@ begin
   end;
 end;
 
-procedure TMainForm.RepaintVirtualDisplay;
-begin
-end;
-
-procedure TMainForm.PaintStringOnVirtualDisplay(AText: string; Col, Row: Integer);
-var
-  C: Char;         // current character
-  Pixels: Byte;    // one vertical block of pixels within a glyph
-  X, Y: Integer;   // position of pixel in virtual display layer
-  Gx, Gy: Integer; // position within a glyph
-  CurrentCol: Integer;  // current column
-  CValue: Byte;         // Ord(C)
-  NumberOfRows: Integer; // number of visible text rows in the display
-begin
-  NumberOfRows:= FStudioConfig.DisplayConfig.ResY div GLYPH_H;
-
-  AText:= TGlyphs.Adapt2Charmap(AText);
-
-  CurrentCol:= Col;
-  for C in AText do begin
-    if (CurrentCol >= (FStudioConfig.DisplayConfig.ResX div (GLYPH_W + GLYPH_GAP))) then
-      Break;
-
-    CValue:= Ord(C);
-    for Gx:= 0 to (GLYPH_W - 1) do begin
-      Pixels:= charMap8x6[CValue, Gx];
-      X:= CurrentCol * (GLYPH_W + GLYPH_GAP) + Gx;
-      for Gy:= 0 to (NumberOfRows - 1) do begin
-        Y:= Row * GLYPH_H + Gy;
-        if ((Pixels and (1 shl Gy)) <> 0) then begin
-          FVirtualLayer1.Canvas.Pixels[X, Y]:= clBlack;
-        end else begin
-          FVirtualLayer1.Canvas.Pixels[X, Y]:= clWhite;
-        end;
-      end;
-    end;
-    Inc(CurrentCol);
-  end;
-  CombineVirtualLayers(Self);
-end;
-
-
-procedure TMainForm.CombineVirtualLayers(Sender: TObject);
-var
-  TmpBitmap: TBitmap;
-begin
-  TmpBitmap:= TBitmap.Create;
-  TmpBitmap.Width:= CombinedImage.Picture.Bitmap.Width;
-  TmpBitmap.Height:= CombinedImage.Picture.Bitmap.Height;
-
-  CombinedImage.Picture.Bitmap.Canvas.CopyMode:= cmNotSrcCopy;
-  CombinedImage.Picture.Bitmap.Canvas.Draw(0, 0, FVirtualLayer0);
-
-  TmpBitmap.Canvas.CopyMode:= cmNotSrcCopy;
-  TmpBitmap.Canvas.Draw(0, 0, FVirtualLayer1);
-
-  if (lmOR = FLayerMode) then
-    CombinedImage.Picture.Bitmap.Canvas.CopyMode:= cmSrcPaint
-  else if (lmXOR = FLayerMode) then
-    CombinedImage.Picture.Bitmap.Canvas.CopyMode:= cmSrcInvert
-  else
-    CombinedImage.Picture.Bitmap.Canvas.CopyMode:= cmSrcAnd;
-
-  CombinedImage.Picture.Bitmap.Canvas.Draw(0, 0, TmpBitmap);
-
-  // ink the combined black&white image
-  TmpBitmap.Canvas.CopyMode:= cmSrcCopy;
-  TmpBitmap.Width:= CombinedImage.Picture.Bitmap.Width;
-  TmpBitmap.Height:= CombinedImage.Picture.Bitmap.Height;
-  TmpBitmap.Canvas.Brush.Color:= ColorButton.ButtonColor;
-  TmpBitmap.Canvas.FillRect(0, 0, TmpBitmap.Width, TmpBitmap.Height);
-  CombinedImage.Picture.Bitmap.Canvas.CopyMode:= cmSrcAnd;
-  CombinedImage.Picture.Bitmap.Canvas.Draw(0, 0, TmpBitmap);
-  TmpBitmap.Free;
-
-end;
 
 procedure TMainForm.AddMatrixDrop(const AText: string; MaxTextLen, Row: Integer; SlownessFactor: Byte);
 var
@@ -2802,7 +2717,8 @@ begin
           if (ARow >= DspRowCount) then
             Continue;
 
-          PaintStringOnVirtualDisplay(PDrop^.Text[Pos], I, ARow);
+          FPreviewDisplay.PaintString(PDrop^.Text[Pos], I, ARow);
+          FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
 
           if (nil <> FDisplay) then
             FDisplay.PaintString(PDrop^.Text[Pos], I, ARow);
@@ -2866,7 +2782,8 @@ begin
           C:= Chr(Tmp);
         end;
 
-        PaintStringOnVirtualDisplay(C, I, FCpuUsageData.BottomRow - Row);
+        FPreviewDisplay.PaintString(C, I, FCpuUsageData.BottomRow - Row);
+        FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
         if (nil <> FDisplay) then
           FDisplay.PaintString(C, I, FCpuUsageData.BottomRow - Row);
 
@@ -2908,7 +2825,8 @@ begin
           C:= Chr(Tmp);
         end;
 
-        PaintStringOnVirtualDisplay(C, I, FMemUsageData.BottomRow - Row);
+        FPreviewDisplay.PaintString(C, I, FMemUsageData.BottomRow - Row);
+        FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
         if (nil <> FDisplay) then
           FDisplay.PaintString(C, I, FMemUsageData.BottomRow - Row);
 
@@ -2945,7 +2863,8 @@ begin
       C:= Chr($8E);
     if (nil <> FDisplay) then
       FDisplay.PaintString(C, X + Col, Row);
-    PaintStringOnVirtualDisplay(C, X + Col, Row);
+    FPreviewDisplay.PaintString(C, X + Col, Row);
+    FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
   end;
 end;
 

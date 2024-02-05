@@ -17,9 +17,9 @@ object MainForm: TMainForm
   LCLVersion = '3.0.0.3'
   object ScreenTimeLabel: TLabel
     AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = CombinedImage
+    AnchorSideTop.Control = PreviewImage
     AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = CombinedImage
+    AnchorSideRight.Control = PreviewImage
     AnchorSideRight.Side = asrBottom
     Left = 184
     Height = 15
@@ -30,7 +30,7 @@ object MainForm: TMainForm
     BorderSpacing.Right = 8
     Caption = 'ScreenTime:'
   end
-  object CombinedImage: TImage
+  object PreviewImage: TImage
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = VersionLabel
     AnchorSideTop.Side = asrBottom
@@ -43,10 +43,10 @@ object MainForm: TMainForm
     Stretch = True
   end
   object LoadListPanel: TPanel
-    AnchorSideLeft.Control = CombinedImage
+    AnchorSideLeft.Control = PreviewImage
     AnchorSideTop.Control = ScreenTimeLabel
     AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = CombinedImage
+    AnchorSideRight.Control = PreviewImage
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 81
@@ -131,10 +131,10 @@ object MainForm: TMainForm
     end
   end
   object OkButtonPanel: TPanel
-    AnchorSideLeft.Control = CombinedImage
+    AnchorSideLeft.Control = PreviewImage
     AnchorSideTop.Control = LoadListPanel
     AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = CombinedImage
+    AnchorSideRight.Control = PreviewImage
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 44
@@ -208,7 +208,7 @@ object MainForm: TMainForm
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = OkButtonPanel
     AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = CombinedImage
+    AnchorSideRight.Control = PreviewImage
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 42
@@ -316,7 +316,7 @@ object MainForm: TMainForm
   end
   object DevelopmentYearsLabel: TLabel
     AnchorSideTop.Control = Owner
-    AnchorSideRight.Control = CombinedImage
+    AnchorSideRight.Control = PreviewImage
     AnchorSideRight.Side = asrBottom
     Left = 193
     Height = 15
@@ -328,7 +328,7 @@ object MainForm: TMainForm
     Caption = ', 2004-2024'
   end
   object ListGroupBox: TGroupBox
-    AnchorSideLeft.Control = CombinedImage
+    AnchorSideLeft.Control = PreviewImage
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = Owner
@@ -386,7 +386,7 @@ object MainForm: TMainForm
     end
   end
   object LogfileGroupBox: TGroupBox
-    AnchorSideLeft.Control = CombinedImage
+    AnchorSideLeft.Control = PreviewImage
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = ListGroupBox
     AnchorSideTop.Side = asrBottom
