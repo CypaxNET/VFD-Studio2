@@ -41,8 +41,9 @@
     </RequiredPackages>
     <Units>
       <Unit>
-        <Filename Value="vfdstudio2.lpr"/>
+        <Filename Value="VFDStudio2.lpr"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="vfdstudio2"/>
       </Unit>
       <Unit>
         <Filename Value="MainUnit.pas"/>
@@ -89,7 +90,7 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="vfdstudio2"/>
+      <Filename Value="VFDStudio2"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
