@@ -1,0 +1,142 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+#: listeditorunit.rscharacters
+msgid "Characters"
+msgstr ""
+
+#: listeditorunit.rshelpbitmap
+msgctxt "listeditorunit.rshelpbitmap"
+msgid "Draws an image from a file to the display at given coordinates."
+msgstr ""
+
+#: listeditorunit.rshelpcomment
+msgctxt "listeditorunit.rshelpcomment"
+msgid ""
+"Inserts a comment text into the list.\n"
+"Comments will not processed and are for your convenience; for example to describe individual commands or blocks of commands."
+msgstr ""
+
+#: listeditorunit.rshelpnewscreen
+msgctxt "listeditorunit.rshelpnewscreen"
+msgid ""
+"The representations on the display are divided into individual sections, called \"Screen\".\n"
+"This command starts a new Screen. Typically, this command stops all animations, effects, updateable information, etc.\n"
+"You can specify whether the new Screen should continue those settings, whether the screen should only be displayed once, or if it is subject to a certain pre-condition to be displayed at all."
+msgstr ""
+
+#: tmainform.caption
+msgctxt "tmainform.caption"
+msgid "List Editor 2"
+msgstr ""
+
+#: tmainform.exitmenuitem.caption
+msgctxt "tmainform.exitmenuitem.caption"
+msgid "E&xit"
+msgstr ""
+
+#: tmainform.menuitem1.caption
+msgctxt "tmainform.menuitem1.caption"
+msgid "&File"
+msgstr ""
+
+#: tmainform.menuitem2.caption
+msgctxt "tmainform.menuitem2.caption"
+msgid "&Open..."
+msgstr ""
+
+#: tmainform.menuitem3.caption
+msgctxt "tmainform.menuitem3.caption"
+msgid "&View"
+msgstr ""
+
+#: tmainform.menuitem4.caption
+msgctxt "tmainform.menuitem4.caption"
+msgid "Edit"
+msgstr ""
+
+#: tmainform.newfilemenuitem.caption
+msgctxt "tmainform.newfilemenuitem.caption"
+msgid "New"
+msgstr ""
+
+#: tmainform.opendialog.title
+msgctxt "tmainform.opendialog.title"
+msgid "Open file"
+msgstr ""
+
+#: tmainform.previewgroupbox.caption
+msgctxt "tmainform.previewgroupbox.caption"
+msgid "Preview"
+msgstr ""
+
+#: tmainform.redomenuitem.caption
+msgctxt "tmainform.redomenuitem.caption"
+msgid "Redo"
+msgstr ""
+
+#: tmainform.saveasmenuitem.caption
+msgctxt "tmainform.saveasmenuitem.caption"
+msgid "Save &as..."
+msgstr ""
+
+#: tmainform.savedialog.title
+msgctxt "tmainform.savedialog.title"
+msgid "Save as"
+msgstr ""
+
+#: tmainform.savemenuitem.caption
+msgctxt "tmainform.savemenuitem.caption"
+msgid "&Save"
+msgstr ""
+
+#: tmainform.statusbar1.panels[0].text
+msgctxt "tmainform.statusbar1.panels[0].text"
+msgid "[1:1]"
+msgstr ""
+
+#: tmainform.statusbar1.panels[1].text
+msgctxt "tmainform.statusbar1.panels[1].text"
+msgid "0 Characters"
+msgstr ""
+
+#: tmainform.statusbar1.panels[2].text
+msgctxt "tmainform.statusbar1.panels[2].text"
+msgid "UTF8"
+msgstr ""
+
+#: tmainform.statusbar1.panels[3].text
+msgctxt "tmainform.statusbar1.panels[3].text"
+msgid "INS"
+msgstr ""
+
+#: tmainform.statusbar1.panels[4].text
+msgctxt "tmainform.statusbar1.panels[4].text"
+msgid "ok"
+msgstr ""
+
+#: tmainform.toolbar1.caption
+msgctxt "tmainform.toolbar1.caption"
+msgid "ToolBar1"
+msgstr ""
+
+#: tmainform.toolgroupbox.caption
+msgctxt "tmainform.toolgroupbox.caption"
+msgid "Commands"
+msgstr ""
+
+#: tmainform.undomenuitem.caption
+msgctxt "tmainform.undomenuitem.caption"
+msgid "Undo"
+msgstr ""
+
+#: tmainform.zoominmenuitem.caption
+msgctxt "tmainform.zoominmenuitem.caption"
+msgid "Zoom in"
+msgstr ""
+
+#: tmainform.zoomoutmenuitem.caption
+msgctxt "tmainform.zoomoutmenuitem.caption"
+msgid "Zoom out"
+msgstr ""
+
