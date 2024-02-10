@@ -123,7 +123,7 @@ function TSysInfo.GetScreenFrequency: string; // nur ab WinNT!!!
 var
    DesktopDC: THandle;
 begin
-     result:='unbekannt';
+     result:='?';
      DesktopDC:=GetDC(0);
      try
       result:=inttostr(GetDeviceCaps(DesktopDC,VREFRESH))+' Hz';
@@ -150,7 +150,7 @@ var
    u: array[0..127] of Char;
    sz: DWord;
 begin
-     Result:='Unbekannter User';
+     Result:='?';
      sz:=SizeOf(u);
      GetUserName(u,sz);
      Result:=u;
@@ -223,7 +223,7 @@ function TSysInfo.GetCPUSpeed: string;
 var
   Reg: TRegistry;
 begin
-  Result:='unbekannt';
+  Result:='?';
   Reg := TRegistry.Create;
   try
     Reg.RootKey := HKEY_LOCAL_MACHINE;
@@ -413,7 +413,7 @@ begin
        DRIVE_RAMDISK : result:='RamDisk';
        DRIVE_CDROM : result:='CD-ROM';
        1 : result:='nicht vorhanden';
-       else result:='unbekannt';
+       else result:='?';
       end; //case
 end;
 
@@ -465,7 +465,7 @@ function TSysInfo.GetMostRecentDirectDraw: string;
 var
   Reg: TRegistry;
 begin
-  Result:='unbekannt';
+  Result:='?';
   Reg := TRegistry.Create;
   try
     Reg.RootKey := HKEY_LOCAL_MACHINE;
@@ -486,7 +486,7 @@ function TSysInfo.GetMostRecentDirect3D: string;
 var
   Reg: TRegistry;
 begin
-  Result:='unbekannt';
+  Result:='?';
   Reg := TRegistry.Create;
   try
     Reg.RootKey := HKEY_LOCAL_MACHINE;
