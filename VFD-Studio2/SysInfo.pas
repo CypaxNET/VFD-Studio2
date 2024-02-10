@@ -326,18 +326,10 @@ end;
 
 function TSysInfo.GetTimeZone: string;
 var
-   reg: TRegistry;
+  TimeZoneInfo: TTimeZoneInformation;
 begin
-     Result:='---';
-     reg:=TRegistry.Create;
-     try
-      reg.RootKey:=HKEY_LOCAL_MACHINE;
-      reg.OpenKeyReadOnly('System\CurrentControlSet\Control\TimeZoneInformation');
-      Result:=reg.ReadString('StandardName');
-      finally
-      reg.free;
-      end;
-      result:=ASCII(result);
+  GetTimeZoneInformation(TimeZoneInfo);
+  Result:= TimeZoneInfo.StandardName;
 end;
 
 procedure TSysInfo.GetPrinterInfos(StrngLst: TStringList);

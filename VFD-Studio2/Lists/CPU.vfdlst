@@ -1,0 +1,15 @@
+;CPU-Fähigkeiten
+NEWSCREEN
+SELECTSCREEN 3
+CLEARSCREEN 1
+CLEARSCREEN 2
+PAINTSTRING ' --- CPU-Technology ---' 00 00
+PAINTSTRING 'MMX:  $MMX$   MultiMediaExtension' 00 01
+PAINTSTRING 'FPU:  $FPU$   FloatingPointUnit' 00 02
+PAINTSTRING 'SSE2: $ISSE2$   Intel SSE2 Befehlsatz' 00 03
+PAINTSTRING 'PSN:  $PSN$ ProcessorSerialNumber' 00 04
+PAINTSTRING 'ACC:  $ACC$   AutomaticClockControl' 00 05
+PAINTSTRING 'PAE:  $PAE$   PhysicalAdressExtension' 00 06
+PAINTSTRING 'VME:  $VME$   VitualMode' 00 07
+SCREENTIME 999999
+ENDSCREEN

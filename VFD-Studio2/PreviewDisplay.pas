@@ -89,6 +89,7 @@ begin
   CombinedImage.Canvas.CopyMode:= cmNotSrcCopy;
   CombinedImage.Canvas.Draw(0, 0, FGraphicsLayer);
 
+
   TmpBitmap.Canvas.CopyMode:= cmNotSrcCopy;
   TmpBitmap.Canvas.Draw(0, 0, FTextLayer);
 
@@ -108,7 +109,7 @@ begin
   TmpBitmap.Canvas.Brush.Color:= FDisplayColor;
   TmpBitmap.Canvas.FillRect(0, 0, TmpBitmap.Width, TmpBitmap.Height);
   CombinedImage.Canvas.CopyMode:= cmSrcAnd;
-  TmpBitmap.Canvas.Pixels[0,0]:= clYellow;
+  //TmpBitmap.Canvas.Pixels[0,0]:= clYellow;
   CombinedImage.Canvas.Draw(0, 0, TmpBitmap);
 
   TmpBitmap.Free;

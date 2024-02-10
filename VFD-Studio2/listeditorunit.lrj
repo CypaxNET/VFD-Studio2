@@ -1,6 +1,7 @@
 {"version":1,"strings":[
 {"hash":167837906,"name":"tmainform.caption","sourcebytes":[76,105,115,116,32,69,100,105,116,111,114,32,50],"value":"List Editor 2"},
-{"hash":105086995,"name":"tmainform.toolgroupbox.caption","sourcebytes":[67,111,109,109,97,110,100,115],"value":"Commands"},
+{"hash":257032339,"name":"tmainform.toolgroupbox.caption","sourcebytes":[67,111,109,109,97,110,100,115,32,97,110,100,32,107,101,121,119,111,114,100,115],"value":"Commands and keywords"},
+{"hash":71181322,"name":"tmainform.examplelabel.caption","sourcebytes":[67,111,100,101,32,101,120,97,109,112,108,101,58],"value":"Code example:"},
 {"hash":126668695,"name":"tmainform.previewgroupbox.caption","sourcebytes":[80,114,101,118,105,101,119],"value":"Preview"},
 {"hash":106991073,"name":"tmainform.toolbar1.caption","sourcebytes":[84,111,111,108,66,97,114,49],"value":"ToolBar1"},
 {"hash":6180205,"name":"tmainform.statusbar1.panels[0].text","sourcebytes":[91,49,58,49,93],"value":"[1:1]"},

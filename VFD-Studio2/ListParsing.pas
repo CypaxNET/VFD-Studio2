@@ -27,8 +27,9 @@ begin
     if (RegEx.Exec(S)) then begin
       Match1:=RegEx.Match[1];
       try
-        if (FSMBios.HasProcessorInfo) then begin
-          S:= RegEx.Replace(S, FSMBios.SystemSlotInfo[StrToInt(Match1)].GetCurrentUsage, False);
+        I:= StrToIntDef(Match1, 0);
+        if (FSMBios.HasProcessorInfo) and (I < Length(FSMBios.SystemSlotInfo)) then begin
+          S:= RegEx.Replace(S, FSMBios.SystemSlotInfo[I].GetCurrentUsage, False);
         end else begin
           S:= RegEx.Replace(S, RsInformationUnknown, False);
         end;
@@ -43,8 +44,9 @@ begin
     if (RegEx.Exec(S)) then begin
       Match1:=RegEx.Match[1];
       try
-        if (FSMBios.HasProcessorInfo) then begin
-          S:= RegEx.Replace(S, FSMBios.SystemSlotInfo[StrToInt(Match1)].GetSlotType, False);
+        I:= StrToIntDef(Match1, 0);
+        if (FSMBios.HasProcessorInfo) and (I < Length(FSMBios.SystemSlotInfo)) then begin
+          S:= RegEx.Replace(S, FSMBios.SystemSlotInfo[I].GetSlotType, False);
         end else begin
           S:= RegEx.Replace(S, RsInformationUnknown, False);
         end;
@@ -59,8 +61,9 @@ begin
     if (RegEx.Exec(S)) then begin
       Match1:=RegEx.Match[1];
       try
-        if (FSMBios.HasProcessorInfo) then begin
-          S:= RegEx.Replace(S, FSMBios.SystemSlotInfo[StrToInt(Match1)].SlotDesignationStr, False);
+        I:= StrToIntDef(Match1, 0);
+        if (FSMBios.HasProcessorInfo) and (I < Length(FSMBios.SystemSlotInfo)) then begin
+          S:= RegEx.Replace(S, FSMBios.SystemSlotInfo[I].SlotDesignationStr, False);
         end else begin
           S:= RegEx.Replace(S, RsInformationUnknown, False);
         end;

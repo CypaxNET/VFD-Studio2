@@ -120,7 +120,7 @@ begin
   inherited Next;
   if (copy(FLineText, FTokenPos, FTokenEnd - FTokenPos) = 'NEWSCREEN') then
     StartCodeFoldBlock(nil);
-  if (copy(FLineText, FTokenPos, FTokenEnd - FTokenPos) = 'SCREENEND') then
+  if (copy(FLineText, FTokenPos, FTokenEnd - FTokenPos) = 'ENDSCREEN') then
     EndCodeFoldBlock;
 end;
 
@@ -327,13 +327,15 @@ begin
     Result := NumberAttri
   else
   begin
-    S := UpperCase(TokenWord);
-    for SearchWord in FCommandsList do
-    begin
-      if S.StartsWith(SearchWord) then
+    if (Trim(FLineText).StartsWith(Trim(TokenWord))) then begin
+      S := UpperCase(TokenWord);
+      for SearchWord in FCommandsList do
       begin
-        Result := CommandAttri;
-        Break;
+        if S.StartsWith(SearchWord) then
+        begin
+          Result := CommandAttri;
+          Break;
+        end;
       end;
     end;
   end;
@@ -391,7 +393,7 @@ begin
   TokenWord := UpperCase(Copy(FLineText, FTokenPos, FTokenEnd - FTokenPos));
   if (TokenWord = 'NEWSCREEN') then
     Inc(FCurRange);
-  if (TokenWord = 'SCREENEND') and (FCurRange > 0) then
+  if (TokenWord = 'ENDSCREEN') and (FCurRange > 0) then
     Dec(FCurRange);
 end;
 

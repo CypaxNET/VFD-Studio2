@@ -11,6 +11,7 @@
 {"hash":178185102,"name":"tmainform.exitbutton.hint","sourcebytes":[84,101,114,109,105,110,97,116,101,32,116,104,101,32,97,112,112,108,105,99,97,116,105,111,110],"value":"Terminate the application"},
 {"hash":315140,"name":"tmainform.exitbutton.caption","sourcebytes":[69,120,105,116],"value":"Exit"},
 {"hash":153827591,"name":"tmainform.expertviewbutton.caption","sourcebytes":[69,120,112,101,114,116,32,118,105,101,119],"value":"Expert view"},
+{"hash":82444546,"name":"tmainform.listeditorbutton.caption","sourcebytes":[76,105,115,116,32,69,100,105,116,111,114],"value":"List Editor"},
 {"hash":178749038,"name":"tmainform.versionlabel.caption","sourcebytes":[86,69,82,83,73,79,78],"value":"VERSION"},
 {"hash":109789124,"name":"tmainform.hyperlinklabel.caption","sourcebytes":[99,121,112,97,120,46,110,101,116],"value":"cypax.net"},
 {"hash":27056,"name":"tmainform.bylabel.caption","sourcebytes":[98,121,32],"value":"by "},

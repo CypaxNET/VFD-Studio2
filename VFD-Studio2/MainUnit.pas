@@ -5,13 +5,11 @@ unit MainUnit;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
+  Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
   NTK300, NTK800, VFDisplay, IniFiles, Menus, ExtCtrls, InfoUnit, uSMBIOS,
   SysInfo, WinampControl, LCLTranslator, ComCtrls, DateUtils, Math,
-  StudioCommon, Glyphs, lclintf, RegExpr, PreviewDisplay;
+  StudioCommon, Glyphs, lclintf, RegExpr, PreviewDisplay, Process;
 
-const MAX_VARIABLE_INFO = 10;
-const MAX_CLOCKS = 4;
 const VERSION_STR = '2.0.0.0';
 
 type
@@ -93,31 +91,13 @@ type
     YPos: Word;                    // y position in display
   end;
 
-  TCpuUsageData = record
-    CurrentCpuUsage: Byte;       // current CPU usage in percent; basically the youngest entry in the history
-    AverageCpuUsage: Byte;       // average CPU usage in percent
-    UsageHistory: array of Byte; // history of CPU usage
-    NumRows: Integer;            // number of rows the usage graph shall use
-    BottomRow: Integer;          // bottom-most row the usage graph shall use
-    IsUsageMonitorDisplayed: Boolean; // is the CPU usage monitor currently displayed?
-  end;
-
-  TMemUsageData = record
-    CurrentMemUsage: Byte;       // current memory usage in percent; basically the youngest entry in the history
-    AverageMemUsage: Byte;       // average memory usage in percent
-    PhysicalMemory: QWord;       // total physical memory size in bytes
-    FreeMemory: QWord;           // free physical memory size in bytes
-    UsageHistory: array of Byte; // history of memory usage
-    NumRows: Integer;            // number of rows the usage graph shall use
-    BottomRow: Integer;          // bottom-most row the usage graph shall use
-    IsUsageMonitorDisplayed: Boolean; // is the memory usage monitor currently displayed?
-  end;
 
 
   { TMainForm }
   TMainForm = class(TForm)
     AnimationsGroupBox: TGroupBox;
     ApplicationGroupBox: TGroupBox;
+    ListEditorButton: TBitBtn;
     BrightListRadioButton: TRadioButton;
     BrightnessControlLabel: TLabel;
     BrightnessPercentLabel: TLabel;
@@ -184,6 +164,7 @@ type
     UsageTimer: TTimer;
     WaitTimer: TTimer;
     procedure AnimateTimerTimer(Sender: TObject);
+    procedure ListEditorButtonClick(Sender: TObject);
     procedure BrightListRadioButtonChange(Sender: TObject);
     procedure BrightnessTrackBarChange(Sender: TObject);
     procedure ClearOnCloseCheckBoxChange(Sender: TObject);
@@ -230,6 +211,8 @@ type
     procedure WaitTimerStartTimer(Sender: TObject);
     procedure WaitTimerStopTimer(Sender: TObject);
     procedure WaitTimerTimer(Sender: TObject);
+
+    function FindWindowByTitle(WindowTitle: string): Hwnd;
     
     
     // methods related to processing lists
@@ -259,7 +242,7 @@ type
     // methods related to the preview display
 
     // special display feature stuff
-    procedure InitTheMatrix;
+    procedure InitMATRIX;
     procedure AddMatrixDrop(const AText: string; MaxTextLen, Row: Integer; SlownessFactor: Byte);
     procedure UpdateMatrixDrops;
     procedure UpdateCpuMonitor;
@@ -302,7 +285,7 @@ type
     FAnimationData: TAnimationData; // holds animation data
     FCpuUsageData: TCpuUsageData;   // hold information about current and average CPU load and a history of recent CPU usage
     FMemUsageData: TMemUsageData;   // hold information about current and average RAM load and a history of recent RAM usage
-    FTheMatrix: TMatrixData; // holds the string drops used to display a Matrix like effect
+    FMATRIX: TMatrixData; // holds the string drops used to display a Matrix like effect
 
 
   public
@@ -595,8 +578,8 @@ begin
     FListIndex:= I;
     S:= '';
 
-    // interprete the commands until SCREENEND is reached (or the end of the list, which should be a SCREENEND command anyway)
-    while (not S.StartsWith('SCREENEND')) do begin
+    // interprete the commands until ENDSCREEN is reached (or the end of the list, which should be a ENDSCREEN command anyway)
+    while (not S.StartsWith('ENDSCREEN')) do begin
       LastIndex:= FListIndex;
       S:= ListBox.items[FListIndex];
       I:= InterpreteListCommand(S);
@@ -609,9 +592,9 @@ begin
 
         // check if the end of the list is reached
         if (FListIndex >= ListBox.Items.Count) then begin
-          if (not S.StartsWith('SCREENEND')) then begin
-            // this should not happen since the last command should have been a 'SCREENEND'
-            LogEvent(lvERROR, 'List does not end with a SCREENEND command.', Now);
+          if (not S.StartsWith('ENDSCREEN')) then begin
+            // this should not happen since the last command should have been a 'ENDSCREEN'
+            LogEvent(lvERROR, 'List does not end with a ENDSCREEN command.', Now);
           end;
           FListIndex:= 0;
           Break;
@@ -738,14 +721,14 @@ begin
 
   LogEvent(lvINFO, 'Application started. Version ' + VERSION_STR , Now);
 
-  IniFilePath:= ExtractFilePath(application.ExeName) + 'vfdstudio.ini';
+  IniFilePath:= ExtractFilePath(application.ExeName) + STUDIO_INIFILE;
   LoadConfig(IniFilePath);
 
   // set controls accordingly to loaded settings
   if (FStudioConfig.ApplicationConfig.DoStartMinimized) then
     Hide;
   ColorButton.ButtonColor:= FStudioConfig.ApplicationConfig.PreviewDisplayColor;
-  FPreviewDisplay.DisplayColor:= FStudioConfig.ApplicationConfig.PreviewDisplayColor;;
+  FPreviewDisplay.DisplayColor:= FStudioConfig.ApplicationConfig.PreviewDisplayColor;
   SetDefaultLang(FStudioConfig.ApplicationConfig.Language);
   StartMinimizedCheckBox.Checked:= FStudioConfig.ApplicationConfig.DoStartMinimized;
   BrightListRadioButton.Checked:= FStudioConfig.DisplayConfig.IsBrightnessControlledByList;
@@ -780,7 +763,7 @@ begin
   FSysInfo:= TSysInfo.Create(Self);
   FWinampControl:= TWinampControl.Create(Self);
 
-  FAnimationData.AnimationBitmap:= TBitmap.create;
+  FAnimationData.AnimationBitmap:= TBitmap.Create;
 
   TrayIcon1.Hint:= 'VFD-Studio 2: ' + FStudioConfig.DisplayConfig.DisplayType + '@' + FStudioConfig.DisplayConfig.IntName;
 
@@ -809,7 +792,7 @@ begin
 
   LogEvent(lvINFO, 'Application closed.', Now);
 
-  IniFilePath:= ExtractFilePath(application.ExeName) + 'vfdstudio.ini';
+  IniFilePath:= ExtractFilePath(application.ExeName) + STUDIO_INIFILE;
   SaveConfig(IniFilePath);
 
   AStringList:= TStringList.Create;
@@ -838,7 +821,7 @@ begin
   FWinampControl.Free;
   FDisplay.Free;
   FAnimationData.AnimationBitmap.Free;
-  SetLength(FTheMatrix.Drops, 0);
+  SetLength(FMATRIX.Drops, 0);
   SetLength(FCpuUsageData.UsageHistory, 0);
   SetLength(FMemUsageData.UsageHistory, 0);
   FPreviewDisplay.Free;
@@ -1168,12 +1151,10 @@ begin
 end;
 
 procedure TMainForm.ExtraTimerTimer(Sender: TObject);
-
 begin
-
-  if (Length(FTheMatrix.Drops) > 0) then begin
+  if (Length(FMATRIX.Drops) > 0) then begin
     UpdateMatrixDrops;
-    Inc(FTheMatrix.CycleCounter);
+    Inc(FMATRIX.CycleCounter);
   end;
 
 end;
@@ -1339,6 +1320,52 @@ begin
     if (FAnimationData.FrameIndex >= FAnimationData.FrameCount) then
       FAnimationData.FrameIndex:= 0;
 
+  end;
+end;
+
+function TMainForm.FindWindowByTitle(WindowTitle: string): Hwnd;
+var
+  NextHandle: Hwnd;
+  NextTitle: array[0..260] of char;
+begin
+  // Get the first window
+  NextHandle := GetWindow(Application.Handle, GW_HWNDFIRST);
+  while NextHandle > 0 do
+  begin
+    // retrieve its text
+    GetWindowText(NextHandle, NextTitle, 255);
+    if Pos(WindowTitle, StrPas(NextTitle)) <> 0 then
+    begin
+      Result := NextHandle;
+      Exit;
+    end
+    else
+      // Get the next window
+      NextHandle := GetWindow(NextHandle, GW_HWNDNEXT);
+  end;
+  Result := 0;
+end;
+
+procedure TMainForm.ListEditorButtonClick(Sender: TObject);
+var
+  Process: TProcess;
+  H: HWND;
+begin
+
+  H := FindWindowByTitle('List Editor 2');
+  if H <> 0 then // if we found notepad
+    // bring to foreground
+    SetForegroundWindow(H)
+  else begin
+    // start List Editor
+    Process := TProcess.Create(nil);
+    try
+      Process.Executable := 'ListEditor.exe';
+      Process.Options := [poNoConsole];
+      Process.Execute;
+    finally
+      Process.Free;
+    end;
   end;
 end;
 
@@ -1690,14 +1717,14 @@ procedure TMainForm.AddMatrixDrop(const AText: string; MaxTextLen, Row: Integer;
 var
   Drop: TMatrixDrop;
 begin
-  SetLength(FTheMatrix.Drops, Length(FTheMatrix.Drops) + 1);
+  SetLength(FMATRIX.Drops, Length(FMATRIX.Drops) + 1);
 
   Drop.Text:= AText;
   Drop.MaxTextLen:= MaxTextLen;
   Drop.Row:= Row;
   Drop.SlownessFactor:= SlownessFactor;
 
-  FTheMatrix.Drops[High(FTheMatrix.Drops)]:= Drop;
+  FMATRIX.Drops[High(FMATRIX.Drops)]:= Drop;
 end;
 
 procedure TMainForm.UpdateMatrixDrops;
@@ -1717,8 +1744,8 @@ const
 begin
   DspRowCount:= (FStudioConfig.DisplayConfig.ResY div GLYPH_H);
 
-  for I:= 0 to High(FTheMatrix.Drops) do begin
-    PDrop:= @FTheMatrix.Drops[I];
+  for I:= 0 to High(FMATRIX.Drops) do begin
+    PDrop:= @FMATRIX.Drops[I];
 
     DoRepaintFirstChar:= False;
     DoRepaintAll:= False;
@@ -1740,7 +1767,7 @@ begin
     end;
 
     // check if this drop is to be moved at all
-    if ((FTheMatrix.CycleCounter mod PDrop^.SlownessFactor) = 0) then begin
+    if ((FMATRIX.CycleCounter mod PDrop^.SlownessFactor) = 0) then begin
       // inc position and restart at begin if needed
       Inc(PDrop^.Row);
       DoRepaintAll:= True;
@@ -1797,14 +1824,14 @@ begin
 end;
 
 
-procedure TMainForm.InitTheMatrix;
+procedure TMainForm.InitMATRIX;
 var
   I: Integer;
   AText: string;
   MaxTextLen, Row: Integer; SlownessFactor: Byte;
 begin
 
-  SetLength(FTheMatrix.Drops, 0);
+  SetLength(FMATRIX.Drops, 0);
   for I:= 1 to (FStudioConfig.DisplayConfig.ResX div (GLYPH_W + GLYPH_GAP)) do begin
     MaxTextLen:= Random(4) + 4;
     SlownessFactor:= Random(3) + 1;
@@ -1930,6 +1957,368 @@ begin
     FPreviewDisplay.PaintString(C, X + Col, Row);
     FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
   end;
+end;
+
+
+// Interpretes a command (from ListBox), given and parameter S.
+// If the command requires jumping formward/backwards the list, the desired new
+// list index is returned; otherwise -1.
+// Reads FListIndex; does not modify FListIndex.
+function TMainForm.InterpreteListCommand(S: string): Integer;
+var
+  CmdParts: TStringList;
+  Cmd: string;
+  n, ITmp: Integer;
+  X, Y: Integer;
+  P1, P2, P3, P4, P5, P6: Integer;
+  IsInverted: Boolean;
+  IsRequirementMet: Boolean;
+  AColor: TColor;
+  Res: Integer;
+  DoContinueScreen: Boolean;
+begin
+  Res:= -1;
+
+  CmdParts:= TStringList.Create;
+  try
+    CmdParts.Delimiter:= ' ';
+    CmdParts.QuoteChar:= '''';
+    CmdParts.DelimitedText:= S;
+
+    if (CmdParts.Count > 0) then begin
+      Cmd:= CmdParts[0];
+
+      if ('NEWSCREEN' = Cmd) then begin
+
+        FIsCurrentScreenShownOnce:= False; // by default this screen will be shown again then the list loops
+        DoContinueScreen:= False;          // by default, NEWSCREEN will stop animations, clear/reset variable information, etc.
+
+        if (CmdParts.Count >= 2) then begin
+          // p1 = screen limitations
+          if ('ONCE' = CmdParts[1]) then begin
+            // display this screen only once
+            FIsCurrentScreenShownOnce:= True;
+          end else if ('CONTINUE' = CmdParts[1]) then begin
+            // do not stop animations, do not clear/reset variable infomration, etc.
+            DoContinueScreen:= True;
+          end else if (CmdParts[1].StartsWith('REQUIRE')) then begin
+            // this screen shall only be shown if a requirement is met
+            IsRequirementMet:= False; // False by default, must be set to True in code below
+
+            if ('REQUIREWINAMP' = CmdParts[1]) then begin
+              // check if Winamp is running
+              if (FWinampControl.IsWinampRunning) then
+                IsRequirementMet:= True;
+            end;
+
+            if (not IsRequirementMet) then begin
+              //LogEvent(lvINFO, 'Requirment ' + CmdParts[1] + ' is not met -> skip to next screen', Now);
+
+              // seek next 'NEWSCREEN' line; starting with next line
+              ITmp:= FListIndex + 1;
+              if (ITmp >= ListBox.Items.Count) then
+                ITmp:= 0;
+              Res:= SeekTo(ITmp, sdForward, 'NEWSCREEN');
+
+              if (-1 = Res) then
+                LogEvent(lvERROR, 'Could not find the next screen in the list.', Now);
+
+            end; // if requirement not met
+          end; // if something required
+        end; // if 2nd parameter with screen limitations given
+
+        if (not DoContinueScreen) then begin
+          StopProcessing;
+        end;
+
+        if (nil <> FDisplay) then begin
+          FDisplay.ShowScreen(BOTH_LAYERS);
+          FPreviewDisplay.LayerMode:= lmXOR;
+          FDisplay.SetLayerMode(FPreviewDisplay.LayerMode);
+          if (not FStudioConfig.DisplayConfig.IsBrightnessControlledByList) then begin
+            if (nil <> FDisplay) then
+              FDisplay.SetBrightness(FStudioConfig.DisplayConfig.DisplayBrightness);
+          end;
+        end;
+
+
+      end else if ('ENDSCREEN' = Cmd) then begin
+        if (True = FIsCurrentScreenShownOnce) then begin
+          // remove this screen from the list
+
+          // go back to last 'NEWSCREEN' line
+          ITmp:= SeekTo(FListIndex, sdBackward, 'NEWSCREEN');
+
+          if ((-1 = ITmp) or (ITmp > FListIndex)) then
+            LogEvent(lvERROR, 'Could not find start of current screen.', Now)
+          else begin
+            LogEvent(lvINFO, 'This screen was once. Clearing lines ' + IntToStr(ITmp) + '..' + IntToStr(FListIndex), Now);
+            ListBox.MultiSelect:= True;
+            ListBox.ClearSelection;
+            for n:= ITmp to FListIndex do begin
+              ListBox.selected[n]:= True;
+            end;
+            ListBox.DeleteSelected;
+            FIsCurrentScreenShownOnce:= False;
+
+            Res:= ITmp - 1;
+            if (Res < 0) then
+              Res:= ListBox.Items.Count - 1;
+          end;
+        end;
+
+      end else if ('DSPINIT' = Cmd) then begin
+        if (nil <> FDisplay) then
+          FDisplay.DspInit(FStudioConfig.DisplayConfig.ResX, FStudioConfig.DisplayConfig.ResY);
+
+      end else if ('ORMODE' = Cmd) then begin
+        if (nil <> FDisplay) then begin
+          FPreviewDisplay.LayerMode:= lmOR;
+          FDisplay.SetLayerMode(FPreviewDisplay.LayerMode);
+        end;
+
+      end else if ('XORMODE' = Cmd) then begin
+        if (nil <> FDisplay) then begin
+          FPreviewDisplay.LayerMode:= lmXOR;
+          FDisplay.SetLayerMode(FPreviewDisplay.LayerMode);
+        end;
+
+      end else if ('ANDMODE' = Cmd) then begin
+        if (nil <> FDisplay) then begin
+          FPreviewDisplay.LayerMode:= lmAND;
+          FDisplay.SetLayerMode(FPreviewDisplay.LayerMode);
+        end;
+
+      end else if ('STOP' = Cmd) then begin
+         WaitTimer.Enabled:= False;
+         StopButton.caption:= RsBtnGo;
+         Popupstopbutton.caption:= RsBtnGo;
+         StopButton.ImageIndex:= 1;
+
+      end else if ('CLEARSCREEN' = Cmd) then begin
+        if (nil <> FDisplay) then
+          FDisplay.ClearScreen;
+        FPreviewDisplay.ClearScreen;
+        FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
+
+      end else if ('SCREENTIME' = Cmd) then begin
+        // p1 = screen time in seconds
+        if (CmdParts.Count >= 2) then begin
+          P1:= StrToInt(CmdParts[1]);
+          WaitTimer.Interval:= P1 * 1000;
+          //ScreenTimeLabel.caption:= 'ScreenTime: ' + floattostr(WaitTimer.Interval/1000)+ 'S';
+          WaitTimer.Enabled:= True;
+        end;
+
+      end else if ('LIGHT' = Cmd) then begin
+        // p1 = brightness level
+        if (FStudioConfig.DisplayConfig.IsBrightnessControlledByList) then begin
+          if (CmdParts.Count >= 2) then begin
+            P1:= StrToInt(CmdParts[1]);
+            if (nil <> FDisplay) then
+              FDisplay.SetBrightness(P1);
+          end;
+        end;
+
+      end else if ('NOISE' = Cmd) then begin
+        // p1 = amount of pixels, p2 = inverted or not [optional]
+         if (CmdParts.Count >= 2) then begin
+           P1:= StrToInt(CmdParts[1]);
+           if ((CmdParts.Count >= 3) and ((CmdParts[2].ToUpper = 'TRUE') or (CmdParts[2] = '1'))) then begin
+             IsInverted:= True;
+             AColor:= clWhite;
+           end else begin
+             IsInverted:= False;
+             AColor:= clBlack;
+           end;
+           Randomize;
+           for ITmp:= 1 to P1 do begin
+             X:= Random(FStudioConfig.DisplayConfig.ResX);
+             Y:= Random(FStudioConfig.DisplayConfig.ResY);
+             if (nil <> FDisplay) then
+               FDisplay.PaintPixel(X, Y, IsInverted);
+             FPreviewDisplay.GraphicsLayer.Canvas.Pixels[X, Y]:= AColor;
+           end;
+           FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
+         end;
+
+      end else if ('PIXEL' = Cmd) then begin
+        // p1 = x, p2 = y, p3 = inverted or not [optional]
+        if (CmdParts.Count >= 3) then begin
+          P1:= StrToInt(CmdParts[1]);
+          P2:= StrToInt(CmdParts[2]);
+          if ((CmdParts.Count >= 4) and ((CmdParts[3].ToUpper = 'TRUE') or (CmdParts[3] = '1'))) then begin
+            if (nil <> FDisplay) then
+              FDisplay.PaintPixel(P1, P2, True);
+            FPreviewDisplay.GraphicsLayer.Canvas.Pixels[P1, P2]:= clWhite;
+          end else begin
+            if (nil <> FDisplay) then
+              FDisplay.PaintPixel(P1, P2, False);
+            FPreviewDisplay.GraphicsLayer.Canvas.Pixels[P1, P2]:= clBlack;
+          end;
+          FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
+        end;
+
+      end else if ('LINE' = Cmd) then begin
+        // p1 = x0, p2 = y0, p3 = x1, p4 = y1, p5 = inverted or not [optional]
+        if (CmdParts.Count >= 5) then begin
+          P1:= StrToInt(CmdParts[1]);
+          P2:= StrToInt(CmdParts[2]);
+          P3:= StrToInt(CmdParts[3]);
+          P4:= StrToInt(CmdParts[4]);
+          if ((CmdParts.Count >= 6) and ((CmdParts[5].ToUpper = 'TRUE') or (CmdParts[5] = '1'))) then begin
+            if (nil <> FDisplay) then
+              FDisplay.PaintLine(P1, P2, P3, P4, True);
+            FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color:= clWhite;
+          end else begin
+            if (nil <> FDisplay) then
+              FDisplay.PaintLine(P1, P2, P3, P4, False);
+            FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color:= clBlack;
+          end;
+          FPreviewDisplay.GraphicsLayer.Canvas.Line(P1, P2, P3, P4);
+          FPreviewDisplay.GraphicsLayer.Canvas.Pixels[P3, P4]:= FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color;
+          FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
+        end;
+
+      end else if ('FRAME' = Cmd) then begin
+        // p1 = x0, p2 = y0, p3 = x1, p4 = y1, p5 = inverted or not [optional]
+        if (CmdParts.Count >= 5) then begin
+          P1:= StrToInt(CmdParts[1]);
+          P2:= StrToInt(CmdParts[2]);
+          P3:= StrToInt(CmdParts[3]);
+          P4:= StrToInt(CmdParts[4]);
+          if ((CmdParts.Count >= 6) and ((CmdParts[5].ToUpper = 'TRUE') or (CmdParts[5] = '1'))) then begin
+            if (nil <> FDisplay) then
+              FDisplay.PaintFrame(P1, P2, P3, P4, True);
+            FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color:= clWhite;
+          end else begin
+            if (nil <> FDisplay) then
+              FDisplay.PaintFrame(P1, P2, P3, P4, False);
+            FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color:= clBlack;
+          end;
+          FPreviewDisplay.GraphicsLayer.Canvas.Frame(P1, P2, P3 + 1, P4 + 1);
+          FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
+        end;
+
+      end else if ('PLAINTEXT' = Cmd) then begin
+        // p1 = text, p2 = x, p3 = y
+        if (CmdParts.Count >= 4) then begin
+          P2:= StrToInt(CmdParts[2]);
+          P3:= StrToInt(CmdParts[3]);
+          // does the text to be displayed include any '$' characters?
+          if (CmdParts[1].Contains('$') ) then begin
+            HandleTextOutput(CmdParts[1], P2, P3, '', 0);
+          end else begin
+            if (nil <> FDisplay) then
+              FDisplay.PaintString(CmdParts[1], P2, P3);
+            FPreviewDisplay.PaintString(CmdParts[1], P2, P3);
+            FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
+          end;
+        end;
+
+      end else if ('TEXTOUT' = Cmd) then begin
+        // p1 = text, p2 = x, p3 = y, p4 = font size, p5 = font name
+        if (CmdParts.Count >= 6) then begin
+          P2:= StrToInt(CmdParts[2]);
+          P3:= StrToInt(CmdParts[3]);
+          P4:= StrToInt(CmdParts[4]);
+          // does the text to be displayed include any '$' characters?
+          if (CmdParts[1].Contains('$') ) then begin
+            HandleTextOutput(CmdParts[1], P2, P3, CmdParts[5], P4);
+          end else begin
+            DrawFontedText(CmdParts[1], P2, P3, CmdParts[5], P4);
+          end;
+        end;
+
+      end else if ('ANIMATE' = Cmd) then begin
+        // p1 = file name, p2 = animation speed, p3 = x, p4 = y, p5 = frame width
+        if (False = FAnimationData.IsAnimationDisplayed) then begin
+          // only one animation per screen is supported
+          if (CmdParts.Count >= 6) then begin
+            P2:= StrToInt(CmdParts[2]);
+            P3:= StrToInt(CmdParts[3]);
+            P4:= StrToInt(CmdParts[4]);
+            P5:= StrToInt(CmdParts[5]);
+            Animate(CmdParts[1], P2, P3, P4, P5);
+            FAnimationData.IsAnimationDisplayed:= True;
+          end;
+        end;
+
+      end else if ('BITMAP' = Cmd) then begin
+        // p1 = file path, p2 = x, p3 = y
+        if (CmdParts.Count >= 4) then begin
+          P2:= StrToInt(CmdParts[2]);
+          P3:= StrToInt(CmdParts[3]);
+          BitmapToVFD(CmdParts[1], P2, P3);
+        end;
+
+      end else if ('DRIVEUSAGE' = Cmd) then begin
+        // p1 = drive letter, P2 = x, P3 = y, P4 = width (in characters)
+        if (CmdParts.Count >= 5) then begin
+          P2:= StrToInt(CmdParts[2]);
+          P3:= StrToInt(CmdParts[3]);
+          P4:= StrToInt(CmdParts[4]);
+          DrawDriveUsage(CmdParts[1][1], P2, P3, P4);
+
+        end;
+
+      end else if ('CLOCK' = Cmd) then begin
+        // p1 = offset in minutes, p2 = x, p3 = y, p4 = hour hand length, p5 = minute hand length, p6 = seconds hand length
+        if (CmdParts.Count >= 7) then begin
+          P1:= StrToInt(CmdParts[1]);
+          P2:= StrToInt(CmdParts[2]);
+          P3:= StrToInt(CmdParts[3]);
+          P4:= StrToInt(CmdParts[4]);
+          P5:= StrToInt(CmdParts[5]);
+          P6:= StrToInt(CmdParts[6]);
+          AddClock(P1, P2, P3, P4, P5, P6);
+        end;
+
+      end else if ('MATRIX' = Cmd) then begin
+        // p1 = speed
+        if (CmdParts.Count >= 2) then begin
+          P1:= StrToInt(CmdParts[1]);
+
+          // Setting up the drops
+          InitMATRIX;
+          ExtraTimer.Interval:= P1;
+          ExtraTimer.Enabled:= True;
+
+        end;
+
+      end else if ('CPUMONITOR' = Cmd) then begin
+        // p1 = number of rows to use, p2 = bottom-most row
+          if (CmdParts.Count >= 3) then begin
+            if (False = FCpuUsageData.IsUsageMonitorDisplayed) then begin
+              P1:= StrToInt(CmdParts[1]);
+              P2:= StrToInt(CmdParts[2]);
+              FCpuUsageData.NumRows:= P1;
+              FCpuUsageData.BottomRow:= P2;
+              FCpuUsageData.IsUsageMonitorDisplayed:= True;
+            end;
+          end;
+
+      end else if ('RAMMONITOR' = Cmd) then begin
+        // p1 = number of rows to use, p2 = bottom-most row
+          if (CmdParts.Count >= 3) then begin
+            if (False = FMemUsageData.IsUsageMonitorDisplayed) then begin
+              P1:= StrToInt(CmdParts[1]);
+              P2:= StrToInt(CmdParts[2]);
+              FMemUsageData.NumRows:= P1;
+              FMemUsageData.BottomRow:= P2;
+              FMemUsageData.IsUsageMonitorDisplayed:= True;
+            end;
+          end;
+
+      end;
+
+
+    end; // endif (CmdParts.Count > 0)
+
+  finally
+    CmdParts.Free;
+  end;
+  Result:= Res;
 end;
 
 

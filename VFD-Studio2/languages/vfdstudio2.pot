@@ -15,30 +15,37 @@ msgid "Currently displayed"
 msgstr ""
 
 #: mainunit.rsdowfriday
+msgctxt "mainunit.rsdowfriday"
 msgid "Friday"
 msgstr ""
 
 #: mainunit.rsdowmonday
+msgctxt "mainunit.rsdowmonday"
 msgid "Monday"
 msgstr ""
 
 #: mainunit.rsdowsaturday
+msgctxt "mainunit.rsdowsaturday"
 msgid "Saturday"
 msgstr ""
 
 #: mainunit.rsdowsunday
+msgctxt "mainunit.rsdowsunday"
 msgid "Sunday"
 msgstr ""
 
 #: mainunit.rsdowthursday
+msgctxt "mainunit.rsdowthursday"
 msgid "Thursday"
 msgstr ""
 
 #: mainunit.rsdowtuesday
+msgctxt "mainunit.rsdowtuesday"
 msgid "Tuesday"
 msgstr ""
 
 #: mainunit.rsdowwednesday
+msgctxt "mainunit.rsdowwednesday"
 msgid "Wednesday"
 msgstr ""
 
@@ -57,6 +64,41 @@ msgstr ""
 
 #: mainunit.rsnextscreentext
 msgid "Next screen in"
+msgstr ""
+
+#: studiocommon.rsdowfriday
+msgctxt "studiocommon.rsdowfriday"
+msgid "Friday"
+msgstr ""
+
+#: studiocommon.rsdowmonday
+msgctxt "studiocommon.rsdowmonday"
+msgid "Monday"
+msgstr ""
+
+#: studiocommon.rsdowsaturday
+msgctxt "studiocommon.rsdowsaturday"
+msgid "Saturday"
+msgstr ""
+
+#: studiocommon.rsdowsunday
+msgctxt "studiocommon.rsdowsunday"
+msgid "Sunday"
+msgstr ""
+
+#: studiocommon.rsdowthursday
+msgctxt "studiocommon.rsdowthursday"
+msgid "Thursday"
+msgstr ""
+
+#: studiocommon.rsdowtuesday
+msgctxt "studiocommon.rsdowtuesday"
+msgid "Tuesday"
+msgstr ""
+
+#: studiocommon.rsdowwednesday
+msgctxt "studiocommon.rsdowwednesday"
+msgid "Wednesday"
 msgstr ""
 
 #: tmainform.animationsgroupbox.caption
@@ -161,6 +203,10 @@ msgstr ""
 #: tmainform.languagegroupbox.caption
 msgctxt "tmainform.languagegroupbox.caption"
 msgid "Language"
+msgstr ""
+
+#: tmainform.listeditorbutton.caption
+msgid "List Editor"
 msgstr ""
 
 #: tmainform.listeladen1.caption

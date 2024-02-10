@@ -26,35 +26,35 @@ msgstr ""
 
 #: mainunit.rsdowfriday
 msgid "Friday"
-msgstr ""
+msgstr "Freitag"
 
 #: mainunit.rsdowmonday
 msgid "Monday"
-msgstr ""
+msgstr "Montag"
 
 #: mainunit.rsdowsaturday
 msgid "Saturday"
-msgstr ""
+msgstr "Samstag"
 
 #: mainunit.rsdowsunday
 msgid "Sunday"
-msgstr ""
+msgstr "Sonntag"
 
 #: mainunit.rsdowthursday
 msgid "Thursday"
-msgstr ""
+msgstr "Donnerstag"
 
 #: mainunit.rsdowtuesday
 msgid "Tuesday"
-msgstr ""
+msgstr "Dienstag"
 
 #: mainunit.rsdowwednesday
 msgid "Wednesday"
-msgstr ""
+msgstr "Mittwoch"
 
 #: mainunit.rsinformationunknown
 msgid "???"
-msgstr ""
+msgstr "???"
 
 #: mainunit.rsmodeviewexpert
 msgctxt "mainunit.rsmodeviewexpert"
@@ -293,4 +293,3 @@ msgstr ""
 msgctxt "tmainform.stopbutton.caption"
 msgid "Stop"
 msgstr ""
-
