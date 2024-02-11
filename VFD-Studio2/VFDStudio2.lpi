@@ -72,7 +72,7 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="studiolanguages.pas"/>
+        <Filename Value="StudioLanguages.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="StudioLanguages"/>
       </Unit>

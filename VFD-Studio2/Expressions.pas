@@ -464,11 +464,13 @@ const
                 'LIGHT 50'),
     (Expr: 'PLAINTEXT';
       Help: RsHelpPLAINTEXT;
-      Example: 'PLAINTEXT ''It''''s me!'' 01 02''PLAINTEXT ''$TIME$'' 01 03'),
+      Example: 'PLAINTEXT ''It''''s me!'' 01 02' + LineEnding +
+               'PLAINTEXT ''$TIME$'' 01 03'),
     (Expr: 'TEXTOUT';
       Help: RsHelpTEXTOUT;
       Example: ';"Hello" written in Arial font:' + LineEnding +
-                'TEXTOUT ''Hello'' 2 25 12 ''Arial''''TEXTOUT ''$TIME$'' 2 5 12 ''Calibri'''),
+                'TEXTOUT ''Hello'' 2 25 12 ''Arial''' + LineEnding +
+                'TEXTOUT ''$TIME$'' 2 5 12 ''Calibri'''),
     (Expr: 'BITMAP';
       Help: RsHelpBITMAP;
       Example: ';relative path:' + LineEnding +

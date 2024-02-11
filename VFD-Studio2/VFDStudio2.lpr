@@ -1,4 +1,4 @@
-program vfdstudio2;
+program VFDStudio2;
 
 {$mode objfpc}{$H+}
 
