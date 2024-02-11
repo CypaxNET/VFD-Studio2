@@ -66,41 +66,6 @@ msgstr ""
 msgid "Next screen in"
 msgstr ""
 
-#: studiocommon.rsdowfriday
-msgctxt "studiocommon.rsdowfriday"
-msgid "Friday"
-msgstr ""
-
-#: studiocommon.rsdowmonday
-msgctxt "studiocommon.rsdowmonday"
-msgid "Monday"
-msgstr ""
-
-#: studiocommon.rsdowsaturday
-msgctxt "studiocommon.rsdowsaturday"
-msgid "Saturday"
-msgstr ""
-
-#: studiocommon.rsdowsunday
-msgctxt "studiocommon.rsdowsunday"
-msgid "Sunday"
-msgstr ""
-
-#: studiocommon.rsdowthursday
-msgctxt "studiocommon.rsdowthursday"
-msgid "Thursday"
-msgstr ""
-
-#: studiocommon.rsdowtuesday
-msgctxt "studiocommon.rsdowtuesday"
-msgid "Tuesday"
-msgstr ""
-
-#: studiocommon.rsdowwednesday
-msgctxt "studiocommon.rsdowwednesday"
-msgid "Wednesday"
-msgstr ""
-
 #: tmainform.animationsgroupbox.caption
 msgid "Animations"
 msgstr ""
