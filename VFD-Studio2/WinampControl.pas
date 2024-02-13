@@ -158,18 +158,19 @@ var
  P: PChar;
  Handle: HWND;
 begin
-Result:='';
-getmem(p,255);
-Handle:=FindWindow('Winamp v1.x',nil);
-if Handle<>0 then
- begin
-  GetWindowText(Handle,P,255);
-  if pos('- Winamp',P)>0 then
-   begin
-    Result:=Copy(P,1,-2+Length(P)-(Length(P)-Pos('- Winamp',P)));
-    Delete(Result,1,Pos(' ',Result));
-   end;
- end;
+  Result:='';
+  GetMem(P, 255);
+  Handle:=FindWindow('Winamp v1.x',nil);
+  if (Handle <> 0) then
+  begin
+    GetWindowText(Handle,P,255);
+    if pos('- Winamp',P)>0 then
+     begin
+       Result:=Copy(P,1,-2+Length(P)-(Length(P)-Pos('- Winamp',P)));
+       Delete(Result,1,Pos(' ',Result));
+     end;
+  end;
+  Freemem(P);
 end;
 
 function TWinampControl.IsWinampRunning: boolean;
