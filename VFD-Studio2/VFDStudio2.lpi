@@ -21,6 +21,11 @@
         <Item1 Value="TMainForm.VersionLabel.Caption"/>
       </ExcludedIdentifiers>
     </i18n>
+    <VersionInfo>
+      <UseVersionInfo Value="True"/>
+      <MajorVersionNr Value="2"/>
+      <StringTable CompanyName="cypax.net" FileDescription="VFD-Studio2" LegalCopyright="cypax.net" ProductName="VFD-Studio" ProductVersion="2"/>
+    </VersionInfo>
     <BuildModes>
       <Item Name="Default" Default="True"/>
     </BuildModes>
@@ -43,7 +48,6 @@
       <Unit>
         <Filename Value="VFDStudio2.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="vfdstudio2"/>
       </Unit>
       <Unit>
         <Filename Value="MainUnit.pas"/>
@@ -74,7 +78,6 @@
       <Unit>
         <Filename Value="StudioLanguages.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="StudioLanguages"/>
       </Unit>
       <Unit>
         <Filename Value="StudioCommon.pas"/>

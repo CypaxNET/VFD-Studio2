@@ -76,7 +76,7 @@ begin
   while (Pos('$VERSION$', S) <> 0 ) do begin
     I:= Pos('$VERSION$', S);
     Delete(S, I, Length('$VERSION$'));
-    Insert(VERSION_STR, S, I);
+    Insert(ResourceVersionInfo, S, I);
   end;
 
   while (Pos('$PCNAME$', S) <> 0 ) do begin

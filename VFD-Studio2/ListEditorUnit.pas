@@ -9,9 +9,9 @@ uses
   IniFiles, StudioCommon, Math, PreviewDisplay, uSMBIOS, SysInfo, WinampControl,
   lclintf, Buttons, Menus, ComCtrls, SynEdit, SynCompletion, Glyphs,
   ListHighlighter, SynEditTypes, LConvEncoding, MultiMon,
-  RegExpr, DateUtils, LCLTranslator, LCLType;
+  RegExpr, DateUtils, LCLTranslator, LCLType, resource, versiontypes,
+  versionresource;
 const
-  VERSION_STR = '2.0.0.0';
   APP_TITLE = 'List Editor 2';
 
   DOUBLESCALE_OFFSET = 16; // some minimum width spacing around the preview image when rescaling
@@ -90,6 +90,8 @@ type
     procedure SynCompletion1SearchPosition(var APosition: Integer);
     procedure LoadConfig(const AFilePath: String);
     procedure CommandListBoxSelectionChange(Sender: TObject; User: Boolean);
+
+    function ResourceVersionInfo: String;
 
     procedure LoadListFromFile(FileName: TFileName);
 
@@ -284,6 +286,31 @@ begin
   FMemUsageData.PhysicalMemory := Random(16 * 1014) * 1024 * 1024;
 
 end;
+
+function TMainForm.ResourceVersionInfo: String;
+var
+  Stream: TResourceStream;
+  vr: TVersionResource;
+  fi: TVersionFixedInfo;
+begin
+  Result := '';
+  { This raises an exception if version info has not been incorporated into the
+    binary (Lazarus Project -> Project Options -> Version Info -> Version numbering). }
+  Stream:= TResourceStream.CreateFromID(HINSTANCE, 1, PChar(RT_VERSION));
+  try
+    vr := TVersionResource.Create;
+    try
+      vr.SetCustomRawDataStream(Stream);
+      fi := vr.FixedInfo;
+      Result := Format('%d.%d.%d.%d', [fi.FileVersion[0], fi.FileVersion[1], fi.FileVersion[2], fi.FileVersion[3]]);
+    finally
+      vr.Free
+    end;
+  finally
+    Stream.Free
+  end;
+end;
+
 
 procedure TMainForm.SaveWindowState;
 var

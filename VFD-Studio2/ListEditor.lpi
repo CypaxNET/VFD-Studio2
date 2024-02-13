@@ -18,6 +18,11 @@
       <EnableI18N Value="True"/>
       <OutDir Value="languages"/>
     </i18n>
+    <VersionInfo>
+      <UseVersionInfo Value="True"/>
+      <MajorVersionNr Value="2"/>
+      <StringTable CompanyName="cypax.net" FileDescription="List Editor" LegalCopyright="cypax.net" ProductName="List Editor" ProductVersion="2"/>
+    </VersionInfo>
     <BuildModes>
       <Item Name="Default" Default="True"/>
     </BuildModes>
@@ -50,7 +55,6 @@
         <ComponentName Value="MainForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="ListEditorUnit"/>
       </Unit>
       <Unit>
         <Filename Value="ListHighlighter.pas"/>

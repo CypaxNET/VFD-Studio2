@@ -707,3 +707,99 @@ msgstr ""
 msgid "?"
 msgstr ""
 
+#: tmainform.caption
+msgid "List Editor 2"
+msgstr ""
+
+#: tmainform.examplelabel.caption
+msgid "Code example:"
+msgstr ""
+
+#: tmainform.exitmenuitem.caption
+msgid "E&xit"
+msgstr ""
+
+#: tmainform.menuitem1.caption
+msgid "&File"
+msgstr ""
+
+#: tmainform.menuitem2.caption
+msgid "&Open..."
+msgstr ""
+
+#: tmainform.menuitem3.caption
+msgid "&View"
+msgstr ""
+
+#: tmainform.menuitem4.caption
+msgid "Edit"
+msgstr ""
+
+#: tmainform.newfilemenuitem.caption
+msgid "New"
+msgstr ""
+
+#: tmainform.opendialog.title
+msgid "Open file"
+msgstr ""
+
+#: tmainform.previewgroupbox.caption
+msgid "Preview"
+msgstr ""
+
+#: tmainform.redomenuitem.caption
+msgid "Redo"
+msgstr ""
+
+#: tmainform.saveasmenuitem.caption
+msgid "Save &as..."
+msgstr ""
+
+#: tmainform.savedialog.title
+msgid "Save as"
+msgstr ""
+
+#: tmainform.savemenuitem.caption
+msgid "&Save"
+msgstr ""
+
+#: tmainform.statusbar1.panels[0].text
+msgid "[1:1]"
+msgstr ""
+
+#: tmainform.statusbar1.panels[1].text
+msgid "0 Characters"
+msgstr ""
+
+#: tmainform.statusbar1.panels[2].text
+msgid "UTF8"
+msgstr ""
+
+#: tmainform.statusbar1.panels[3].text
+msgid "INS"
+msgstr ""
+
+#: tmainform.statusbar1.panels[4].text
+msgid "ok"
+msgstr ""
+
+#: tmainform.toolbar1.caption
+msgid "ToolBar1"
+msgstr ""
+
+#: tmainform.toolgroupbox.caption
+msgid "Commands and keywords"
+msgstr ""
+
+#: tmainform.undomenuitem.caption
+msgid "Undo"
+msgstr ""
+
+#: tmainform.zoominmenuitem.caption
+msgid "Zoom in"
+msgstr ""
+
+#: tmainform.zoomoutmenuitem.caption
+msgid "Zoom out"
+msgstr ""
+

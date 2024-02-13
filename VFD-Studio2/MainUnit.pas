@@ -8,9 +8,8 @@ uses
   Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
   NTK300, NTK800, VFDisplay, IniFiles, Menus, ExtCtrls, InfoUnit, uSMBIOS,
   SysInfo, WinampControl, LCLTranslator, ComCtrls, DateUtils, Math,
-  StudioCommon, Glyphs, lclintf, RegExpr, PreviewDisplay, Process;
-
-const VERSION_STR = '2.0.0.0';
+  StudioCommon, Glyphs, lclintf, RegExpr, PreviewDisplay, Process, resource,
+  versiontypes, versionresource;
 
 type
 
@@ -213,6 +212,8 @@ type
     procedure WaitTimerTimer(Sender: TObject);
 
     function FindWindowByTitle(WindowTitle: string): Hwnd;
+
+    function ResourceVersionInfo: String;
     
     
     // methods related to processing lists
@@ -711,6 +712,9 @@ end;
 procedure TMainForm.FormCreate(Sender: TObject);
 var
   IniFilePath: string;
+  Stream: TResourceStream;
+  vr: TVersionResource;
+  fi: TVersionFixedInfo;
 begin
   Randomize;
   FSMBios:= TSMBios.Create;
@@ -719,7 +723,7 @@ begin
   FPreviewDisplay:= TPreviewDisplay.Create(Self);
   FPreviewDisplay.LayerMode:= lmXOR;
 
-  LogEvent(lvINFO, 'Application started. Version ' + VERSION_STR , Now);
+  LogEvent(lvINFO, 'Application started. Version ' + ResourceVersionInfo , Now);
 
   IniFilePath:= ExtractFilePath(application.ExeName) + STUDIO_INIFILE;
   LoadConfig(IniFilePath);
@@ -767,7 +771,8 @@ begin
 
   TrayIcon1.Hint:= 'VFD-Studio 2: ' + FStudioConfig.DisplayConfig.DisplayType + '@' + FStudioConfig.DisplayConfig.IntName;
 
-  VersionLabel.Caption:= 'v' + VERSION_STR;
+  VersionLabel.Caption:= 'v' + ResourceVersionInfo;
+
 
   // Starting the application might require quite some (CPU)time, so it's a good
   // idea to give the system some time. That's why loading the list is moved
@@ -775,6 +780,30 @@ begin
   // itself afterwards.
   LoadListTimer.Enabled:= True;
 
+end;
+
+function TMainForm.ResourceVersionInfo: String;
+var
+  Stream: TResourceStream;
+  vr: TVersionResource;
+  fi: TVersionFixedInfo;
+begin
+  Result := '';
+  { This raises an exception if version info has not been incorporated into the
+    binary (Lazarus Project -> Project Options -> Version Info -> Version numbering). }
+  Stream:= TResourceStream.CreateFromID(HINSTANCE, 1, PChar(RT_VERSION));
+  try
+    vr := TVersionResource.Create;
+    try
+      vr.SetCustomRawDataStream(Stream);
+      fi := vr.FixedInfo;
+      Result := Format('%d.%d.%d.%d', [fi.FileVersion[0], fi.FileVersion[1], fi.FileVersion[2], fi.FileVersion[3]]);
+    finally
+      vr.Free
+    end;
+  finally
+    Stream.Free
+  end;
 end;
 
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
