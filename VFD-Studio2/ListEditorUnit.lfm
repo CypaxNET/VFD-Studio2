@@ -550,6 +550,7 @@ object MainForm: TMainForm
     ClientHeight = 770
     ClientWidth = 290
     TabOrder = 1
+    OnClick = ToolGroupBoxClick
     object CommandListBox: TListBox
       AnchorSideLeft.Control = ToolGroupBox
       AnchorSideTop.Control = ToolGroupBox
@@ -1318,7 +1319,7 @@ object MainForm: TMainForm
   end
   object SynCompletion1: TSynCompletion
     OnExecute = SynCompletion1Execute
-    Position = 0
+    Position = -1
     LinesInWindow = 6
     OnSearchPosition = SynCompletion1SearchPosition
     SelectedColor = clHighlight

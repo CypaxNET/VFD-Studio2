@@ -25,34 +25,6 @@ msgctxt "listeditorunit.rsdiscardtitle"
 msgid "You have unsaved changes."
 msgstr ""
 
-#: listeditorunit.rsdowfriday
-msgid "Friday"
-msgstr "Freitag"
-
-#: listeditorunit.rsdowmonday
-msgid "Monday"
-msgstr "Montag"
-
-#: listeditorunit.rsdowsaturday
-msgid "Saturday"
-msgstr "Samstag"
-
-#: listeditorunit.rsdowsunday
-msgid "Sunday"
-msgstr "Sonntag"
-
-#: listeditorunit.rsdowthursday
-msgid "Thursday"
-msgstr "Donnerstag"
-
-#: listeditorunit.rsdowtuesday
-msgid "Tuesday"
-msgstr "Dienstag"
-
-#: listeditorunit.rsdowwednesday
-msgid "Wednesday"
-msgstr "Mittwoch"
-
 #: listeditorunit.rshelpandmode
 msgid ""
 "AND combination of display layers.\n"
@@ -714,10 +686,6 @@ msgid ""
 "Current year.\n"
 "Example: \"2024\""
 msgstr ""
-
-#: listeditorunit.rsinformationunknown
-msgid "?"
-msgstr "?"
 
 #: tmainform.caption
 msgid "List Editor 2"

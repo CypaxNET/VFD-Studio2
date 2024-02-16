@@ -14,45 +14,6 @@ msgstr ""
 msgid "Currently displayed"
 msgstr ""
 
-#: mainunit.rsdowfriday
-msgctxt "mainunit.rsdowfriday"
-msgid "Friday"
-msgstr ""
-
-#: mainunit.rsdowmonday
-msgctxt "mainunit.rsdowmonday"
-msgid "Monday"
-msgstr ""
-
-#: mainunit.rsdowsaturday
-msgctxt "mainunit.rsdowsaturday"
-msgid "Saturday"
-msgstr ""
-
-#: mainunit.rsdowsunday
-msgctxt "mainunit.rsdowsunday"
-msgid "Sunday"
-msgstr ""
-
-#: mainunit.rsdowthursday
-msgctxt "mainunit.rsdowthursday"
-msgid "Thursday"
-msgstr ""
-
-#: mainunit.rsdowtuesday
-msgctxt "mainunit.rsdowtuesday"
-msgid "Tuesday"
-msgstr ""
-
-#: mainunit.rsdowwednesday
-msgctxt "mainunit.rsdowwednesday"
-msgid "Wednesday"
-msgstr ""
-
-#: mainunit.rsinformationunknown
-msgid "???"
-msgstr ""
-
 #: mainunit.rsmodeviewexpert
 msgctxt "mainunit.rsmodeviewexpert"
 msgid "Expert view"

@@ -4,7 +4,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, registry, winsock, ExtCtrls, JwaWinBase, Win32Proc;
+  StdCtrls, registry, winsock, ExtCtrls, JwaWinBase, Win32Proc, resource,
+  versiontypes, versionresource;
 type
   TSysInfo = class(TComponent)
   private
@@ -16,6 +17,8 @@ type
     function ASCII(s: string): string;
   public
     { Public-Deklarationen }
+
+    function ResourceVersionInfo: String;
 
     function GetCurrentUserName: string;
     function ComputerName: string;
@@ -65,6 +68,31 @@ type
 procedure Register;
 
 implementation
+
+
+function TSysInfo.ResourceVersionInfo: String;
+var
+  Stream: TResourceStream;
+  vr: TVersionResource;
+  fi: TVersionFixedInfo;
+begin
+  Result := '';
+  { This raises an exception if version info has not been incorporated into the
+    binary (Lazarus Project -> Project Options -> Version Info -> Version numbering). }
+  Stream:= TResourceStream.CreateFromID(HINSTANCE, 1, PChar(RT_VERSION));
+  try
+    vr := TVersionResource.Create;
+    try
+      vr.SetCustomRawDataStream(Stream);
+      fi := vr.FixedInfo;
+      Result := Format('%d.%d.%d.%d', [fi.FileVersion[0], fi.FileVersion[1], fi.FileVersion[2], fi.FileVersion[3]]);
+    finally
+      vr.Free
+    end;
+  finally
+    Stream.Free
+  end;
+end;
 
 
 function TSysInfo.ASCII(s: string): string;     // ersetzt ö,ä,ü durch oe,ae,ue zwecks ASCII Kompatiblität

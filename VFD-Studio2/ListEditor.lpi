@@ -35,6 +35,9 @@
     </RunParams>
     <RequiredPackages>
       <Item>
+        <PackageName Value="laz_synapse"/>
+      </Item>
+      <Item>
         <PackageName Value="SynEditDsgn"/>
       </Item>
       <Item>

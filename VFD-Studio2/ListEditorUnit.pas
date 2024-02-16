@@ -9,8 +9,7 @@ uses
   IniFiles, StudioCommon, Math, PreviewDisplay, uSMBIOS, SysInfo, WinampControl,
   lclintf, Buttons, Menus, ComCtrls, SynEdit, SynCompletion, Glyphs,
   ListHighlighter, SynEditTypes, LConvEncoding, MultiMon,
-  RegExpr, DateUtils, LCLTranslator, LCLType, resource, versiontypes,
-  versionresource;
+  RegExpr, DateUtils, LCLTranslator, LCLType, DisplayManager;
 const
   APP_TITLE = 'List Editor 2';
 
@@ -91,14 +90,13 @@ type
     procedure LoadConfig(const AFilePath: String);
     procedure CommandListBoxSelectionChange(Sender: TObject; User: Boolean);
 
-    function ResourceVersionInfo: String;
-
     procedure LoadListFromFile(FileName: TFileName);
 
     procedure ShowCommandExplanation(Cmd: String);
     procedure ShowKeywordExplanation(Cmd: String);
 
     procedure AddAutocompleteWords(Sender: TObject);
+    procedure ToolGroupBoxClick(Sender: TObject);
     procedure UndoButtonClick(Sender: TObject);
     procedure UndoMenuItemClick(Sender: TObject);
     procedure ZoomInButtonClick(Sender: TObject);
@@ -113,15 +111,7 @@ type
 
     procedure PreviewLine(S: String);
 
-    procedure HandleTextOutput(AText: String; X, Y: Byte; FontName: String; FontSize: Integer);
-    function DrawFontedText(AText: String; X, Y: Byte; FontName: String; FontSize: Integer): TPoint;
-    procedure BitmapToVFD(FileName: String; X, Y: Word);
     procedure DrawDriveUsage(DriveLetter: Char; Col, Row, BarWidth: Integer);
-    procedure UpdateCpuMonitor;
-    procedure UpdateMemMonitor;
-
-    function SubstituteStaticInfo(AText: String): String;
-    function SubstituteVariableInfo(AText: String): String;
 
     function FindCommandIndex(const Expr: String): Integer;
     function FindKeywordIndex(const Expr: String): Integer;
@@ -129,15 +119,18 @@ type
     procedure SaveWindowState;
     procedure RestoreWindowState;
 
+    // methods related to the preview image
+    procedure HandlePreviewImageUpdate(NewImage: TBitmap);
+
   private
 
     // settings
     FStudioConfig: TStudioConfig;
 
-    FPreviewDisplay: TPreviewDisplay; // preview display object
+    // display stuff
+    FDisplayMgr: TDisplayManager;
 
     // objects to gather system information from
-    FSMBios: TSMBios;
     FSysInfo: TSysInfo;
     FWinampControl: TWinampControl;
 
@@ -147,13 +140,11 @@ type
 
     FLastLine: String;
 
-
     FFileName: String;
 
-    // STUBS
+    IsCpuMonitorDisplayed: Boolean; // is the CPU usage monitor currently displayed?
+    IsMemMonitorDisplayed: Boolean; // is the RAM usage monitor currently displayed?
 
-    FCpuUsageData: TCpuUsageData;   // hold information about current and average CPU load and a history of recent CPU usage
-    FMemUsageData: TMemUsageData;   // hold information about current and average RAM load and a history of recent RAM usage
 
 
   public
@@ -170,17 +161,6 @@ implementation
 
 
 resourcestring
-  { Day of the week }
-  RsDoWSunday = 'Sunday';
-  RsDoWMonday = 'Monday';
-  RsDoWTuesday = 'Tuesday';
-  RsDoWWednesday = 'Wednesday';
-  RsDoWThursday = 'Thursday';
-  RsDoWFriday = 'Friday';
-  RsDoWSaturday = 'Saturday';
-
-  RsInformationUnknown = '?';
-
   RsCharacters = 'Characters';
 
   RsDiscardTitle = 'You have unsaved changes.';
@@ -207,12 +187,12 @@ begin
   Editor.Highlighter := FSynHighlighter;
   //ExampleEdit.Highlighter := FSynHighlighter;
 
-  FSMBios := TSMBios.Create;
+
+  FDisplayMgr:= TDisplayManager.Create(Self);
+  FDisplayMgr.OnPreviewChanged:= @HandlePreviewImageUpdate;
+
   FSysInfo := TSysInfo.Create(Self);
   FWinampControl := TWinampControl.Create(Self);
-  FPreviewDisplay := TPreviewDisplay.Create(Self);
-
-  FPreviewDisplay.LayerMode := lmXOR;
 
   IniFilePath := ExtractFilePath(application.ExeName) + STUDIO_INIFILE;
   LoadConfig(IniFilePath);
@@ -247,8 +227,9 @@ begin
 
   PreviewImage.Picture.Bitmap.Width := FStudioConfig.DisplayConfig.ResX;
   PreviewImage.Picture.Bitmap.Height := FStudioConfig.DisplayConfig.ResY;
-  FPreviewDisplay.SetSize(FStudioConfig.DisplayConfig.ResX, FStudioConfig.DisplayConfig.ResY);
-  FPreviewDisplay.DisplayColor := FStudioConfig.ApplicationConfig.PreviewDisplayColor;
+
+  FDisplayMgr.PreviewColor:= FStudioConfig.ApplicationConfig.PreviewDisplayColor;
+  FDisplayMgr.AddDisplay('PREVIEW', FStudioConfig.DisplayConfig.ResX, FStudioConfig.DisplayConfig.ResY, '', 0);
 
   if (Paramcount > 0) then begin
     // load passed file
@@ -265,6 +246,7 @@ begin
 
   TextWidth := FStudioConfig.DisplayConfig.ResX div (GLYPH_W + GLYPH_GAP);
 
+  (*removeme
   // fill CPU usage with random data
   while (Length(FCpuUsageData.UsageHistory) < TextWidth) do
   begin
@@ -284,32 +266,10 @@ begin
   FMemUsageData.CurrentMemUsage := Random(100);
   FMemUsageData.FreeMemory := Random(8 * 1014) * 1024 * 1024;
   FMemUsageData.PhysicalMemory := Random(16 * 1014) * 1024 * 1024;
+  *)
 
 end;
 
-function TMainForm.ResourceVersionInfo: String;
-var
-  Stream: TResourceStream;
-  vr: TVersionResource;
-  fi: TVersionFixedInfo;
-begin
-  Result := '';
-  { This raises an exception if version info has not been incorporated into the
-    binary (Lazarus Project -> Project Options -> Version Info -> Version numbering). }
-  Stream:= TResourceStream.CreateFromID(HINSTANCE, 1, PChar(RT_VERSION));
-  try
-    vr := TVersionResource.Create;
-    try
-      vr.SetCustomRawDataStream(Stream);
-      fi := vr.FixedInfo;
-      Result := Format('%d.%d.%d.%d', [fi.FileVersion[0], fi.FileVersion[1], fi.FileVersion[2], fi.FileVersion[3]]);
-    finally
-      vr.Free
-    end;
-  finally
-    Stream.Free
-  end;
-end;
 
 
 procedure TMainForm.SaveWindowState;
@@ -366,6 +326,11 @@ begin
   finally
     IniFile.Free;
   end;
+end;
+
+procedure TMainForm.HandlePreviewImageUpdate(NewImage: TBitmap);
+begin
+  PreviewImage.Picture.Bitmap.Canvas.Draw(0, 0, NewImage);
 end;
 
 procedure TMainForm.CommandListBoxSelectionChange(Sender: TObject; User: Boolean);
@@ -507,14 +472,13 @@ begin
       FLastLine := Line;
       if ('ok' = StatusBar1.Panels[4].Text) then
         // is result was ok, then show a preview ...
-        if (assigned(FPreviewDisplay)) then
+        if (assigned(FDisplayMgr)) then
           PreviewLine(Line)
       else
       begin
         // ... otherwise clear the preview display
-        if (assigned(FPreviewDisplay)) then begin
-          FPreviewDisplay.ClearScreen;
-          FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
+        if (assigned(FDisplayMgr)) then begin
+          FDisplayMgr.ClearScreen;
         end;
       end;
     end;
@@ -533,13 +497,12 @@ begin
     if (FLastLine <> Line) then begin// only when the line has changed
       StatusBar1.Panels[4].Text := CheckLine(Line);
       if ('ok' = StatusBar1.Panels[4].Text) then
-        if (assigned(FPreviewDisplay)) then
+        if (assigned(FDisplayMgr)) then
           PreviewLine(Editor.Lines[Editor.CaretY - 1])
       else
       begin
-        if (assigned(FPreviewDisplay)) then begin
-          FPreviewDisplay.ClearScreen;
-          FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
+        if (assigned(FDisplayMgr)) then begin
+          FDisplayMgr.ClearScreen;
         end;
       end;
     end;
@@ -608,10 +571,9 @@ end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
-  FSMBios.Free;
   FSysInfo.Free;
   FWinampControl.Free;
-  FPreviewDisplay.Free;
+  FDisplayMgr.Free;
   FSynHighlighter.Free;
 end;
 
@@ -771,6 +733,11 @@ begin
   end;
 
   StringList.Free;
+end;
+
+procedure TMainForm.ToolGroupBoxClick(Sender: TObject);
+begin
+
 end;
 
 procedure TMainForm.UndoButtonClick(Sender: TObject);
@@ -1266,13 +1233,13 @@ var
   ITmp: Integer;
   X, Y: Integer;
   P1, P2, P3, P4, P5: Integer;
-  AColor: TColor;
   TmpBitmap: TBitmap;
+  IsInverted: Boolean;
 begin
-  if (not assigned(FPreviewDisplay)) then
+  if (not assigned(FDisplayMgr)) then
     Exit;
 
-  FPreviewDisplay.ClearScreen;
+  FDisplayMgr.ClearScreen;
 
   CmdParts := TStringList.Create;
   try
@@ -1317,8 +1284,7 @@ begin
       else
       if ('CLEARSCREEN' = Cmd) then
       begin
-        FPreviewDisplay.ClearScreen;
-        FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
+        FDisplayMgr.ClearScreen;
       end
       else
       if ('SCREENTIME' = Cmd) then
@@ -1337,20 +1303,19 @@ begin
           P1 := StrToIntDef(CmdParts[1], 100);
           if ((CmdParts.Count >= 3) and ((CmdParts[2].ToUpper = 'TRUE') or (CmdParts[2] = '1'))) then
           begin
-            AColor := clWhite;
+            IsInverted:= True;
           end
           else
           begin
-            AColor := clBlack;
+            IsInverted:= False;
           end;
           Randomize;
           for ITmp := 1 to P1 do
           begin
             X := Random(FStudioConfig.DisplayConfig.ResX);
             Y := Random(FStudioConfig.DisplayConfig.ResY);
-            FPreviewDisplay.GraphicsLayer.Canvas.Pixels[X, Y] := AColor;
+            FDisplayMgr.PaintPixel(X, Y, IsInverted);
           end;
-          FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
         end;
       end
       else
@@ -1363,13 +1328,13 @@ begin
           P2 := StrToIntDef(CmdParts[2], 0);
           if ((CmdParts.Count >= 4) and ((CmdParts[3].ToUpper = 'TRUE') or (CmdParts[3] = '1'))) then
           begin
-            FPreviewDisplay.GraphicsLayer.Canvas.Pixels[P1, P2] := clWhite;
+            IsInverted:= True;
           end
           else
           begin
-            FPreviewDisplay.GraphicsLayer.Canvas.Pixels[P1, P2] := clBlack;
+            IsInverted:= False;
           end;
-          FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
+          FDisplayMgr.PaintPixel(P1, P2, IsInverted);
         end;
       end
       else
@@ -1384,15 +1349,13 @@ begin
           P4 := StrToIntDef(CmdParts[4], 32);
           if ((CmdParts.Count >= 6) and ((CmdParts[5].ToUpper = 'TRUE') or (CmdParts[5] = '1'))) then
           begin
-            FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color := clWhite;
+            IsInverted:= True;
           end
           else
           begin
-            FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color := clBlack;
+            IsInverted:= False;
           end;
-          FPreviewDisplay.GraphicsLayer.Canvas.Line(P1, P2, P3, P4);
-          FPreviewDisplay.GraphicsLayer.Canvas.Pixels[P3, P4] := FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color;
-          FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
+          FDisplayMgr.PaintLine(P1, P2, P3, P4, IsInverted);
         end;
       end
       else
@@ -1407,14 +1370,13 @@ begin
           P4 := StrToIntDef(CmdParts[4], 32);
           if ((CmdParts.Count >= 6) and ((CmdParts[5].ToUpper = 'TRUE') or (CmdParts[5] = '1'))) then
           begin
-            FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color := clWhite;
+            IsInverted:= True;
           end
           else
           begin
-            FPreviewDisplay.GraphicsLayer.Canvas.Pen.Color := clBlack;
+            IsInverted:= False;
           end;
-          FPreviewDisplay.GraphicsLayer.Canvas.Frame(P1, P2, P3 + 1, P4 + 1);
-          FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
+          FDisplayMgr.PaintFrame(P1, P2, P3, P4, IsInverted);
         end;
       end
       else
@@ -1428,12 +1390,11 @@ begin
           // does the text to be displayed include any '$' characters?
           if (CmdParts[1].Contains('$')) then
           begin
-            HandleTextOutput(CmdParts[1], P2, P3, '', 0);
+            FDisplayMgr.HandleTextOutput(CmdParts[1], P2, P3, '', 0);
           end
           else
           begin
-            FPreviewDisplay.PaintString(CmdParts[1], P2, P3);
-            FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
+            FDisplayMgr.PaintString(CmdParts[1], P2, P3);
           end;
         end;
       end
@@ -1449,11 +1410,11 @@ begin
           // does the text to be displayed include any '$' characters?
           if (CmdParts[1].Contains('$')) then
           begin
-            HandleTextOutput(CmdParts[1], P2, P3, CmdParts[5], P4);
+            FDisplayMgr.HandleTextOutput(CmdParts[1], P2, P3, CmdParts[5], P4);
           end
           else
           begin
-            DrawFontedText(CmdParts[1], P2, P3, CmdParts[5], P4);
+            FDisplayMgr.DrawFontedText(CmdParts[1], P2, P3, CmdParts[5], P4);
           end;
         end;
       end
@@ -1477,8 +1438,7 @@ begin
             if (TmpBitmap.Width + P3 >= FStudioConfig.DisplayConfig.ResX) then
               TmpBitmap.Width := TmpBitmap.Width - (TmpBitmap.Width + P3 - FStudioConfig.DisplayConfig.ResX);
 
-            FPreviewDisplay.GraphicsLayer.Canvas.Draw(P3, P4, TmpBitmap);
-            FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
+            FDisplayMgr.PaintBitmap(TmpBitmap, P3, P4);
 
           finally
             TmpBitmap.Free;
@@ -1495,7 +1455,7 @@ begin
         begin
           P2 := StrToIntDef(CmdParts[2], 0);
           P3 := StrToIntDef(CmdParts[3], 0);
-          BitmapToVFD(CmdParts[1], P2, P3);
+          FDisplayMgr.PaintBitmapFromFile(CmdParts[1], P2, P3);
         end;
       end
       else
@@ -1548,10 +1508,9 @@ begin
         begin
           P1 := StrToIntDef(CmdParts[1], 1);
           P2 := StrToIntDef(CmdParts[2], 7);
-          FCpuUsageData.NumRows := P1;
-          FCpuUsageData.BottomRow := P2;
-          FCpuUsageData.IsUsageMonitorDisplayed := True;
-          UpdateCpuMonitor;
+          FDisplayMgr.ConfigureCpuMonitor(P1, P2);
+          IsCpuMonitorDisplayed := True;
+          FDisplayMgr.UpdateUsageMonitors(IsCpuMonitorDisplayed, IsMemMonitorDisplayed);
         end;
       end
       else
@@ -1562,10 +1521,9 @@ begin
         begin
           P1 := StrToIntDef(CmdParts[1], 1);
           P2 := StrToIntDef(CmdParts[2], 7);
-          FMemUsageData.NumRows := P1;
-          FMemUsageData.BottomRow := P2;
-          FMemUsageData.IsUsageMonitorDisplayed := True;
-          UpdateMemMonitor;
+          FDisplayMgr.ConfigureMemMonitor(P1, P2);
+          IsMemMonitorDisplayed := True;
+          FDisplayMgr.UpdateUsageMonitors(IsCpuMonitorDisplayed, IsMemMonitorDisplayed);
         end;
       end;
 
@@ -1578,83 +1536,6 @@ begin
 end;
 
 
-//Infos, die sich nicht ständig ändern
-procedure TMainForm.HandleTextOutput(AText: String; X, Y: Byte; FontName: String; FontSize: Integer);
-var
-  S: String;
-begin
-  S := SubstituteStaticInfo(AText);
-  S := SubstituteVariableInfo(S);
-
-  if (FontName = '') or (FontSize = 0) then
-  begin
-    FPreviewDisplay.PaintString(S, X, Y);
-    FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
-  end
-  else
-  begin
-    DrawFontedText(S, X, Y, FontName, FontSize);
-  end;
-
-end;
-
-function TMainForm.DrawFontedText(AText: String; X, Y: Byte; FontName: String; FontSize: Integer): TPoint;
-var
-  TmpBitmap: TBitmap;
-  ResultPoint: TPoint;
-begin
-  ResultPoint := Point(0, 0);
-
-  TmpBitmap := TBitmap.Create;
-  try
-    TmpBitmap.Monochrome := True;
-    TmpBitmap.Canvas.Font.Color := clblack;
-    TmpBitmap.Canvas.Font.Name := FontName;
-    TmpBitmap.Canvas.Font.Size := FontSize;
-    TmpBitmap.Canvas.Font.Bold := False;
-    TmpBitmap.Canvas.Font.Italic := False;
-    TmpBitmap.SetSize(TmpBitmap.Canvas.TextWidth(AText), TmpBitmap.Canvas.TextHeight(AText));
-    TmpBitmap.Canvas.AntialiasingMode := amOff;
-    TmpBitmap.Canvas.TextOut(0, 0, AText);
-    //TrimBitmap(TmpBitmap);
-
-    // clip bitmap to display if needed
-    if (TmpBitmap.Height + Y >= FStudioConfig.DisplayConfig.ResY) then
-      TmpBitmap.Height := TmpBitmap.Height - (TmpBitmap.Height + Y - FStudioConfig.DisplayConfig.ResY);
-    if (TmpBitmap.Width + X >= FStudioConfig.DisplayConfig.ResX) then
-      TmpBitmap.Width := TmpBitmap.Width - (TmpBitmap.Width + X - FStudioConfig.DisplayConfig.ResX);
-
-    FPreviewDisplay.GraphicsLayer.Canvas.Draw(X, Y, TmpBitmap);
-    FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
-    TmpBitmap.Canvas.Pixels[0, 0] := TmpBitmap.Canvas.Pixels[0, 0]; // this seems like nonsense but is required to actually load the bitmap in memory
-    ResultPoint.X := TmpBitmap.Width;
-    ResultPoint.Y := TmpBitmap.Height;
-  finally
-    TmpBitmap.Free;
-  end;
-
-  Result := ResultPoint;
-end;
-
-
-procedure TMainForm.BitmapToVFD(FileName: String; X, Y: Word);
-var
-  TmpBitmap: TBitmap;
-begin
-  TmpBitmap := TBitmap.Create;
-  TmpBitmap.LoadFromFile(FileName);
-  //LogEvent(lvINFO, 'Loading bitmap. Size ' + IntToStr(TmpBitmap.Width) + 'x' + IntToStr(TmpBitmap.Height), Now);
-
-  // clip bitmap to display if needed
-  if (TmpBitmap.Height + Y >= FStudioConfig.DisplayConfig.ResY) then
-    TmpBitmap.Height := TmpBitmap.Height - (TmpBitmap.Height + Y - FStudioConfig.DisplayConfig.ResY);
-  if (TmpBitmap.Width + X >= FStudioConfig.DisplayConfig.ResX) then
-    TmpBitmap.Width := TmpBitmap.Width - (TmpBitmap.Width + X - FStudioConfig.DisplayConfig.ResX);
-
-  FPreviewDisplay.GraphicsLayer.Canvas.Draw(X, Y, TmpBitmap);
-  FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
-  TmpBitmap.Free;
-end;
 
 procedure TMainForm.DrawDriveUsage(DriveLetter: Char; Col, Row, BarWidth: Integer);
 var
@@ -1682,101 +1563,10 @@ begin
       C := Chr($87)
     else
       C := Chr($8E);
-    FPreviewDisplay.PaintString(C, X + Col, Row);
-    FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
+    FDisplayMgr.PaintString(C, X + Col, Row);
   end;
 end;
 
-procedure TMainForm.UpdateCpuMonitor;
-var
-  I: Integer;
-  Tmp: Integer;
-  CpuUsage: Byte;
-  C: Char;
-  Row: Integer;
-  IntervalSize, LowerBound, UpperBound: Byte;
-begin
-  if (Length(FCpuUsageData.UsageHistory) > 0) then
-  begin
-    for I := High(FCpuUsageData.UsageHistory) downto 0 do
-    begin
-      CpuUsage := FCpuUsageData.UsageHistory[I];
-
-      IntervalSize := 100 div FCpuUsageData.NumRows;
-
-      for Row := 0 to (FCpuUsageData.NumRows - 1) do
-      begin
-        // specify boundaries of this row
-        LowerBound := IntervalSize * Row;
-        UpperBound := LowerBound + IntervalSize - 1;
-
-        // compare boundaries with CpuUsage
-        if (CpuUsage < LowerBound) then
-          C := ' '
-        else
-        if (CpuUsage > UpperBound) then
-          C := Chr($87)
-        else
-        begin
-          Tmp := Trunc((CpuUsage - LowerBound) / IntervalSize * GLYPH_H);
-          Tmp := $80 + Tmp;
-          C := Chr(Tmp);
-        end;
-
-        FPreviewDisplay.PaintString(C, I, FCpuUsageData.BottomRow - Row);
-        FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
-
-      end; // for Row
-
-    end; // end for loop
-  end;
-end;
-
-
-procedure TMainForm.UpdateMemMonitor;
-var
-  I: Integer;
-  Tmp: Integer;
-  MemUsage: Byte;
-  C: Char;
-  Row: Integer;
-  IntervalSize, LowerBound, UpperBound: Byte;
-begin
-  if (Length(FMemUsageData.UsageHistory) > 0) then
-  begin
-    for I := High(FMemUsageData.UsageHistory) downto 0 do
-    begin
-      MemUsage := FMemUsageData.UsageHistory[I];
-
-      IntervalSize := 100 div FMemUsageData.NumRows;
-
-      for Row := 0 to (FMemUsageData.NumRows - 1) do
-      begin
-        // specify boundaries of this row
-        LowerBound := IntervalSize * Row;
-        UpperBound := LowerBound + IntervalSize - 1;
-
-        // compare boundaries with MemUsage
-        if (MemUsage < LowerBound) then
-          C := ' '
-        else
-        if (MemUsage > UpperBound) then
-          C := Chr($87)
-        else
-        begin
-          Tmp := Trunc((MemUsage - LowerBound) / IntervalSize * GLYPH_H);
-          Tmp := $80 + Tmp;
-          C := Chr(Tmp);
-        end;
-
-        FPreviewDisplay.PaintString(C, I, FMemUsageData.BottomRow - Row);
-        FPreviewDisplay.CombineVirtualLayers(PreviewImage.Picture.Bitmap);
-
-      end; // for Row
-
-    end; // end for loop
-  end;
-end;
 
 function TMainForm.FindCommandIndex(const Expr: String): Integer;
 var
@@ -1809,6 +1599,5 @@ begin
 end;
 
 
-{$include ListParsing.pas}
 
 end.

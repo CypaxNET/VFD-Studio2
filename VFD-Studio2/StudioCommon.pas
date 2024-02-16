@@ -96,7 +96,6 @@ type
     UsageHistory: array of Byte; // history of CPU usage
     NumRows: Integer;            // number of rows the usage graph shall use
     BottomRow: Integer;          // bottom-most row the usage graph shall use
-    IsUsageMonitorDisplayed: Boolean; // is the CPU usage monitor currently displayed?
   end;
 
   TMemUsageData = record
@@ -107,7 +106,6 @@ type
     UsageHistory: array of Byte; // history of memory usage
     NumRows: Integer;            // number of rows the usage graph shall use
     BottomRow: Integer;          // bottom-most row the usage graph shall use
-    IsUsageMonitorDisplayed: Boolean; // is the memory usage monitor currently displayed?
   end;
 
 

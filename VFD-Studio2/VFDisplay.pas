@@ -23,6 +23,7 @@ type
 type
   TLoggingProcedure = procedure(const LogLevel: TLogLevel; const Text: string; const Timestamp: TDateTime) of object;
 
+
   { VFDisplay }
   TVFDisplay = class(TComponent)
   private
