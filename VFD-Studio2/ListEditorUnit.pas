@@ -472,8 +472,7 @@ begin
       FLastLine := Line;
       if ('ok' = StatusBar1.Panels[4].Text) then
         // is result was ok, then show a preview ...
-        if (assigned(FDisplayMgr)) then
-          PreviewLine(Line)
+        PreviewLine(Line)
       else
       begin
         // ... otherwise clear the preview display
@@ -494,7 +493,7 @@ begin
   if (Editor.CaretY > 0) then
   begin
     Line:= Editor.Lines[Editor.CaretY - 1];
-    if (FLastLine <> Line) then begin// only when the line has changed
+    if (FLastLine <> Line) then begin // only when the line has changed
       StatusBar1.Panels[4].Text := CheckLine(Line);
       if ('ok' = StatusBar1.Panels[4].Text) then
         if (assigned(FDisplayMgr)) then
@@ -1240,6 +1239,7 @@ begin
     Exit;
 
   FDisplayMgr.ClearScreen;
+  FDisplayMgr.ClearInfoStrings;
 
   CmdParts := TStringList.Create;
   try
@@ -1391,10 +1391,12 @@ begin
           if (CmdParts[1].Contains('$')) then
           begin
             FDisplayMgr.HandleTextOutput(CmdParts[1], P2, P3, '', 0);
+            FDisplayMgr.ForcePreviewUpdate;
           end
           else
           begin
             FDisplayMgr.PaintString(CmdParts[1], P2, P3);
+            FDisplayMgr.ForcePreviewUpdate;
           end;
         end;
       end
@@ -1411,10 +1413,12 @@ begin
           if (CmdParts[1].Contains('$')) then
           begin
             FDisplayMgr.HandleTextOutput(CmdParts[1], P2, P3, CmdParts[5], P4);
+            FDisplayMgr.ForcePreviewUpdate;
           end
           else
           begin
             FDisplayMgr.DrawFontedText(CmdParts[1], P2, P3, CmdParts[5], P4);
+            FDisplayMgr.ForcePreviewUpdate;
           end;
         end;
       end

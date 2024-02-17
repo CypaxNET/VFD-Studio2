@@ -67,6 +67,7 @@ type
     function GetVariableInfoCount: Integer;
 
     // utility methods
+    procedure ForcePreviewUpdate;
     function GetAverageCpuLoad: Byte;
     procedure TrimBitmap(var Bmp: TBitmap);
 
@@ -406,6 +407,18 @@ begin
 end;
 
 
+procedure TDisplayManager.ForcePreviewUpdate;
+var
+  DspIdx: Integer;
+begin
+  for DspIdx:= Low(FDisplays) to High(FDisplays) do begin
+    if (FDisplays[DspIdx].DisplayType = 'PREVIEW') and (Assigned(FOnPreviewChangedEvent)) then begin
+      TPreviewDisplay(FDisplays[DspIdx]).CombineVirtualLayers;
+      FOnPreviewChangedEvent(TPreviewDisplay(FDisplays[DspIdx]).CombinedBitmap);
+    end;
+  end;
+
+end;
 
 
 

@@ -1319,7 +1319,7 @@ object MainForm: TMainForm
   end
   object SynCompletion1: TSynCompletion
     OnExecute = SynCompletion1Execute
-    Position = -1
+    Position = 0
     LinesInWindow = 6
     OnSearchPosition = SynCompletion1SearchPosition
     SelectedColor = clHighlight

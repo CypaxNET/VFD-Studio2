@@ -50,7 +50,7 @@ type
     procedure Dbg(Value: Byte); override;
 
     procedure SetSize(AWidth, AHeight: Integer);
-    procedure CombineVirtualLayers(CombinedImage: TBitmap);
+    procedure CombineVirtualLayers;
 
   end;
 
@@ -132,7 +132,7 @@ begin
     Inc(CurrentCol);
   end;
 
-  CombineVirtualLayers(CombinedBitmap);
+  CombineVirtualLayers;
 end;
 
 procedure TPreviewDisplay.Connect(AInterface: string);
@@ -153,7 +153,7 @@ end;
 procedure TPreviewDisplay.PaintBitmap(ABitmap: TBitmap; XPos, YPos: Word);
 begin
   FGraphicsLayer.Canvas.Draw(XPos, YPos, ABitmap);
-  CombineVirtualLayers(CombinedBitmap);
+  CombineVirtualLayers;
 end;
 
 procedure TPreviewDisplay.PaintPixel(X, Y: Word; IsInverted: Boolean);
@@ -162,7 +162,7 @@ begin
     FGraphicsLayer.Canvas.Pixels[X, Y]:= clWhite
   else
     FGraphicsLayer.Canvas.Pixels[X, Y]:= clBlack;
-  CombineVirtualLayers(CombinedBitmap);
+  CombineVirtualLayers;
 end;
 
 procedure TPreviewDisplay.PaintLine(X0, Y0, X1, Y1: Word; IsInverted: Boolean);
@@ -172,7 +172,7 @@ begin
   else
     FGraphicsLayer.Canvas.Pen.Color:= clBlack;
   FGraphicsLayer.Canvas.Line(X0, Y0, X1, Y1);
-  CombineVirtualLayers(CombinedBitmap);
+  CombineVirtualLayers;
 end;
 
 procedure TPreviewDisplay.SetBrightness(Percent: Byte);
@@ -183,7 +183,7 @@ end;
 procedure TPreviewDisplay.SetLayerMode(ALayerMode: TLayerMode);
 begin
   FLayerMode:= ALayerMode;
-  CombineVirtualLayers(FCombinedBitmap);
+  CombineVirtualLayers;
 end;
 
 procedure TPreviewDisplay.Dbg(Value: Byte);
@@ -191,38 +191,38 @@ begin
 
 end;
 
-procedure TPreviewDisplay.CombineVirtualLayers(CombinedImage: TBitmap);
+procedure TPreviewDisplay.CombineVirtualLayers;
 var
   TmpBitmap: TBitmap;
 begin
   TmpBitmap:= TBitmap.Create;
-  TmpBitmap.Width:= CombinedImage.Width;
-  TmpBitmap.Height:= CombinedImage.Height;
+  TmpBitmap.Width:= FCombinedBitmap.Width;
+  TmpBitmap.Height:= FCombinedBitmap.Height;
 
-  CombinedImage.Canvas.CopyMode:= cmNotSrcCopy;
-  CombinedImage.Canvas.Draw(0, 0, FGraphicsLayer);
+  FCombinedBitmap.Canvas.CopyMode:= cmNotSrcCopy;
+  FCombinedBitmap.Canvas.Draw(0, 0, FGraphicsLayer);
 
   TmpBitmap.Canvas.CopyMode:= cmNotSrcCopy;
   TmpBitmap.Canvas.Draw(0, 0, FTextLayer);
 
   if (lmOR = FLayerMode) then
-    CombinedImage.Canvas.CopyMode:= cmSrcPaint
+    FCombinedBitmap.Canvas.CopyMode:= cmSrcPaint
   else if (lmXOR = FLayerMode) then
-    CombinedImage.Canvas.CopyMode:= cmSrcInvert
+    FCombinedBitmap.Canvas.CopyMode:= cmSrcInvert
   else
-    CombinedImage.Canvas.CopyMode:= cmSrcAnd;
+    FCombinedBitmap.Canvas.CopyMode:= cmSrcAnd;
 
-  CombinedImage.Canvas.Draw(0, 0, TmpBitmap);
+  FCombinedBitmap.Canvas.Draw(0, 0, TmpBitmap);
 
   // ink the combined black&white image
   TmpBitmap.Canvas.CopyMode:= cmSrcCopy;
-  TmpBitmap.Width:= CombinedImage.Width;
-  TmpBitmap.Height:= CombinedImage.Height;
+  TmpBitmap.Width:= FCombinedBitmap.Width;
+  TmpBitmap.Height:= FCombinedBitmap.Height;
   TmpBitmap.Canvas.Brush.Color:= FDisplayColor;
   TmpBitmap.Canvas.FillRect(0, 0, TmpBitmap.Width, TmpBitmap.Height);
-  CombinedImage.Canvas.CopyMode:= cmSrcAnd;
+  FCombinedBitmap.Canvas.CopyMode:= cmSrcAnd;
   //TmpBitmap.Canvas.Pixels[0,0]:= clYellow;
-  CombinedImage.Canvas.Draw(0, 0, TmpBitmap);
+  FCombinedBitmap.Canvas.Draw(0, 0, TmpBitmap);
 
   TmpBitmap.Free;
 end;
