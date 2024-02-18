@@ -1829,7 +1829,7 @@ var
 begin
 
   if (0 = FStudioConfig.ApplicationConfig.IconIndex) then
-    FileName:= 'Studio2.ico'
+    FileName:= 'VFDStudio2.ico'
   else
     FileName:= IntToStr(FStudioConfig.ApplicationConfig.IconIndex) + '.ico';
 
