@@ -71,7 +71,6 @@ msgid "Setting"
 msgstr ""
 
 #: tconfigform.caption
-msgctxt "tconfigform.caption"
 msgid "Settings"
 msgstr ""
 
