@@ -48,7 +48,7 @@ The general concept is that the display is connected to an [Arduino](https://en.
 
 Once all installed and wired, simply start VFD-Studio, configure the type of display, it's resolution and select the serial port.
 
-VFD-Studio processes so-called *Lists*, which contain instructions for the display - e.g. draw an image or print some text.
+VFD-Studio processes so-called *Lists* - text files which contain instructions for the display - e.g. draw an image or print some text.
 
 A set of instructions belongs to a *Screen* which is displayed for a certain duration before the next Screen is displayed.
 
