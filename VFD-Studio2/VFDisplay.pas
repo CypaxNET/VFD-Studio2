@@ -8,8 +8,6 @@ uses
   Classes, SysUtils, Forms, Graphics, Controls, ExtCtrls, StudioCommon;
 
 type
-  TIntferfaceType = (itNONE, itCOM);
-
   TInterfaceConfig = record
     IfaceType: TIntferfaceType;
     IfaceName: string;
