@@ -6,9 +6,9 @@ interface
 
 uses
   Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
-  NTK300, NTK800, VFDisplay, IniFiles, Menus, ExtCtrls, InfoUnit, uSMBIOS,
+  VFDisplay, IniFiles, Menus, ExtCtrls, InfoUnit, uSMBIOS,
   SysInfo, WinampControl, LCLTranslator, ComCtrls, DateUtils, Math,
-  StudioCommon, Glyphs, lclintf, RegExpr, Process, DisplayManager;
+  StudioCommon, Glyphs, lclintf, RegExpr, Process, DisplayManager, SettingsForm;
 
 type
 
@@ -21,6 +21,7 @@ type
     IsBrightnessControlledByList: Boolean; // display brightness is controlled by list commands (otherwise by following setting)
     DisplayBrightness: Byte; // display brightness in percent, unless brightness is controlled by list commands
     DoClearOnExit: Boolean; // clear the display when closing the application (otherwise it is left as it is)
+    IconIndex: Integer; // which icon shall be shown in system tray?
   end;
 
   TListConfig = record
@@ -85,30 +86,11 @@ type
 
   { TMainForm }
   TMainForm = class(TForm)
-    AnimationsGroupBox: TGroupBox;
-    ApplicationGroupBox: TGroupBox;
+    CfgButton: TBitBtn;
     ListEditorButton: TBitBtn;
-    BrightListRadioButton: TRadioButton;
-    BrightnessControlLabel: TLabel;
-    BrightnessPercentLabel: TLabel;
-    BrightnessTrackBar: TTrackBar;
-    BrightSettingsRadioButton: TRadioButton;
     ClearLogButton: TBitBtn;
-    ClearOnCloseCheckBox: TCheckBox;
-    ColorButton: TColorButton;
-    DisplayGroupBox: TGroupBox;
     ExpertViewButton: TBitBtn;
     ExtListBox: TListBox;
-    IdleLevelLabel: TLabel;
-    IdlePercentageLabel: TLabel;
-    IdleTrackBar: TTrackBar;
-    LangDeButton: TBitBtn;
-    LangEnButton: TBitBtn;
-    LangItButton: TBitBtn;
-    LanguageGroupBox: TGroupBox;
-    OnlyOnIdleBox: TCheckBox;
-    PreviewColorLabel: TLabel;
-    SettingsGroupBox: TGroupBox;
     LogfileGroupBox: TGroupBox;
     ListBox: TListBox;
     ListGroupBox: TGroupBox;
@@ -117,12 +99,10 @@ type
     DevelopmentYearsLabel: TLabel;
     byLabel: TLabel;
     LogListView: TListView;
-    MenuItem1: TMenuItem;
-    SettingsScrollBox: TScrollBox;
+    MenuItemReload: TMenuItem;
     SpacerPanel: TPanel;
     SaveDialog: TSaveDialog;
     SaveLogButton: TBitBtn;
-    StartMinimizedCheckBox: TCheckBox;
     VersionLabel: TLabel;
     BottomButtonsPanel: TPanel;
     ExitButton: TBitBtn;
@@ -133,27 +113,28 @@ type
     NextButton: TBitBtn;
     OKButton: TBitBtn;
     LoadListPanel: TPanel;
-    Exit1: TMenuItem;
+    MenuItemExit: TMenuItem;
     ExtraTimer: TTimer;
     LoadListTimer: TTimer;
     InfoTimer: TTimer;
-    Listeladen1: TMenuItem;
+    MenuItemLoadList: TMenuItem;
     N1: TMenuItem;
     N2: TMenuItem;
-    NchsterScreen1: TMenuItem;
+    MenuItemNext: TMenuItem;
     OpenDialog: TOpenDialog;
     OkButtonPanel: TPanel;
     PopupMenu1: TPopupMenu;
-    PopupStopButton: TMenuItem;
+    MenuItemStopGo: TMenuItem;
     ReloadButton: TBitBtn;
     ScreenTimeLabel: TLabel;
-    Show1: TMenuItem;
+    MenuItemMainWindow: TMenuItem;
     AnimateTimer: TTimer;
     StopButton: TBitBtn;
     TrayIcon1: TTrayIcon;
     UsageTimer: TTimer;
     WaitTimer: TTimer;
     procedure AnimateTimerTimer(Sender: TObject);
+    procedure CfgButtonClick(Sender: TObject);
     procedure ListEditorButtonClick(Sender: TObject);
     procedure BrightListRadioButtonChange(Sender: TObject);
     procedure BrightnessTrackBarChange(Sender: TObject);
@@ -167,7 +148,7 @@ type
     procedure Button2Click(Sender: TObject);
     procedure ColorPanelClick(Sender: TObject);
     procedure ColorShapeChangeBounds(Sender: TObject);
-    procedure Exit1Click(Sender: TObject);
+    procedure MenuItemExitClick(Sender: TObject);
     procedure ExitButtonClick(Sender: TObject);
     procedure ExtraTimerTimer(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -182,17 +163,17 @@ type
     procedure LangDeButtonClick(Sender: TObject);
     procedure LangEnButtonClick(Sender: TObject);
     procedure ListBoxDblClick(Sender: TObject);
-    procedure Listeladen1Click(Sender: TObject);
+    procedure MenuItemLoadListClick(Sender: TObject);
     procedure ListTestButtonClick(Sender: TObject);
-    procedure MenuItem1Click(Sender: TObject);
-    procedure NchsterScreen1Click(Sender: TObject);
+    procedure MenuItemReloadClick(Sender: TObject);
+    procedure MenuItemNextClick(Sender: TObject);
     procedure NextButtonClick(Sender: TObject);
     procedure OKButtonClick(Sender: TObject);
     procedure OnlyOnIdleBoxChange(Sender: TObject);
-    procedure PopupStopButtonClick(Sender: TObject);
+    procedure MenuItemStopGoClick(Sender: TObject);
     procedure ReloadButtonClick(Sender: TObject);
     procedure SaveLogButtonClick(Sender: TObject);
-    procedure Show1Click(Sender: TObject);
+    procedure MenuItemMainWindowClick(Sender: TObject);
     procedure StartMinimizedCheckBoxChange(Sender: TObject);
     procedure StopButtonClick(Sender: TObject);
     procedure TrayIcon1Click(Sender: TObject);
@@ -203,6 +184,9 @@ type
     procedure WaitTimerTimer(Sender: TObject);
 
     function FindWindowByTitle(WindowTitle: string): Hwnd;
+
+    // Icon handling
+    procedure SetApplicationIcon;
 
     // methods related to the preview image
     procedure HandlePreviewImageUpdate(NewImage: TBitmap);
@@ -232,6 +216,9 @@ type
     // settings
     procedure LoadConfig(const AFilePath: string);
     procedure SaveConfig(const AFilePath: string);
+    procedure SettingsOkPressed;
+    procedure SettingsAbortPressed;
+    procedure SettingsColorChange(AColor: TColor);
     
     // logging
     procedure LogEvent(const LogLevel: TLogLevel; const AText: string; const Timestamp: TDateTime);
@@ -277,10 +264,6 @@ resourcestring
   { stop / play button }
   RsBtnStop = 'Stop';
   RsBtnGo = 'Go';
-
-  { expert / normal mode view button }
-  RsModeViewExpert = 'Expert view';
-  RsModeViewNormal = 'Normal view';
 
   { Next screen announcement }
   RsNextScreenText = 'Next screen in';
@@ -429,6 +412,8 @@ begin
     ColorString:= ColorString.Replace('#', '$');
     FStudioConfig.ApplicationConfig.PreviewDisplayColor:= StringToColor(ColorString);
     FStudioConfig.ApplicationConfig.DoStartMinimized:= IniFile.ReadBool('APPLICATION', 'StartMinimized', False);
+    FStudioConfig.ApplicationConfig.IconIndex:= IniFile.ReadInteger('APPLICATION', 'IconIndex', 0);
+
     FStudioConfig.ApplicationConfig.DoClearOnExit:= IniFile.ReadBool(   'APPLICATION', 'DspClearOnExit', False);
     FStudioConfig.ApplicationConfig.IsBrightnessControlledByList:= IniFile.ReadBool('APPLICATION', 'DspBrightnessByList', True);
     FStudioConfig.ApplicationConfig.DisplayBrightness:= Min(100, IniFile.ReadInteger('APPLICATION', 'DspBrightness', 100));
@@ -464,6 +449,7 @@ begin
     IniFile.WriteString('APPLICATION', 'Language', FStudioConfig.ApplicationConfig.Language);
     ColorString:= Format('$%.6x', [FStudioConfig.ApplicationConfig.PreviewDisplayColor]);
     IniFile.WriteBool('APPLICATION', 'StartMinimized', FStudioConfig.ApplicationConfig.DoStartMinimized);
+    IniFile.WriteInteger('APPLICATION', 'IconIndex',        FStudioConfig.ApplicationConfig.IconIndex);
     IniFile.WriteString('APPLICATION', 'DspColor', ColorString);
     IniFile.WriteBool('APPLICATION', 'DspClearOnExit',      FStudioConfig.ApplicationConfig.DoClearOnExit);
     IniFile.WriteBool('APPLICATION', 'DspBrightnessByList', FStudioConfig.ApplicationConfig.IsBrightnessControlledByList);
@@ -509,18 +495,11 @@ begin
   // set controls accordingly to loaded settings
   if (FStudioConfig.ApplicationConfig.DoStartMinimized) then
     Hide;
-  ColorButton.ButtonColor:= FStudioConfig.ApplicationConfig.PreviewDisplayColor;
+
+  SetApplicationIcon;
+
   FDisplayMgr.PreviewColor:= FStudioConfig.ApplicationConfig.PreviewDisplayColor;
   SetDefaultLang(FStudioConfig.ApplicationConfig.Language);
-  StartMinimizedCheckBox.Checked:= FStudioConfig.ApplicationConfig.DoStartMinimized;
-  BrightListRadioButton.Checked:= FStudioConfig.ApplicationConfig.IsBrightnessControlledByList;
-  BrightSettingsRadioButton.Checked:= not FStudioConfig.ApplicationConfig.IsBrightnessControlledByList;
-  BrightnessTrackBar.Position:= FStudioConfig.ApplicationConfig.DisplayBrightness;
-  BrightnessPercentLabel.Caption:= IntToStr(FStudioConfig.ApplicationConfig.DisplayBrightness) + '%';
-  OnlyOnIdleBox.Checked:= FStudioConfig.AnimationConfig.PlayOnlyOnIdle;
-  IdleTrackBar.Position:= FStudioConfig.AnimationConfig.IdlePercent;
-  IdlePercentageLabel.Caption:= IntToStr(FStudioConfig.AnimationConfig.IdlePercent) + '%';
-  ClearOnCloseCheckBox.Checked:= FStudioConfig.ApplicationConfig.DoClearOnExit;
 
   FDisplayMgr.AddDisplay('PREVIEW', FStudioConfig.DisplayConfig.ResX, FStudioConfig.DisplayConfig.ResY, '', 0);
 
@@ -601,7 +580,7 @@ end;
 
 procedure TMainForm.LanguageGroupBoxResize(Sender: TObject);
 begin
-  LanguageGroupBox.ChildSizing.ControlsPerLine:= LanguageGroupBox.Width div (LangDeButton.Width + LanguageGroupBox.ChildSizing.HorizontalSpacing);
+
 end;
 
 procedure TMainForm.LoadListTimerTimer(Sender: TObject);
@@ -615,6 +594,40 @@ end;
 procedure TMainForm.InfoButtonClick(Sender: TObject);
 begin
   InfoForm.Show;
+(*
+var
+  wt, at, ut, it, et: Boolean;
+begin
+  wt:= WaitTimer.Enabled;
+  at:= AnimateTimer.Enabled;
+  ut:= UsageTimer.Enabled;
+  it:= InfoTimer.Enabled;
+  et:= ExtraTimer.Enabled;
+  WaitTimer.Enabled:= False;
+  AnimateTimer.Enabled:= False;
+  UsageTimer.Enabled:= False;
+  InfoTimer. Enabled:= False;
+  ExtraTimer.Enabled:= False;
+  MenuItemMainWindow.Enabled:= False;
+  MenuItemLoadList.Enabled:= False;
+  MenuItemNext.Enabled:= False;
+  MenuItemReload.Enabled:= False;
+  MenuItemStopGo.Enabled:= False;
+
+  InfoForm.ShowModal;
+
+  MenuItemMainWindow.Enabled:= True;
+  MenuItemLoadList.Enabled:= True;
+  MenuItemNext.Enabled:= True;
+  MenuItemReload.Enabled:= True;
+  MenuItemStopGo.Enabled:= True;
+  WaitTimer.Enabled:= wt;
+  AnimateTimer.Enabled:= at;
+  UsageTimer.Enabled:= ut;
+  InfoTimer. Enabled:= it;
+  ExtraTimer.Enabled:= et;
+  *)
+
 end;
 
 procedure TMainForm.UpdateTimeLabel;
@@ -653,14 +666,10 @@ end;
 
 procedure TMainForm.LangEnButtonClick(Sender: TObject);
 begin
-  FStudioConfig.ApplicationConfig.Language:= 'en';
-  SetDefaultLang(FStudioConfig.ApplicationConfig.Language);
 end;
 
 procedure TMainForm.LangDeButtonClick(Sender: TObject);
 begin
-  FStudioConfig.ApplicationConfig.Language:= 'de';
-  SetDefaultLang(FStudioConfig.ApplicationConfig.Language);
 end;
 
 procedure TMainForm.LangItButtonClick(Sender: TObject);
@@ -682,7 +691,7 @@ begin
   end;
 end;
 
-procedure TMainForm.Listeladen1Click(Sender: TObject);
+procedure TMainForm.MenuItemLoadListClick(Sender: TObject);
 begin
   ListTestButtonClick(Self);
 end;
@@ -699,7 +708,7 @@ begin
   IsCpuMonitorDisplayed:= False;
   IsMemMonitorDisplayed:= False;
   StopButton.Caption:= RsBtnStop;
-  PopupStopButton.Caption:= RsBtnStop;
+  MenuItemStopGo.Caption:= RsBtnStop;
 end;
 
 procedure TMainForm.ListTestButtonClick(Sender: TObject);
@@ -712,12 +721,12 @@ begin
   end;
 end;
 
-procedure TMainForm.MenuItem1Click(Sender: TObject);
+procedure TMainForm.MenuItemReloadClick(Sender: TObject);
 begin
   ReloadButtonClick(Self);
 end;
 
-procedure TMainForm.NchsterScreen1Click(Sender: TObject);
+procedure TMainForm.MenuItemNextClick(Sender: TObject);
 begin
   NextButtonClick(Sender);
 end;
@@ -745,10 +754,10 @@ end;
 
 procedure TMainForm.OnlyOnIdleBoxChange(Sender: TObject);
 begin
-  FStudioConfig.AnimationConfig.PlayOnlyOnIdle:= OnlyOnIdleBox.Checked;
+
 end;
 
-procedure TMainForm.PopupStopButtonClick(Sender: TObject);
+procedure TMainForm.MenuItemStopGoClick(Sender: TObject);
 begin
   StopButtonClick(Sender);
 end;
@@ -786,7 +795,7 @@ begin
   end;
 end;
 
-procedure TMainForm.Show1Click(Sender: TObject);
+procedure TMainForm.MenuItemMainWindowClick(Sender: TObject);
 begin
   WindowState:= wsNormal;
   Show;
@@ -794,7 +803,7 @@ end;
 
 procedure TMainForm.StartMinimizedCheckBoxChange(Sender: TObject);
 begin
-  FStudioConfig.ApplicationConfig.DoStartMinimized:= StartMinimizedCheckBox.Checked;
+
 end;
 
 procedure TMainForm.StopButtonClick(Sender: TObject);
@@ -803,14 +812,14 @@ begin
   if (True = Waittimer.Enabled) then begin
     StopButton.caption:= RsBtnStop;
     StopButton.ImageIndex:= 0;
-    Popupstopbutton.caption:= RsBtnStop;
-    PopupStopButton.ImageIndex:= 0;
+    MenuItemStopGo.caption:= RsBtnStop;
+    MenuItemStopGo.ImageIndex:= 0;
   end
   else begin
     StopButton.caption:= RsBtnGo;
     StopButton.ImageIndex:= 1;
-    PopupStopButton.caption:= RsBtnGo;
-    PopupStopButton.ImageIndex:= 1;
+    MenuItemStopGo.caption:= RsBtnGo;
+    MenuItemStopGo.ImageIndex:= 1;
   end;
 end;
 
@@ -840,7 +849,7 @@ end;
 
 
 
-procedure TMainForm.Exit1Click(Sender: TObject);
+procedure TMainForm.MenuItemExitClick(Sender: TObject);
 begin
   MainForm.close;
 end;
@@ -896,6 +905,42 @@ begin
   end;
 end;
 
+procedure TMainForm.CfgButtonClick(Sender: TObject);
+begin
+  ConfigForm.ColorButton.ButtonColor:= FStudioConfig.ApplicationConfig.PreviewDisplayColor;
+  ConfigForm.StartMinimizedCheckBox.Checked:= FStudioConfig.ApplicationConfig.DoStartMinimized;
+  ConfigForm.BrightListRadioButton.Checked:= FStudioConfig.ApplicationConfig.IsBrightnessControlledByList;
+  ConfigForm.BrightSettingsRadioButton.Checked:= not FStudioConfig.ApplicationConfig.IsBrightnessControlledByList;
+  ConfigForm.BrightnessTrackBar.Position:= FStudioConfig.ApplicationConfig.DisplayBrightness;
+  ConfigForm.BrightnessPercentLabel.Caption:= IntToStr(FStudioConfig.ApplicationConfig.DisplayBrightness) + '%';
+  ConfigForm.OnlyOnIdleBox.Checked:= FStudioConfig.AnimationConfig.PlayOnlyOnIdle;
+  ConfigForm.IdleTrackBar.Position:= FStudioConfig.AnimationConfig.IdlePercent;
+  ConfigForm.IdlePercentageLabel.Caption:= IntToStr(FStudioConfig.AnimationConfig.IdlePercent) + '%';
+  ConfigForm.ClearOnCloseCheckBox.Checked:= FStudioConfig.ApplicationConfig.DoClearOnExit;
+  ConfigForm.Language:= FStudioConfig.ApplicationConfig.Language;
+
+  ConfigForm.InterfaceCombo.Caption:= FStudioConfig.DisplayConfig.IntName;
+  ConfigForm.ResXSpinEdit.Value:= FStudioConfig.DisplayConfig.ResX;
+  ConfigForm.ResYSpinEdit.Value:= FStudioConfig.DisplayConfig.ResY;
+  ConfigForm.IfCfgCombo.Caption:= IntToStr(FStudioConfig.DisplayConfig.Baudrate);
+
+  if (FStudioConfig.DisplayConfig.DisplayType = 'NTK800') then
+    ConfigForm.DspTypeCombo.ItemIndex:= 1
+  else if (FStudioConfig.DisplayConfig.DisplayType = 'NTK300') then
+    ConfigForm.DspTypeCombo.ItemIndex:= 2
+  else
+    ConfigForm.DspTypeCombo.ItemIndex:= 0;
+
+  ConfigForm.OnAbortPressed:= @SettingsAbortPressed;
+  ConfigForm.OnOkPressed:= @SettingsOkPressed;
+  ConfigForm.OnColorChange:= @SettingsColorChange;
+
+  SetApplicationIcon;
+  ConfigForm.IconIndex:= FStudioConfig.ApplicationConfig.IconIndex;
+
+  ConfigForm.Show;
+end;
+
 procedure TMainForm.HandlePreviewImageUpdate(NewImage: TBitmap);
 begin
   PreviewImage.Picture.Bitmap.Canvas.Draw(0, 0, NewImage);
@@ -949,18 +994,15 @@ end;
 
 procedure TMainForm.BrightListRadioButtonChange(Sender: TObject);
 begin
-  FStudioConfig.ApplicationConfig.IsBrightnessControlledByList:= BrightListRadioButton.Checked;
+
 end;
 
 procedure TMainForm.BrightnessTrackBarChange(Sender: TObject);
 begin
-  BrightnessPercentLabel.Caption:= IntToStr(BrightnessTrackBar.Position) + '%';
-  FStudioConfig.ApplicationConfig.DisplayBrightness:= BrightnessTrackBar.Position;
 end;
 
 procedure TMainForm.ClearOnCloseCheckBoxChange(Sender: TObject);
 begin
-  FStudioConfig.ApplicationConfig.DoClearOnExit:= ClearOnCloseCheckBox.Checked;
 end;
 
 procedure TMainForm.ColorButtonClick(Sender: TObject);
@@ -969,29 +1011,24 @@ end;
 
 procedure TMainForm.ColorButtonColorChanged(Sender: TObject);
 begin
-  FStudioConfig.ApplicationConfig.PreviewDisplayColor:= ColorButton.ButtonColor;
-  FDisplayMgr.SetPreviewColor(ColorButton.ButtonColor);
 end;
 
 procedure TMainForm.IdleTrackBarChange(Sender: TObject);
 begin
-  IdlePercentageLabel.Caption:= IntTosTr(IdleTrackBar.Position) + '%';
-  FStudioConfig.AnimationConfig.IdlePercent:= IdleTrackBar.Position;
 end;
 
 procedure TMainForm.ExpertViewButtonClick(Sender: TObject);
 begin
   LogfileGroupBox.Visible:= not LogfileGroupBox.Visible;
-  SettingsScrollBox.Visible:= LogfileGroupBox.Visible;
   ListGroupBox.Visible:= LogfileGroupBox.Visible;
 
+  (*
   if (LogfileGroupBox.Visible) then begin
-    ExpertViewButton.Caption:= RsModeViewNormal;
     ExpertViewButton.ImageIndex:= 2;
   end else begin
-    ExpertViewButton.Caption:= RsModeViewExpert;
     ExpertViewButton.ImageIndex:= 3;
   end;
+  *)
 
 end;
 
@@ -1434,7 +1471,6 @@ var
   P1, P2, P3, P4, P5, P6: Integer;
   IsInverted: Boolean;
   IsRequirementMet: Boolean;
-  AColor: TColor;
   Res: Integer;
   DoContinueScreen: Boolean;
 begin
@@ -1543,7 +1579,7 @@ begin
       end else if ('STOP' = Cmd) then begin
          WaitTimer.Enabled:= False;
          StopButton.caption:= RsBtnGo;
-         Popupstopbutton.caption:= RsBtnGo;
+         MenuItemStopGo.caption:= RsBtnGo;
          StopButton.ImageIndex:= 1;
 
       end else if ('CLEARSCREEN' = Cmd) then begin
@@ -1573,10 +1609,8 @@ begin
            P1:= StrToInt(CmdParts[1]);
            if ((CmdParts.Count >= 3) and ((CmdParts[2].ToUpper = 'TRUE') or (CmdParts[2] = '1'))) then begin
              IsInverted:= True;
-             AColor:= clWhite;
            end else begin
              IsInverted:= False;
-             AColor:= clBlack;
            end;
            Randomize;
            for ITmp:= 1 to P1 do begin
@@ -1742,9 +1776,69 @@ begin
   Result:= Res;
 end;
 
+procedure TMainForm.SettingsOkPressed;
+var
+  IniFilePath: string;
+begin
+  FStudioConfig.ApplicationConfig.PreviewDisplayColor := ConfigForm.ColorButton.ButtonColor;
+  FDisplayMgr.PreviewColor:= FStudioConfig.ApplicationConfig.PreviewDisplayColor;
+  FStudioConfig.ApplicationConfig.DoStartMinimized:= ConfigForm.StartMinimizedCheckBox.Checked;
+  FStudioConfig.ApplicationConfig.IsBrightnessControlledByList:= ConfigForm.BrightListRadioButton.Checked;
+  FStudioConfig.ApplicationConfig.DisplayBrightness:= ConfigForm.BrightnessTrackBar.Position;
+  FStudioConfig.AnimationConfig.PlayOnlyOnIdle:= ConfigForm.OnlyOnIdleBox.Checked;
+  FStudioConfig.AnimationConfig.IdlePercent:= ConfigForm.IdleTrackBar.Position;
+  FStudioConfig.ApplicationConfig.DoClearOnExit:= ConfigForm.ClearOnCloseCheckBox.Checked;
+  FStudioConfig.ApplicationConfig.Language:= ConfigForm.Language;
 
+  if (1 = ConfigForm.DspTypeCombo.ItemIndex) then
+    FStudioConfig.DisplayConfig.DisplayType:= 'NTK800'
+  else if (2 = ConfigForm.DspTypeCombo.ItemIndex) then
+    FStudioConfig.DisplayConfig.DisplayType:= 'NTK300'
+  else
+    FStudioConfig.DisplayConfig.DisplayType:= '';
+  FStudioConfig.DisplayConfig.IntName:= ConfigForm.InterfaceCombo.Caption;
+  FStudioConfig.DisplayConfig.Baudrate:= StrToIntDef(ConfigForm.IfCfgCombo.Caption, 115200);
+  FStudioConfig.DisplayConfig.ResX:= ConfigForm.ResXSpinEdit.Value;
+  FStudioConfig.DisplayConfig.ResY:= ConfigForm.ResYSpinEdit.Value;
 
+  if (FStudioConfig.ApplicationConfig.IconIndex <> ConfigForm.IconIndex) then begin
+    FStudioConfig.ApplicationConfig.IconIndex:= ConfigForm.IconIndex;
+    SetApplicationIcon;
+  end;
 
+  IniFilePath:= ExtractFilePath(application.ExeName) + STUDIO_INIFILE;
+  SaveConfig(IniFilePath);
+
+end;
+
+procedure TMainForm.SettingsAbortPressed;
+begin
+  // restore settings which might have been changed in ConfigForm
+  SetDefaultLang(FStudioConfig.ApplicationConfig.Language);
+  FDisplayMgr.PreviewColor:= FStudioConfig.ApplicationConfig.PreviewDisplayColor;
+end;
+
+procedure TMainForm.SettingsColorChange(AColor: TColor);
+begin
+  FDisplayMgr.PreviewColor:= AColor;
+end;
+
+procedure TMainForm.SetApplicationIcon;
+var
+  FileName: string;
+begin
+
+  if (0 = FStudioConfig.ApplicationConfig.IconIndex) then
+    FileName:= 'Studio2.ico'
+  else
+    FileName:= IntToStr(FStudioConfig.ApplicationConfig.IconIndex) + '.ico';
+
+  if (FileExists(FileName)) then begin
+    Application.Icon.LoadFromFile(FileName);
+    TrayIcon1.Icon.LoadFromFile(FileName);
+  end;
+
+end;
 
 end.
 

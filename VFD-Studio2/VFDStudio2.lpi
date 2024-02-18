@@ -11,14 +11,30 @@
       <UseXPManifest Value="True"/>
       <XPManifest>
         <DpiAware Value="True"/>
+        <TextName Value="VFD-Studio 2"/>
+        <TextDesc Value="Shows system information on a monochrome graphics display."/>
       </XPManifest>
       <Icon Value="0"/>
     </General>
     <i18n>
       <EnableI18N Value="True"/>
       <OutDir Value="languages"/>
-      <ExcludedIdentifiers Count="1">
-        <Item1 Value="TMainForm.VersionLabel.Caption"/>
+      <ExcludedIdentifiers Count="15">
+        <Item1 Value="TMainForm.Caption"/>
+        <Item2 Value="TMainForm.VersionLabel.Caption"/>
+        <Item3 Value="TMainForm.ByLabel.Caption"/>
+        <Item4 Value="TMainForm.DevelopmentYearsLabel.Caption"/>
+        <Item5 Value="TMainForm.LogListView.Columns[0].Caption"/>
+        <Item6 Value="TMainForm.HyperlinkLabel.Caption"/>
+        <Item7 Value="TConfigForm.DspTypeCombo.Text"/>
+        <Item8 Value="TConfigForm.BrightnessPercentLabel.Caption"/>
+        <Item9 Value="TConfigForm.IdlePercentageLabel.Caption"/>
+        <Item10 Value="TConfigForm.IfCfgCombo.Text"/>
+        <Item11 Value="TConfigForm.InterfaceCombo.Text"/>
+        <Item12 Value="TConfigForm.LangDeButton.caption"/>
+        <Item13 Value="TConfigForm.LangEnButton.caption"/>
+        <Item14 Value="TConfigForm.LangItButton.caption"/>
+        <Item15 Value="TConfigForm.XLabel.caption"/>
       </ExcludedIdentifiers>
     </i18n>
     <VersionInfo>
@@ -38,6 +54,9 @@
     </RunParams>
     <RequiredPackages>
       <Item>
+        <PackageName Value="FrameViewer09"/>
+      </Item>
+      <Item>
         <PackageName Value="laz_synapse"/>
       </Item>
       <Item>
@@ -56,6 +75,57 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit>
+      <Unit>
+        <Filename Value="NTK800.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="InfoUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="InfoForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit>
+      <Unit>
+        <Filename Value="VFDisplay.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="Glyphs.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="StudioCommon.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="PreviewDisplay.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="SysInfo.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="WinampControl.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="DisplayManager.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="NTK300.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="settingsform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ConfigForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="SettingsForm"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -71,7 +141,6 @@
     <Linking>
       <Debugging>
         <DebugInfoType Value="dsDwarf3"/>
-        <UseHeaptrc Value="True"/>
       </Debugging>
       <Options>
         <Win32>

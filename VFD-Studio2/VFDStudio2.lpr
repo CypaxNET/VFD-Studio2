@@ -10,7 +10,9 @@ uses
   athreads,
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, MainUnit, SysInfo, uSMBIOS, WinampControl;
+  Forms, FrameViewer09, MainUnit, SysInfo, uSMBIOS, WinampControl, SettingsForm,
+  InfoUnit, StudioCommon, DisplayManager, Glyphs, NTK300, NTK800, VFDisplay,
+  PreviewDisplay;
 
 {$R *.res}
 
@@ -20,6 +22,8 @@ begin
   Application.Scaled:=True;
   Application.Initialize;
   Application.CreateForm(TMainForm, MainForm);
+  Application.CreateForm(TConfigForm, ConfigForm);
+  Application.CreateForm(TInfoForm, InfoForm);
   Application.Run;
 end.
 
