@@ -3,8 +3,8 @@ unit SysInfo;
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, registry, winsock, ExtCtrls, JwaWinBase, Win32Proc, resource,
+  Windows, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  Registry, winsock, ExtCtrls, JwaWinBase, Win32Proc, resource,
   versiontypes, versionresource;
 type
   TSysInfo = class(TComponent)
