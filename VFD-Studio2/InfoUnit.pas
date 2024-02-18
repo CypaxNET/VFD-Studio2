@@ -5,8 +5,8 @@ unit InfoUnit;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-  Buttons;
+  SysUtils, Forms, Dialogs, ExtCtrls, StdCtrls,
+  Buttons, HtmlView, HTMLUn2, HtmlGlobals, lclintf;
 
 type
 
@@ -14,12 +14,14 @@ type
 
   TInfoForm = class(TForm)
     Bevel1: TBevel;
-    BitBtn1: TBitBtn;
+    HtmlViewer1: THtmlViewer;
+    InfoOkButton: TBitBtn;
     Image1: TImage;
     Memo1: TMemo;
-    procedure Bevel1ChangeBounds(Sender: TObject);
-    procedure BitBtn1Click(Sender: TObject);
-    procedure Memo1Change(Sender: TObject);
+    procedure HtmlViewer1HotSpotClick(Sender: TObject; const SRC: ThtString;
+      var Handled: Boolean);
+    procedure InfoOkButtonClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
 
   public
@@ -35,19 +37,20 @@ implementation
 
 { TInfoForm }
 
-procedure TInfoForm.BitBtn1Click(Sender: TObject);
+procedure TInfoForm.InfoOkButtonClick(Sender: TObject);
 begin
-  close;
+  Close;
 end;
 
-procedure TInfoForm.Bevel1ChangeBounds(Sender: TObject);
+procedure TInfoForm.HtmlViewer1HotSpotClick(Sender: TObject;
+  const SRC: ThtString; var Handled: Boolean);
 begin
-
+  OpenURL(SRC);
 end;
 
-procedure TInfoForm.Memo1Change(Sender: TObject);
+procedure TInfoForm.FormCreate(Sender: TObject);
 begin
-
+  HtmlViewer1.LoadFromString(Memo1.Text);
 end;
 
 end.
