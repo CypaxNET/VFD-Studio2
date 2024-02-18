@@ -14,7 +14,7 @@ If you would like to keep an eye on CPU load and memory usage during gaming, if 
 
 Greetings everyone and welcome to VFD-Studio 2! This is a free and open-source project to show system information on a Vacuum Fluorescent Display ([VFD](https://en.wikipedia.org/wiki/Vacuum_fluorescent_display)) or other monochrome graphics display:
 
-<img src="file:///E:/Projekte/VFD-Studio2/git/doc/vfdstudio_screenshot1.png" title="" alt="Application screenshot" width="191">  <img title="" src=".\doc\screen_example_mainboard.jpg" alt="Graphics output on a VFD" width="506">  <mark>TODO: YT-Video</mark>
+<img title="" src="./doc/vfdstudio_screenshot1.png" alt="Application screenshot" width="191">  <img title="" src=".\doc\screen_example_mainboard.jpg" alt="Graphics output on a VFD" width="506">  <mark>TODO: YT-Video</mark>
 
 A VFD is a kind of display you've probably seen before on HiFi devices or supermarket checkouts. Here's an example from a cassette player:
 
