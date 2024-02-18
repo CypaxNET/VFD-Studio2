@@ -1,6 +1,38 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
+#: displaymanager.rsdowfriday
+msgid "Friday"
+msgstr ""
+
+#: displaymanager.rsdowmonday
+msgid "Monday"
+msgstr ""
+
+#: displaymanager.rsdowsaturday
+msgid "Saturday"
+msgstr ""
+
+#: displaymanager.rsdowsunday
+msgid "Sunday"
+msgstr ""
+
+#: displaymanager.rsdowthursday
+msgid "Thursday"
+msgstr ""
+
+#: displaymanager.rsdowtuesday
+msgid "Tuesday"
+msgstr ""
+
+#: displaymanager.rsdowwednesday
+msgid "Wednesday"
+msgstr ""
+
+#: displaymanager.rsinformationunknown
+msgid "???"
+msgstr ""
+
 #: mainunit.rsbtngo
 msgid "Go"
 msgstr ""
@@ -14,51 +46,103 @@ msgstr ""
 msgid "Currently displayed"
 msgstr ""
 
-#: mainunit.rsmodeviewexpert
-msgctxt "mainunit.rsmodeviewexpert"
-msgid "Expert view"
-msgstr ""
-
-#: mainunit.rsmodeviewnormal
-msgid "Normal view"
-msgstr ""
-
 #: mainunit.rsnextscreentext
 msgid "Next screen in"
 msgstr ""
 
-#: tmainform.animationsgroupbox.caption
-msgid "Animations"
+#: tconfigform.abortbutton.caption
+msgid "Abort"
 msgstr ""
 
-#: tmainform.applicationgroupbox.caption
+#: tconfigform.applicationgroupbox.caption
 msgid "Application"
 msgstr ""
 
-#: tmainform.brightlistradiobutton.caption
+#: tconfigform.brightlistradiobutton.caption
 msgid "List commands"
 msgstr ""
 
-#: tmainform.brightnesscontrollabel.caption
-msgid "Brightness controlled by"
+#: tconfigform.brightnesscontrollabel.caption
+msgid "Display brightness controlled by"
 msgstr ""
 
-#: tmainform.brightnesspercentlabel.caption
-msgctxt "tmainform.brightnesspercentlabel.caption"
-msgid "%"
-msgstr ""
-
-#: tmainform.brightsettingsradiobutton.caption
+#: tconfigform.brightsettingsradiobutton.caption
 msgid "Setting"
 msgstr ""
 
-#: tmainform.bylabel.caption
-msgctxt "tmainform.bylabel.caption"
-msgid "by "
+#: tconfigform.caption
+msgctxt "tconfigform.caption"
+msgid "Settings"
 msgstr ""
 
-#: tmainform.caption
-msgid "VFD-Studio  2"
+#: tconfigform.clearonclosecheckbox.caption
+msgid "Clear display on exit"
+msgstr ""
+
+#: tconfigform.dspbox.caption
+msgid "Display (requires restart)"
+msgstr ""
+
+#: tconfigform.icongroupbox.caption
+msgid "Icon"
+msgstr ""
+
+#: tconfigform.idlelevellabel.caption
+msgid "Idle level:"
+msgstr ""
+
+#: tconfigform.ifcfglabel.caption
+msgid "Baud rate:"
+msgstr ""
+
+#: tconfigform.iflabel.caption
+msgid "Interface:"
+msgstr ""
+
+#: tconfigform.languagegroupbox.caption
+msgid "Language"
+msgstr ""
+
+#: tconfigform.okbutton.caption
+msgid "Ok"
+msgstr ""
+
+#: tconfigform.onlyonidlebox.caption
+msgid "Play animations only when CPU is idle"
+msgstr ""
+
+#: tconfigform.optionsbox.caption
+msgid "Options"
+msgstr ""
+
+#: tconfigform.previewcolorlabel.caption
+msgid "Color of preview display"
+msgstr ""
+
+#: tconfigform.reslabel.caption
+msgid "Resolution:"
+msgstr ""
+
+#: tconfigform.startminimizedcheckbox.caption
+msgid "Start minimized"
+msgstr ""
+
+#: tconfigform.typelabel.caption
+msgid "Type:"
+msgstr ""
+
+#: tinfoform.caption
+msgctxt "tinfoform.caption"
+msgid "Info"
+msgstr ""
+
+#: tinfoform.infookbutton.caption
+msgctxt "tinfoform.infookbutton.caption"
+msgid "OK"
+msgstr ""
+
+#: tmainform.cfgbutton.caption
+msgid "Config"
 msgstr ""
 
 #: tmainform.clearlogbutton.caption
@@ -66,77 +150,21 @@ msgctxt "tmainform.clearlogbutton.caption"
 msgid "Clear log"
 msgstr ""
 
-#: tmainform.clearonclosecheckbox.caption
-msgid "Clear display on exit"
-msgstr ""
-
-#: tmainform.developmentyearslabel.caption
-msgctxt "tmainform.developmentyearslabel.caption"
-msgid ", 2004-2024"
-msgstr ""
-
-#: tmainform.displaygroupbox.caption
-msgid "Display"
-msgstr ""
-
-#: tmainform.exit1.caption
-msgid "&Exit"
-msgstr ""
-
 #: tmainform.exitbutton.caption
 msgid "Exit"
 msgstr ""
 
-#: tmainform.exitbutton.hint
-msgid "Terminate the application"
-msgstr ""
-
 #: tmainform.expertviewbutton.caption
-msgctxt "tmainform.expertviewbutton.caption"
-msgid "Expert view"
-msgstr ""
-
-#: tmainform.hyperlinklabel.caption
-msgid "cypax.net"
-msgstr ""
-
-#: tmainform.idlelevellabel.caption
-msgid "Idle level:"
-msgstr ""
-
-#: tmainform.idlepercentagelabel.caption
-msgctxt "tmainform.idlepercentagelabel.caption"
-msgid "%"
+msgid "View"
 msgstr ""
 
 #: tmainform.infobutton.caption
+msgctxt "tmainform.infobutton.caption"
 msgid "Info"
 msgstr ""
 
-#: tmainform.langdebutton.caption
-msgid "Deutsch"
-msgstr ""
-
-#: tmainform.langenbutton.caption
-msgid "English"
-msgstr ""
-
-#: tmainform.langitbutton.caption
-msgctxt "tmainform.langitbutton.caption"
-msgid "Italiano"
-msgstr ""
-
-#: tmainform.languagegroupbox.caption
-msgctxt "tmainform.languagegroupbox.caption"
-msgid "Language"
-msgstr ""
-
 #: tmainform.listeditorbutton.caption
-msgid "List Editor"
-msgstr ""
-
-#: tmainform.listeladen1.caption
-msgid "&Load list..."
+msgid "Editor"
 msgstr ""
 
 #: tmainform.listgroupbox.caption
@@ -153,10 +181,6 @@ msgctxt "tmainform.logfilegroupbox.caption"
 msgid "Log file:"
 msgstr ""
 
-#: tmainform.loglistview.columns[0].caption
-msgid "#"
-msgstr ""
-
 #: tmainform.loglistview.columns[1].caption
 msgctxt "tmainform.loglistview.columns[1].caption"
 msgid "Message"
@@ -171,13 +195,34 @@ msgctxt "tmainform.loglistview.columns[3].caption"
 msgid "Time"
 msgstr ""
 
-#: tmainform.menuitem1.caption
-msgctxt "tmainform.menuitem1.caption"
+#: tmainform.menuitemexit.caption
+msgctxt "tmainform.menuitemexit.caption"
+msgid "&Exit"
+msgstr ""
+
+#: tmainform.menuitemloadlist.caption
+msgctxt "tmainform.menuitemloadlist.caption"
+msgid "&Load list..."
+msgstr ""
+
+#: tmainform.menuitemmainwindow.caption
+msgctxt "tmainform.menuitemmainwindow.caption"
+msgid "&Main window"
+msgstr ""
+
+#: tmainform.menuitemnext.caption
+msgctxt "tmainform.menuitemnext.caption"
+msgid "&Next screen"
+msgstr ""
+
+#: tmainform.menuitemreload.caption
+msgctxt "tmainform.menuitemreload.caption"
 msgid "Reload"
 msgstr ""
 
-#: tmainform.nchsterscreen1.caption
-msgid "&Next screen"
+#: tmainform.menuitemstopgo.caption
+msgctxt "tmainform.menuitemstopgo.caption"
+msgid "&Stop"
 msgstr ""
 
 #: tmainform.nextbutton.caption
@@ -185,28 +230,12 @@ msgid "Next screen"
 msgstr ""
 
 #: tmainform.okbutton.caption
+msgctxt "tmainform.okbutton.caption"
 msgid "OK"
-msgstr ""
-
-#: tmainform.okbutton.hint
-msgid "Minimize to system tray"
-msgstr ""
-
-#: tmainform.onlyonidlebox.caption
-msgid "Play only when CPU is idle"
 msgstr ""
 
 #: tmainform.opendialog.title
 msgid "Open file"
-msgstr ""
-
-#: tmainform.popupstopbutton.caption
-msgid "&Stop"
-msgstr ""
-
-#: tmainform.previewcolorlabel.caption
-msgctxt "tmainform.previewcolorlabel.caption"
-msgid "Color of preview display"
 msgstr ""
 
 #: tmainform.reloadbutton.caption
@@ -225,18 +254,6 @@ msgstr ""
 #: tmainform.screentimelabel.caption
 msgctxt "tmainform.screentimelabel.caption"
 msgid "ScreenTime:"
-msgstr ""
-
-#: tmainform.settingsgroupbox.caption
-msgid "Settings"
-msgstr ""
-
-#: tmainform.show1.caption
-msgid "&Main window"
-msgstr ""
-
-#: tmainform.startminimizedcheckbox.caption
-msgid "Start minimized"
 msgstr ""
 
 #: tmainform.stopbutton.caption
