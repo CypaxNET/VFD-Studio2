@@ -1,0 +1,272 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: it_IT\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.4.2\n"
+
+#: displaymanager.rsdowfriday
+msgid "Friday"
+msgstr "Venerdì"
+
+#: displaymanager.rsdowmonday
+msgid "Monday"
+msgstr "Lunedi"
+
+#: displaymanager.rsdowsaturday
+msgid "Saturday"
+msgstr "Sabato"
+
+#: displaymanager.rsdowsunday
+msgid "Sunday"
+msgstr "Domenica"
+
+#: displaymanager.rsdowthursday
+msgid "Thursday"
+msgstr "Giovedì"
+
+#: displaymanager.rsdowtuesday
+msgid "Tuesday"
+msgstr "Martedì"
+
+#: displaymanager.rsdowwednesday
+msgid "Wednesday"
+msgstr "Mercoledì"
+
+#: displaymanager.rsinformationunknown
+msgid "???"
+msgstr "???"
+
+#: mainunit.rsbtngo
+msgid "Go"
+msgstr "Continuare"
+
+#: mainunit.rsbtnstop
+msgctxt "mainunit.rsbtnstop"
+msgid "Stop"
+msgstr "Stop"
+
+#: mainunit.rscurrentlydisplayed
+msgid "Currently displayed"
+msgstr "Attualmente in visualizzazione"
+
+#: mainunit.rsnextscreentext
+msgid "Next screen in"
+msgstr "Prossimo Screen in"
+
+#: tconfigform.abortbutton.caption
+msgid "Abort"
+msgstr "Esci"
+
+#: tconfigform.applicationgroupbox.caption
+msgid "Application"
+msgstr "Applicazione"
+
+#: tconfigform.brightlistradiobutton.caption
+msgid "List commands"
+msgstr "Comando di elenco"
+
+#: tconfigform.brightnesscontrollabel.caption
+msgid "Display brightness controlled by"
+msgstr "La luminosità del display è controllata da"
+
+#: tconfigform.brightsettingsradiobutton.caption
+msgid "Setting"
+msgstr "Valore"
+
+#: tconfigform.caption
+msgctxt "tconfigform.caption"
+msgid "Settings"
+msgstr "Impostazioni"
+
+#: tconfigform.clearonclosecheckbox.caption
+msgid "Clear display on exit"
+msgstr "Display cancellato all'uscita"
+
+#: tconfigform.dspbox.caption
+msgid "Display (requires restart)"
+msgstr "Display (richiede il riavvio)"
+
+#: tconfigform.icongroupbox.caption
+msgid "Icon"
+msgstr "Icona"
+
+#: tconfigform.idlelevellabel.caption
+msgid "Idle level:"
+msgstr "Livello inattività:"
+
+#: tconfigform.ifcfglabel.caption
+msgid "Baud rate:"
+msgstr "Baud rate:"
+
+#: tconfigform.iflabel.caption
+msgid "Interface:"
+msgstr "Interfaccia:"
+
+#: tconfigform.languagegroupbox.caption
+msgid "Language"
+msgstr "Lingua"
+
+#: tconfigform.okbutton.caption
+msgid "Ok"
+msgstr "Ok"
+
+#: tconfigform.onlyonidlebox.caption
+msgid "Play animations only when CPU is idle"
+msgstr "Animazioni solo quando la CPU è inattiva"
+
+#: tconfigform.optionsbox.caption
+msgid "Options"
+msgstr "Opzione"
+
+#: tconfigform.previewcolorlabel.caption
+msgid "Color of preview display"
+msgstr "Colore della display dell'anteprima"
+
+#: tconfigform.reslabel.caption
+msgid "Resolution:"
+msgstr "Risoluzione:"
+
+#: tconfigform.startminimizedcheckbox.caption
+msgid "Start minimized"
+msgstr "Avvio ridotto a icona"
+
+#: tconfigform.typelabel.caption
+msgid "Type:"
+msgstr "Tipo:"
+
+#: tinfoform.caption
+msgctxt "tinfoform.caption"
+msgid "Info"
+msgstr "Info"
+
+#: tinfoform.infookbutton.caption
+msgctxt "tinfoform.infookbutton.caption"
+msgid "OK"
+msgstr "OK"
+
+#: tmainform.cfgbutton.caption
+msgid "Config"
+msgstr "Setup"
+
+#: tmainform.clearlogbutton.caption
+msgctxt "tmainform.clearlogbutton.caption"
+msgid "Clear log"
+msgstr "Cancellare il log"
+
+#: tmainform.exitbutton.caption
+msgid "Exit"
+msgstr "Uscita"
+
+#: tmainform.expertviewbutton.caption
+msgid "View"
+msgstr "Veduta"
+
+#: tmainform.infobutton.caption
+msgctxt "tmainform.infobutton.caption"
+msgid "Info"
+msgstr "Info"
+
+#: tmainform.listeditorbutton.caption
+msgid "Editor"
+msgstr "Editor"
+
+#: tmainform.listgroupbox.caption
+msgctxt "tmainform.listgroupbox.caption"
+msgid "Currently displayed:"
+msgstr "Attualmente in visualizzazione:"
+
+#: tmainform.listtestbutton.caption
+msgid "Load list..."
+msgstr "Aprire un file..."
+
+#: tmainform.logfilegroupbox.caption
+msgctxt "tmainform.logfilegroupbox.caption"
+msgid "Log file:"
+msgstr "File di log:"
+
+#: tmainform.loglistview.columns[1].caption
+msgctxt "tmainform.loglistview.columns[1].caption"
+msgid "Message"
+msgstr "Messagio"
+
+#: tmainform.loglistview.columns[2].caption
+msgid "Level"
+msgstr "Livello"
+
+#: tmainform.loglistview.columns[3].caption
+msgctxt "tmainform.loglistview.columns[3].caption"
+msgid "Time"
+msgstr "Momento"
+
+#: tmainform.menuitemexit.caption
+msgctxt "tmainform.menuitemexit.caption"
+msgid "&Exit"
+msgstr "&Uscita"
+
+#: tmainform.menuitemloadlist.caption
+msgctxt "tmainform.menuitemloadlist.caption"
+msgid "&Load list..."
+msgstr "Aprire un &file..."
+
+#: tmainform.menuitemmainwindow.caption
+msgctxt "tmainform.menuitemmainwindow.caption"
+msgid "&Main window"
+msgstr "Finestra &principale"
+
+#: tmainform.menuitemnext.caption
+msgctxt "tmainform.menuitemnext.caption"
+msgid "&Next screen"
+msgstr "&Continuare"
+
+#: tmainform.menuitemreload.caption
+msgctxt "tmainform.menuitemreload.caption"
+msgid "Reload"
+msgstr "Riavviare"
+
+#: tmainform.menuitemstopgo.caption
+msgctxt "tmainform.menuitemstopgo.caption"
+msgid "&Stop"
+msgstr "&Stop"
+
+#: tmainform.nextbutton.caption
+msgid "Next screen"
+msgstr "Continuare"
+
+#: tmainform.okbutton.caption
+msgctxt "tmainform.okbutton.caption"
+msgid "OK"
+msgstr "OK"
+
+#: tmainform.opendialog.title
+msgid "Open file"
+msgstr "Aprire un file"
+
+#: tmainform.reloadbutton.caption
+msgctxt "tmainform.reloadbutton.caption"
+msgid "Reload"
+msgstr "Riavviare"
+
+#: tmainform.savedialog.title
+msgid "Save file as"
+msgstr "Salva il file"
+
+#: tmainform.savelogbutton.caption
+msgid "Save log file..."
+msgstr "Salvare il log..."
+
+#: tmainform.screentimelabel.caption
+msgctxt "tmainform.screentimelabel.caption"
+msgid "ScreenTime:"
+msgstr "Durata della visualizzazione:"
+
+#: tmainform.stopbutton.caption
+msgctxt "tmainform.stopbutton.caption"
+msgid "Stop"
+msgstr "Stop"
