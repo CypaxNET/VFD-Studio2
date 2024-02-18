@@ -9,11 +9,11 @@ uses
 type
   TLogLevel = (lvINFO, lvWARNING, lvERROR, lvCRITICAL);
 
-type
   TLayerMode = (lmOR, lmAND, lmXOR);
 
-type
   TSearchDirection = (sdForward, sdBackward);
+
+  TIntferfaceType = (itNONE, itCOM);
 
   TApplicationConfig = record
     Language: String;
