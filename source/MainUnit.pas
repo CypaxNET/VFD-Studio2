@@ -136,18 +136,8 @@ type
     procedure AnimateTimerTimer(Sender: TObject);
     procedure CfgButtonClick(Sender: TObject);
     procedure ListEditorButtonClick(Sender: TObject);
-    procedure BrightListRadioButtonChange(Sender: TObject);
-    procedure BrightnessTrackBarChange(Sender: TObject);
-    procedure ClearOnCloseCheckBoxChange(Sender: TObject);
-    procedure ColorButtonClick(Sender: TObject);
-    procedure ColorButtonColorChanged(Sender: TObject);
-    procedure IdleTrackBarChange(Sender: TObject);
-    procedure LangItButtonClick(Sender: TObject);
     procedure ExpertViewButtonClick(Sender: TObject);
     procedure ClearLogButtonClick(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
-    procedure ColorPanelClick(Sender: TObject);
-    procedure ColorShapeChangeBounds(Sender: TObject);
     procedure MenuItemExitClick(Sender: TObject);
     procedure ExitButtonClick(Sender: TObject);
     procedure ExtraTimerTimer(Sender: TObject);
@@ -155,13 +145,10 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormWindowStateChange(Sender: TObject);
-    procedure LanguageGroupBoxResize(Sender: TObject);
     procedure LoadListTimerTimer(Sender: TObject);
     procedure InfoButtonClick(Sender: TObject);
     procedure InfoTimerTimer(Sender: TObject);
     procedure HyperlinkLabelClick(Sender: TObject);
-    procedure LangDeButtonClick(Sender: TObject);
-    procedure LangEnButtonClick(Sender: TObject);
     procedure ListBoxDblClick(Sender: TObject);
     procedure MenuItemLoadListClick(Sender: TObject);
     procedure ListTestButtonClick(Sender: TObject);
@@ -169,12 +156,10 @@ type
     procedure MenuItemNextClick(Sender: TObject);
     procedure NextButtonClick(Sender: TObject);
     procedure OKButtonClick(Sender: TObject);
-    procedure OnlyOnIdleBoxChange(Sender: TObject);
     procedure MenuItemStopGoClick(Sender: TObject);
     procedure ReloadButtonClick(Sender: TObject);
     procedure SaveLogButtonClick(Sender: TObject);
     procedure MenuItemMainWindowClick(Sender: TObject);
-    procedure StartMinimizedCheckBoxChange(Sender: TObject);
     procedure StopButtonClick(Sender: TObject);
     procedure TrayIcon1Click(Sender: TObject);
     procedure UsageTimerTimer(Sender: TObject);
@@ -578,11 +563,6 @@ begin
     Hide;
 end;
 
-procedure TMainForm.LanguageGroupBoxResize(Sender: TObject);
-begin
-
-end;
-
 procedure TMainForm.LoadListTimerTimer(Sender: TObject);
 begin
   LoadListTimer.Enabled:= False; // self-disabling
@@ -664,19 +644,6 @@ begin
   OpenURL('http://cypax.net');
 end;
 
-procedure TMainForm.LangEnButtonClick(Sender: TObject);
-begin
-end;
-
-procedure TMainForm.LangDeButtonClick(Sender: TObject);
-begin
-end;
-
-procedure TMainForm.LangItButtonClick(Sender: TObject);
-begin
-end;
-
-
 // User whishes to jump to a specific line
 procedure TMainForm.ListBoxDblClick(Sender: TObject);
 var
@@ -752,11 +719,6 @@ begin
   Hide;
 end;
 
-procedure TMainForm.OnlyOnIdleBoxChange(Sender: TObject);
-begin
-
-end;
-
 procedure TMainForm.MenuItemStopGoClick(Sender: TObject);
 begin
   StopButtonClick(Sender);
@@ -799,11 +761,6 @@ procedure TMainForm.MenuItemMainWindowClick(Sender: TObject);
 begin
   WindowState:= wsNormal;
   Show;
-end;
-
-procedure TMainForm.StartMinimizedCheckBoxChange(Sender: TObject);
-begin
-
 end;
 
 procedure TMainForm.StopButtonClick(Sender: TObject);
@@ -992,31 +949,6 @@ begin
   end;
 end;
 
-procedure TMainForm.BrightListRadioButtonChange(Sender: TObject);
-begin
-
-end;
-
-procedure TMainForm.BrightnessTrackBarChange(Sender: TObject);
-begin
-end;
-
-procedure TMainForm.ClearOnCloseCheckBoxChange(Sender: TObject);
-begin
-end;
-
-procedure TMainForm.ColorButtonClick(Sender: TObject);
-begin
-end;
-
-procedure TMainForm.ColorButtonColorChanged(Sender: TObject);
-begin
-end;
-
-procedure TMainForm.IdleTrackBarChange(Sender: TObject);
-begin
-end;
-
 procedure TMainForm.ExpertViewButtonClick(Sender: TObject);
 begin
   LogfileGroupBox.Visible:= not LogfileGroupBox.Visible;
@@ -1119,20 +1051,6 @@ begin
     Result:= Res;
   end;
 end;
-
-procedure TMainForm.Button2Click(Sender: TObject);
-begin
-end;
-
-procedure TMainForm.ColorPanelClick(Sender: TObject);
-begin
-end;
-
-procedure TMainForm.ColorShapeChangeBounds(Sender: TObject);
-begin
-
-end;
-
 
 procedure TMainForm.AddClock(Offset: Integer; X, Y, HourHandLength, MinuteHandLength, SecondsHandLength: Word);
 var
