@@ -7,7 +7,6 @@ interface
 uses
   Classes, SysUtils, Forms, VFDisplay, Graphics, Math, synaser, GraphUtil,
   StudioCommon, Glyphs;
-
 type
   { NTK300 }
   TNTK300 = class(TVFDisplay)
@@ -24,7 +23,7 @@ type
     FPosX, FPosY: Word;
 
     FNumBytesSent: Cardinal;
-    FDbgLastSent: string;
+    FDbgLastSent: String;
 
     FIsAutoInc: Boolean;
 
@@ -34,11 +33,11 @@ type
     destructor Destroy; override;
 
     { Overloaded methods }
-    procedure Connect(AInterface: string); override;
+    procedure Connect(AInterface: String); override;
     procedure DspInit(XRes, YRes: Word); override;
     procedure ClearScreen; override;
     procedure ShowScreen(ALayer: Word); override;
-    procedure PaintString(Text: string; X, Y: Integer); override;
+    procedure PaintString(Text: String; X, Y: Integer); override;
     procedure PaintBitmap(ABitmap: TBitmap; XPos, YPos: Word); override;
     procedure PaintPixel(X, Y: Word; IsInverted: Boolean); override;
     procedure PaintLine(X0, Y0, X1, Y1: Word; IsInverted: Boolean); override;
@@ -58,7 +57,7 @@ type
     { Display data write/read }
     procedure VFDWriteByte(Value: Byte);
     procedure VFDWriteByteXY(Value, X, Y: Byte);
-    function  VFDReadByte(Col, Row: Integer): Byte;
+    function VFDReadByte(Col, Row: Integer): Byte;
     { Low level display methods }
     procedure VFDWriteCommand(Cmd: Byte);
     procedure VFDWriteData(Dat: Byte);
@@ -66,7 +65,7 @@ type
     { Other / helper methods }
     procedure SelectScreen(ALayer: Word);
     procedure SendClearScreenRequest(ALayer: Word);
-    procedure SerialOut(Text: string);
+    procedure SerialOut(Text: String);
 
   end;
 
@@ -120,16 +119,16 @@ constructor TNTK300.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  FDisplayType:= 'NTK300';
+  FDisplayType := 'NTK300';
 
-  FNumBytesSent:= 0;
-  FDbgLastSent:= '';
+  FNumBytesSent := 0;
+  FDbgLastSent := '';
 
-  FInterfaceConfig.IfaceType:= itNONE;
+  FInterfaceConfig.IfaceType := itNONE;
 
-  FNumLayers:= 2; // this display has two layers
+  FNumLayers := 2; // this display has two layers
 
-  FSelectedLayer:= 0;
+  FSelectedLayer := 0;
 
   //VFDInit; // start/initialize the display
 
@@ -137,7 +136,8 @@ end;
 
 destructor TNTK300.Destroy;
 begin
-  if (nil <> FSerialInterface) then begin
+  if (nil <> FSerialInterface) then
+  begin
     FSerialInterface.CloseSocket;
     FSerialInterface.Free;
   end;
@@ -148,9 +148,9 @@ end;
 
 procedure TNTK300.Dbg(Value: Byte);
 const
-  THIS_METHOD_NAME: string = 'Dbg';
+  THIS_METHOD_NAME: String = 'Dbg';
 begin
-  FLoggingCallback(lvINFO, Self.ClassName  + '.' + THIS_METHOD_NAME + ': Debug procedure entered', Now);
+  FLoggingCallback(lvINFO, Self.ClassName + '.' + THIS_METHOD_NAME + ': Debug procedure entered', Now);
   //VFDPutGlyphText('HALLO');
   //VFDSetCoord(1, 8);
   //VFDWriteCommand(CMD_DATA_WRITE);
@@ -173,67 +173,86 @@ end;
 
 procedure TNTK300.SendClearScreenRequest(ALayer: Word);
 const
-  THIS_METHOD_NAME: string = 'SendClearScreenRequest';
+  THIS_METHOD_NAME: String = 'SendClearScreenRequest';
 var
-  Text, RecvText: string;
+  Text, RecvText: String;
   Row, Col: Word;
 begin
 
-    // sending all the 0-bytes to clear the screen would take a lot of bandwidth
-    // so instead we instruct the Arduino to do it
-    if (itCOM = FInterfaceConfig.IfaceType) then begin
-      if (0 = ALayer) then begin
-        Text:= 'x0' + #10;
-      end else begin
-        Text:= 'x1' + #10;
-      end;
+  // sending all the 0-bytes to clear the screen would take a lot of bandwidth
+  // so instead we instruct the Arduino to do it
+  if (itCOM = FInterfaceConfig.IfaceType) then
+  begin
+    if (0 = ALayer) then
+    begin
+      Text := 'x0' + #10;
+    end
+    else
+    begin
+      Text := 'x1' + #10;
+    end;
 
-      try
-        if FSerialInterface.CanWrite(100) then begin
-           FSerialInterface.SendString(Text);
-           Application.ProcessMessages;
-           FSerialInterface.Flush;
-           Sleep(100);
-        end else begin
-          FInterfaceConfig.IfaceType:= itNONE;
-            if Assigned(FLoggingCallback) then begin
-              FLoggingCallback(lvERROR, Self.ClassName  + '.' + THIS_METHOD_NAME + ': Write timeout on ' + FInterfaceConfig.IfaceName, Now);
-            end;
-        end;
-      except
-        on E: Exception do begin
-          FInterfaceConfig.IfaceType:= itNONE;
-          if Assigned(FLoggingCallback) then begin
-            FLoggingCallback(lvCRITICAL, Self.ClassName  + '.' + THIS_METHOD_NAME + ': Interface exception: ' + E.Message, Now);
-          end;
+    try
+      if FSerialInterface.CanWrite(100) then
+      begin
+        FSerialInterface.SendString(Text);
+        Application.ProcessMessages;
+        FSerialInterface.Flush;
+        Sleep(100);
+      end
+      else
+      begin
+        FInterfaceConfig.IfaceType := itNONE;
+        if Assigned(FLoggingCallback) then
+        begin
+          FLoggingCallback(lvERROR, Self.ClassName + '.' + THIS_METHOD_NAME + ': Write timeout on ' + FInterfaceConfig.IfaceName, Now);
         end;
       end;
-
-      if Assigned(FLoggingCallback) then begin
-        if FSerialInterface.CanRead(100) then begin
-          RecvText:= FSerialInterface.Recvstring(100);
-          if (RecvText.StartsWith('Err')) then begin
-            FLoggingCallback(lvWARNING, Self.ClassName  + '.' + THIS_METHOD_NAME + ': Received an error when sending "' + Text + '":' + Trim(RecvText), Now);
-          end;
+    except
+      on E: Exception do
+      begin
+        FInterfaceConfig.IfaceType := itNONE;
+        if Assigned(FLoggingCallback) then
+        begin
+          FLoggingCallback(lvCRITICAL, Self.ClassName + '.' + THIS_METHOD_NAME + ': Interface exception: ' + E.Message, Now);
         end;
       end;
     end;
 
-    // also clear the shadow screen
-    if (0 = ALayer) then begin
-      for Row:= 0 to 7 do begin
-        for Col:= 0 to FGfxWidth - 1 do begin
-          FShadowLayer0 [Col, Row]:= 0;
+    if Assigned(FLoggingCallback) then
+    begin
+      if FSerialInterface.CanRead(100) then
+      begin
+        RecvText := FSerialInterface.Recvstring(100);
+        if (RecvText.StartsWith('Err')) then
+        begin
+          FLoggingCallback(lvWARNING, Self.ClassName + '.' + THIS_METHOD_NAME + ': Received an error when sending "' + Text + '":' + Trim(RecvText), Now);
         end;
       end;
     end;
-    if (1 = ALayer) then begin
-      for Row:= 0 to 7 do begin
-        for Col:= 0 to FGfxWidth - 1 do begin
-          FShadowLayer1 [Col, Row]:= 0;
-        end;
+  end;
+
+  // also clear the shadow screen
+  if (0 = ALayer) then
+  begin
+    for Row := 0 to 7 do
+    begin
+      for Col := 0 to FGfxWidth - 1 do
+      begin
+        FShadowLayer0[Col, Row] := 0;
       end;
     end;
+  end;
+  if (1 = ALayer) then
+  begin
+    for Row := 0 to 7 do
+    begin
+      for Col := 0 to FGfxWidth - 1 do
+      begin
+        FShadowLayer1[Col, Row] := 0;
+      end;
+    end;
+  end;
 end;
 
 procedure TNTK300.ClearScreen;
@@ -244,8 +263,9 @@ end;
 
 procedure TNTK300.SelectScreen(ALayer: Word);
 begin
-  if (ALayer < FNumLayers) then begin
-    FSelectedLayer:= ALayer;
+  if (ALayer < FNumLayers) then
+  begin
+    FSelectedLayer := ALayer;
   end;
 end;
 
@@ -254,18 +274,18 @@ procedure TNTK300.ShowScreen(ALayer: Word);
 var
   L0, L1: Boolean;
 begin
-  L0:= (ALayer and LAYER_0) = LAYER_0;
-  L1:= (ALayer and LAYER_1) = LAYER_1;
+  L0 := (ALayer and LAYER_0) = LAYER_0;
+  L1 := (ALayer and LAYER_1) = LAYER_1;
 
   VFDLayerConfig(L0, L1, lmXOR);
 end;
 
 
-procedure TNTK300.PaintString(Text: string; X, Y: Integer);
+procedure TNTK300.PaintString(Text: String; X, Y: Integer);
 var
   Character: Char;
 begin
-  Text:= TGlyphs.Adapt2Charmap(Text);
+  Text := TGlyphs.Adapt2Charmap(Text);
 
   SelectScreen(1);
   VFDSetCoord(X, Y);
@@ -277,7 +297,8 @@ begin
   VFDWriteCommand(CMD_DATA_WRITE);
 
   // loop through string
-  for Character in Text do begin
+  for Character in Text do
+  begin
     VFDWriteData(Byte(Character));
   end; // end for
 
@@ -302,58 +323,66 @@ var
 begin
   SelectScreen(0);
 
-  aBitmap.Canvas.Pixels[0, 0]:= aBitmap.Canvas.Pixels[0, 0];  // this seems nonsense, but one way to actually assign memory to the bitmap canvas is by acessing its pixels
+  aBitmap.Canvas.Pixels[0, 0] := aBitmap.Canvas.Pixels[0, 0];  // this seems nonsense, but one way to actually assign memory to the bitmap canvas is by acessing its pixels
 
-  X0:= XPos;
-  Y0:= YPos;
-  X1:= X0 + aBitmap.Canvas.Width - 1;
-  Y1:= Y0 + aBitmap.Canvas.Height;
+  X0 := XPos;
+  Y0 := YPos;
+  X1 := X0 + aBitmap.Canvas.Width - 1;
+  Y1 := Y0 + aBitmap.Canvas.Height;
 
   if (X1 >= FGfxWidth) then
-    X1:= FGfxWidth - 1;
+    X1 := FGfxWidth - 1;
 
   if (Y1 >= FGfxHeight) then
-    Y1:= FGfxHeight - 1;
+    Y1 := FGfxHeight - 1;
 
 
-  for X:= X0 to X1 do begin
+  for X := X0 to X1 do
+  begin
     VFDSetCoord(X, Y0);
     VFDAddressInc(True);
     VFDWriteCommand(CMD_DATA_WRITE);
 
-    NumPixels:= 0;
-    Y:= Y0;
+    NumPixels := 0;
+    Y := Y0;
 
     // draw a partial first row of dots?
-    if ((Y0 and 7) <> 0) then begin
-      NumPixels:= 8 - (Y0 and 7); // number of pixels to set in the first row
-      Temp:= 8 - NumPixels; // number of pixels we don't overwrite
+    if ((Y0 and 7) <> 0) then
+    begin
+      NumPixels := 8 - (Y0 and 7); // number of pixels to set in the first row
+      Temp := 8 - NumPixels; // number of pixels we don't overwrite
 
-      Block:= VFDReadByte(X, Y); // get the existing data
+      Block := VFDReadByte(X, Y); // get the existing data
 
-      Pixel:= 0;
-      for IY:= 0 to NumPixels - 1 do begin
+      Pixel := 0;
+      for IY := 0 to NumPixels - 1 do
+      begin
         if (IY >= aBitmap.Canvas.Height) then
           Break;
 
-        Pixel:= Pixel shl 1;
-        PixelColor:= aBitmap.Canvas.Pixels[X - X0, IY];
-        if (ColorToGray(PixelColor) < GREY_VALUE_THRESHOLD) then begin
-          Pixel:= Pixel or $01;
+        Pixel := Pixel shl 1;
+        PixelColor := aBitmap.Canvas.Pixels[X - X0, IY];
+        if (ColorToGray(PixelColor) < GREY_VALUE_THRESHOLD) then
+        begin
+          Pixel := Pixel or $01;
         end;
       end;
 
       // Block now contains the display data and Pixel the bitmap data
       // set the pixels we are overwriting
-      for I:= 0 to NumPixels - 1 do begin
-        Mask:= Byte($01) shl I;
+      for I := 0 to NumPixels - 1 do
+      begin
+        Mask := Byte($01) shl I;
         // take the pixels from the bitmap
-        if (Mask and Pixel <> 0) then begin
+        if (Mask and Pixel <> 0) then
+        begin
           // bit is set
-          Block:= Block or Mask;
-        end else begin
+          Block := Block or Mask;
+        end
+        else
+        begin
           // bit is not set
-          Block:= Block and (not Mask);
+          Block := Block and (not Mask);
         end;
       end; // end for I
 
@@ -365,60 +394,72 @@ begin
     if (NumPixels >= aBitmap.Canvas.Height) then
       Continue;
 
-    Y:= Y + NumPixels;
+    Y := Y + NumPixels;
 
     // is there more to display?
-    if Y < Y1 then begin
-      NumRemainingPixels:= Y1 - Y;     // how much is left?
-      Temp:= NumRemainingPixels shr 3; // divide by 8 to get number of full columns
-      if (Temp > 0) then begin
-        for I:= 0 to (Temp - 1) do begin  // for each full column
+    if Y < Y1 then
+    begin
+      NumRemainingPixels := Y1 - Y;     // how much is left?
+      Temp := NumRemainingPixels shr 3; // divide by 8 to get number of full columns
+      if (Temp > 0) then
+      begin
+        for I := 0 to (Temp - 1) do
+        begin  // for each full column
 
-          Pixel:= 0;
-          for IY:= 0 to 7 do begin
-            Pixel:= Pixel shl 1;
-            PixelColor:= aBitmap.Canvas.Pixels[X - X0, Y - Y0 + IY];
-            if (ColorToGray(PixelColor) < GREY_VALUE_THRESHOLD) then begin
-              Pixel:= Pixel or $01;
+          Pixel := 0;
+          for IY := 0 to 7 do
+          begin
+            Pixel := Pixel shl 1;
+            PixelColor := aBitmap.Canvas.Pixels[X - X0, Y - Y0 + IY];
+            if (ColorToGray(PixelColor) < GREY_VALUE_THRESHOLD) then
+            begin
+              Pixel := Pixel or $01;
             end;
           end;
 
           VFDWriteData(Pixel);
 
-          Y:= Y + 8; // increment by one column in each loop
+          Y := Y + 8; // increment by one column in each loop
 
         end; // for I
       end; // if Temp > 0
     end; // Y < Y1
 
     // is there still more to display?
-    if Y < Y1 then begin
-      NumRemainingPixels:= Y1 - Y;     // how much is left?
-      Temp:= 8 - NumRemainingPixels; // number of pixels we don't overwrite
-      Block:= VFDReadByte(X, Y); // get the existing data
+    if Y < Y1 then
+    begin
+      NumRemainingPixels := Y1 - Y;     // how much is left?
+      Temp := 8 - NumRemainingPixels; // number of pixels we don't overwrite
+      Block := VFDReadByte(X, Y); // get the existing data
 
-      Pixel:= 0;
-      for IY:= NumRemainingPixels downto 1 do begin
-        Pixel:= Pixel shl 1;
-        PixelColor:= aBitmap.Canvas.Pixels[X - X0, aBitmap.Canvas.Height - IY];
-        if (ColorToGray(PixelColor) < GREY_VALUE_THRESHOLD) then begin
-          Pixel:= Pixel or $01;
+      Pixel := 0;
+      for IY := NumRemainingPixels downto 1 do
+      begin
+        Pixel := Pixel shl 1;
+        PixelColor := aBitmap.Canvas.Pixels[X - X0, aBitmap.Canvas.Height - IY];
+        if (ColorToGray(PixelColor) < GREY_VALUE_THRESHOLD) then
+        begin
+          Pixel := Pixel or $01;
         end;
       end;
-      Pixel:= Pixel shl Temp;
+      Pixel := Pixel shl Temp;
 
       // Block now contains the display data and Pixel the bitmap data
 
       // set the pixels we are overwriting
-      for I:= 0 to NumRemainingPixels - 1 do begin
-        Mask:= Byte($80) shr I;
+      for I := 0 to NumRemainingPixels - 1 do
+      begin
+        Mask := Byte($80) shr I;
         // take the pixels from the bitmap
-        if (Mask and Pixel <> 0) then begin
+        if (Mask and Pixel <> 0) then
+        begin
           // bit is set
-          Block:= Block or Mask;
-        end else begin
+          Block := Block or Mask;
+        end
+        else
+        begin
           // bit is not set
-          Block:= Block and (not Mask);
+          Block := Block and (not Mask);
         end;
       end; // end for I
 
@@ -437,14 +478,17 @@ var
 begin
   SelectScreen(0);
 
-  Pixel:= VFDReadByte(X, Y);
-  Mask:= 1 shl (7 - (Y and 7));
+  Pixel := VFDReadByte(X, Y);
+  Mask := 1 shl (7 - (Y and 7));
 
   // set or reset Pixel, depending on color
-  if (IsInverted) then begin
-    Pixel:= Pixel and (not Mask);
-  end else begin
-    Pixel:= Pixel or Mask;
+  if (IsInverted) then
+  begin
+    Pixel := Pixel and (not Mask);
+  end
+  else
+  begin
+    Pixel := Pixel or Mask;
   end; // endif
 
   // write modified Byte back to display
@@ -458,80 +502,96 @@ var
   DeltaX, DeltaY: Integer;
   S1, S2: Integer;
   //Temp: Integer;
-  Direction: shortint;
+  Direction: Shortint;
   Err: Integer;
   Pixel, Mask: Byte;
 begin
   SelectScreen(0);
 
-  if (X0=X1) and (Y0=Y1) then begin//  return if no line to draw
+  if (X0 = X1) and (Y0 = Y1) then
+  begin//  return if no line to draw
     PaintPixel(X0, Y0, IsInverted);
     Exit;
   end;
 
   // make sure X0 is < X1
-  if (X0 > X1) then begin
-    Temp:= X0;
-    X0:= X1;
-    X1:= Temp;
-    Temp:= Y0;
-    Y0:= Y1;
-    Y1:= Temp;
+  if (X0 > X1) then
+  begin
+    Temp := X0;
+    X0 := X1;
+    X1 := Temp;
+    Temp := Y0;
+    Y0 := Y1;
+    Y1 := Temp;
   end;
 
   // initialize variables
-  X:= X0;
-  Y:= Y0;
+  X := X0;
+  Y := Y0;
 
-  DeltaX:= Abs(X1 - X0);
-  DeltaY:= Abs(Y1 - Y0);
+  DeltaX := Abs(X1 - X0);
+  DeltaY := Abs(Y1 - Y0);
 
-  S1:= Sign(X1 - X0);
-  S2:= Sign(Y1 - Y0);
+  S1 := Sign(X1 - X0);
+  S2 := Sign(Y1 - Y0);
 
   // exchange DeltaX and DeltaY depending on slope
-  if (DeltaY > DeltaX) then begin
-    Temp:= DeltaX;
-    DeltaX:= DeltaY;
-    DeltaY:= Temp;
-    Direction:= 1;
-  end else begin
-    Direction:= 0;
+  if (DeltaY > DeltaX) then
+  begin
+    Temp := DeltaX;
+    DeltaX := DeltaY;
+    DeltaY := Temp;
+    Direction := 1;
+  end
+  else
+  begin
+    Direction := 0;
   end; // endif
 
   // initialize the error term to compensate for nonzero intercept
-  Err:= (DeltaY shl 1) - DeltaX;
+  Err := (DeltaY shl 1) - DeltaX;
 
   // draw the line
-  for I:= 0 to DeltaX do begin
-    Pixel:= VFDReadByte(X, Y);
-    Mask:= 1 shl (7 - (Y and 7));
+  for I := 0 to DeltaX do
+  begin
+    Pixel := VFDReadByte(X, Y);
+    Mask := 1 shl (7 - (Y and 7));
 
     // set or reset Pixel, depending on color
-    if (IsInverted) then begin
-      Pixel:= Pixel and (not Mask);
-    end else begin
-      Pixel:= Pixel or Mask;
+    if (IsInverted) then
+    begin
+      Pixel := Pixel and (not Mask);
+    end
+    else
+    begin
+      Pixel := Pixel or Mask;
     end; // endif
 
     // write modified Byte back to display
     VFDWriteByteXY(Pixel, X, Y);
 
-    while (Err >= 0) do begin
-      if (Direction = 1) then begin
-        X:= X + S1;
-      end else begin
-        Y:= Y + S2;
+    while (Err >= 0) do
+    begin
+      if (Direction = 1) then
+      begin
+        X := X + S1;
+      end
+      else
+      begin
+        Y := Y + S2;
       end; // endif
-      Err:= Err - (DeltaX shl 1);
+      Err := Err - (DeltaX shl 1);
     end; // endwhile
 
-    if (Direction = 1) then begin
-      Y:= Y + S2;
-    end else begin
-      X:= X + S1;
+    if (Direction = 1) then
+    begin
+      Y := Y + S2;
+    end
+    else
+    begin
+      X := X + S1;
     end; // endif
-    Err:= Err + (DeltaY shl 1);
+    Err := Err + (DeltaY shl 1);
 
   end; // endfor
 
@@ -547,13 +607,15 @@ begin
   // 62,5% = $1B = 27
 
   if (Percent > 87) then
-    Cmd:= $18
-  else if (Percent > 75) then
-    Cmd:= $19
-  else if (Percent > 62) then
-    Cmd:= $1A
+    Cmd := $18
   else
-    Cmd:= $1B;
+  if (Percent > 75) then
+    Cmd := $19
+  else
+  if (Percent > 62) then
+    Cmd := $1A
+  else
+    Cmd := $1B;
   VFDWriteCommand(Cmd);
 end;
 
@@ -563,41 +625,49 @@ begin
   VFDLayerConfig(True, True, LayerMode);
 end;
 
-procedure TNTK300.Connect(AInterface: string);
+procedure TNTK300.Connect(AInterface: String);
 const
-  THIS_METHOD_NAME: string = 'Connect';
+  THIS_METHOD_NAME: String = 'Connect';
 var
-  RecvText: string;
+  RecvText: String;
 begin
-  if (AInterface.StartsWith('COM')) then begin
-    FInterfaceConfig.IfaceType:= itCOM;
+  if (AInterface.StartsWith('COM')) then
+  begin
+    FInterfaceConfig.IfaceType := itCOM;
     try
-      FSerialInterface:= TBlockSerial.Create;
-      FSerialInterface.ConvertLineEnd:= true;
-      FSerialInterface.DeadlockTimeout:= 100; // Wartezeit für den seriellen Port
+      FSerialInterface := TBlockSerial.Create;
+      FSerialInterface.ConvertLineEnd := True;
+      FSerialInterface.DeadlockTimeout := 100; // Wartezeit für den seriellen Port
       FSerialInterface.Connect(AInterface); // Setzen Sie den gewünschten COM - Port
-      FSerialInterface.Config(115200, 8, 'N', SB1, true, false); // Setzen Sie die gewünschte Baudrate und Konfiguration
+      FSerialInterface.Config(115200, 8, 'N', SB1, True, False); // Setzen Sie die gewünschte Baudrate und Konfiguration
       Sleep(500);
-      FInterfaceConfig.IsConnected:= True;
-      FInterfaceConfig.IfaceName:= AInterface;
+      FInterfaceConfig.IsConnected := True;
+      FInterfaceConfig.IfaceName := AInterface;
 
-      if Assigned(FLoggingCallback) then begin
-        if FSerialInterface.CanRead(1000) then begin
-          RecvText:= FSerialInterface.RecvPacket(1);
-          if (RecvText.StartsWith('Err')) then begin
-            FLoggingCallback(lvWARNING, Self.ClassName  + '.' + THIS_METHOD_NAME + ': Received an error during connection: ' + Trim(RecvText), Now);
-          end else if Length(RecvText) > 0 then begin
-            FLoggingCallback(lvINFO, Self.ClassName  + '.' + THIS_METHOD_NAME + ': Received: ' + Trim(RecvText), Now);
+      if Assigned(FLoggingCallback) then
+      begin
+        if FSerialInterface.CanRead(1000) then
+        begin
+          RecvText := FSerialInterface.RecvPacket(1);
+          if (RecvText.StartsWith('Err')) then
+          begin
+            FLoggingCallback(lvWARNING, Self.ClassName + '.' + THIS_METHOD_NAME + ': Received an error during connection: ' + Trim(RecvText), Now);
+          end
+          else
+          if Length(RecvText) > 0 then
+          begin
+            FLoggingCallback(lvINFO, Self.ClassName + '.' + THIS_METHOD_NAME + ': Received: ' + Trim(RecvText), Now);
           end;
         end;
       end;
 
     except
-      on E: Exception do begin
-      FInterfaceConfig.IsConnected:= False;
-      FInterfaceConfig.IfaceType:= itNONE;
-      if Assigned(FLoggingCallback) then
-        FLoggingCallback(lvCRITICAL, Self.ClassName  + '.' + THIS_METHOD_NAME + ': Interface exception: ' + E.Message, Now);
+      on E: Exception do
+      begin
+        FInterfaceConfig.IsConnected := False;
+        FInterfaceConfig.IfaceType := itNONE;
+        if Assigned(FLoggingCallback) then
+          FLoggingCallback(lvCRITICAL, Self.ClassName + '.' + THIS_METHOD_NAME + ': Interface exception: ' + E.Message, Now);
       end;
     end;
   end;
@@ -610,47 +680,56 @@ end;
 
 procedure TNTK300.DspInit(XRes, YRes: Word);
 begin
-  FGfxWidth:= XRes;
-  FGfxHeight:= YRes;
+  FGfxWidth := XRes;
+  FGfxHeight := YRes;
   VFDInit;
 end;
 
 
-procedure TNTK300.SerialOut(Text: string);
+procedure TNTK300.SerialOut(Text: String);
 const
-  THIS_METHOD_NAME: string = 'SerialOut';
+  THIS_METHOD_NAME: String = 'SerialOut';
 var
-  RecvText: string;
+  RecvText: String;
   TextLen: Integer;
 begin
-  Text:= Text + #10;
-  TextLen:= Length(Text);
-  if Assigned(FLoggingCallback) then begin
-    if (TextLen < 4) then begin
-      FLoggingCallback(lvERROR, Self.ClassName  + '.' + THIS_METHOD_NAME + ': Invalid text length in command "' + Text + '"', Now);
+  Text := Text + #10;
+  TextLen := Length(Text);
+  if Assigned(FLoggingCallback) then
+  begin
+    if (TextLen < 4) then
+    begin
+      FLoggingCallback(lvERROR, Self.ClassName + '.' + THIS_METHOD_NAME + ': Invalid text length in command "' + Text + '"', Now);
     end;
-    if (Text.ToUpper.Chars[0] <> 'C') and (Text.Chars[0] <> 'D')  and (Text.Chars[0] <> 'R') then begin
-      FLoggingCallback(lvERROR, Self.ClassName  + '.' + THIS_METHOD_NAME + ': Invalid command "' + Text + '"', Now);
+    if (Text.ToUpper.Chars[0] <> 'C') and (Text.Chars[0] <> 'D') and (Text.Chars[0] <> 'R') then
+    begin
+      FLoggingCallback(lvERROR, Self.ClassName + '.' + THIS_METHOD_NAME + ': Invalid command "' + Text + '"', Now);
     end;
   end;
 
   try
-    if FSerialInterface.CanWrite(-1) then begin
-       FSerialInterface.SendString(Text);
-       FNumBytesSent:= FNumBytesSent + Length(Text);
-       //Application.ProcessMessages;
-       //FSerialInterface.Flush;
-    end else begin
-      FInterfaceConfig.IfaceType:= itNONE;
-      if Assigned(FLoggingCallback) then begin
-        FLoggingCallback(lvERROR, Self.ClassName  + '.' + THIS_METHOD_NAME + ': Write timeout on ' + FInterfaceConfig.IfaceName, Now);
+    if FSerialInterface.CanWrite(-1) then
+    begin
+      FSerialInterface.SendString(Text);
+      FNumBytesSent := FNumBytesSent + Length(Text);
+      //Application.ProcessMessages;
+      //FSerialInterface.Flush;
+    end
+    else
+    begin
+      FInterfaceConfig.IfaceType := itNONE;
+      if Assigned(FLoggingCallback) then
+      begin
+        FLoggingCallback(lvERROR, Self.ClassName + '.' + THIS_METHOD_NAME + ': Write timeout on ' + FInterfaceConfig.IfaceName, Now);
       end;
     end;
   except
-    on E: Exception do begin
-      FInterfaceConfig.IfaceType:= itNONE;
-      if Assigned(FLoggingCallback) then begin
-        FLoggingCallback(lvCRITICAL, Self.ClassName  + '.' + THIS_METHOD_NAME + ': Interface exception: ' + E.Message, Now);
+    on E: Exception do
+    begin
+      FInterfaceConfig.IfaceType := itNONE;
+      if Assigned(FLoggingCallback) then
+      begin
+        FLoggingCallback(lvCRITICAL, Self.ClassName + '.' + THIS_METHOD_NAME + ': Interface exception: ' + E.Message, Now);
       end;
     end;
   end;
@@ -670,9 +749,10 @@ begin
   end;
   *)
 
-  FDbgLastSent:= FDbgLastSent + Text.Replace(#10, 'n');
-  if Length(FDbgLastSent) > 80 then begin
-    FDbgLastSent:= RightStr(FDbgLastSent, 80);
+  FDbgLastSent := FDbgLastSent + Text.Replace(#10, 'n');
+  if Length(FDbgLastSent) > 80 then
+  begin
+    FDbgLastSent := RightStr(FDbgLastSent, 80);
   end;
 end;
 
@@ -681,12 +761,13 @@ end;
 }
 procedure TNTK300.VFDWriteCommand(Cmd: Byte);
 var
-  Text: string;
+  Text: String;
 begin
-  if (false = FInterfaceConfig.isConnected) then Exit;
+  if (False = FInterfaceConfig.isConnected) then Exit;
 
-  if (itCOM = FInterfaceConfig.IfaceType) then begin
-    Text:= 'C' + inttohex(Cmd);
+  if (itCOM = FInterfaceConfig.IfaceType) then
+  begin
+    Text := 'C' + inttohex(Cmd);
     //Text:= 'C' + Format('%.02x', [Cmd]);
     SerialOut(Text);
   end;
@@ -697,12 +778,13 @@ end;
 }
 procedure TNTK300.VFDWriteData(Dat: Byte);
 var
-  Text: string;
+  Text: String;
 begin
-  if (false = FInterfaceConfig.isConnected) then Exit;
+  if (False = FInterfaceConfig.isConnected) then Exit;
 
-  if (itCOM = FInterfaceConfig.IfaceType) then begin
-    Text:= 'D' + inttohex(Dat);
+  if (itCOM = FInterfaceConfig.IfaceType) then
+  begin
+    Text := 'D' + inttohex(Dat);
     //Text:= 'D' + Format('%.02x', [d]);
     SerialOut(Text);
   end;
@@ -714,10 +796,13 @@ end;
 }
 procedure TNTK300.VFDWriteByte(Value: Byte);
 begin
-  if (FSelectedLayer = 0) then begin
-    FShadowLayer0[FPosX, FPosY shr 3]:= Value;
-  end else begin
-    FShadowLayer1[FPosX, FPosY shr 3]:= Value;
+  if (FSelectedLayer = 0) then
+  begin
+    FShadowLayer0[FPosX, FPosY shr 3] := Value;
+  end
+  else
+  begin
+    FShadowLayer1[FPosX, FPosY shr 3] := Value;
   end;
 
   VFDWriteData(Value);
@@ -732,15 +817,18 @@ procedure TNTK300.VFDSetCoord(X, Y: Byte);
 var
   Addr: Word;
 begin
-  FPosX:= X;
-  FPosY:= Y;
+  FPosX := X;
+  FPosY := Y;
 
-  Addr:= 0;
+  Addr := 0;
 
-  if (FSelectedLayer = 0) then begin
-    Addr:= START_ADDR_L0 + (FPosX * 8) + (FPosY shr 3);
-  end else begin
-    Addr:= START_ADDR_L1 + FPosX + (FPosY * $80);
+  if (FSelectedLayer = 0) then
+  begin
+    Addr := START_ADDR_L0 + (FPosX * 8) + (FPosY shr 3);
+  end
+  else
+  begin
+    Addr := START_ADDR_L1 + FPosX + (FPosY * $80);
   end;
 
   VFDWriteCommand(CMD_SET_CURSOR_L);
@@ -755,10 +843,13 @@ end;
 }
 procedure TNTK300.VFDSetXCoord(X: Byte);
 begin
-  FPosX:= X;
-  if (FSelectedLayer = 0) then begin
+  FPosX := X;
+  if (FSelectedLayer = 0) then
+  begin
     VFDSetAddress((FPosX * 8) + (FPosY shr 3), 0);
-  end else begin
+  end
+  else
+  begin
     VFDSetAddress(START_ADDR_L1 + FPosX + (FPosY * $80), 1);
   end;
 end;
@@ -768,10 +859,13 @@ end;
 }
 procedure TNTK300.VFDSetYCoord(Y: Byte);
 begin
-  FPosY:= Y;
-  if (FSelectedLayer = 0) then begin
+  FPosY := Y;
+  if (FSelectedLayer = 0) then
+  begin
     VFDSetAddress((FPosX * 8) + (FPosY shr 3), 0);
-  end else begin
+  end
+  else
+  begin
     VFDSetAddress(START_ADDR_L1 + FPosX + (FPosY * $80), 1);
   end;
 end;
@@ -801,16 +895,19 @@ var
   X, Y: Integer;
   Data: Byte;
 begin
-  Data:= 0;
-  X:= Col;
-  Y:= Row shr 3;
-  if (FSelectedLayer = 0) then begin
-    Data:= FShadowLayer0[X, Y];
-  end else begin
-    Data:= FShadowLayer1[X, Y];
+  Data := 0;
+  X := Col;
+  Y := Row shr 3;
+  if (FSelectedLayer = 0) then
+  begin
+    Data := FShadowLayer0[X, Y];
+  end
+  else
+  begin
+    Data := FShadowLayer1[X, Y];
   end;
 
-  Result:= Data;
+  Result := Data;
 end;
 
 
@@ -822,20 +919,22 @@ var
   Cmd: Byte;
 begin
 
-  Cmd:= CMD_DSP_ONOFF;
+  Cmd := CMD_DSP_ONOFF;
   if (IsL0On) then
-    Cmd:= Cmd or  BITS_L0;
+    Cmd := Cmd or BITS_L0;
   if (IsL1On) then
-    Cmd:= Cmd or  BITS_L1;
+    Cmd := Cmd or BITS_L1;
 
   VFDWriteCommand(Cmd);
 
   if (lmOR = Comb) then
-    Cmd:= CMD_OR_MODE
-  else if (lmAND = Comb) then
-    Cmd:= CMD_AND_MODE
-  else if (lmXOR = Comb) then
-    Cmd:= CMD_XOR_MODE
+    Cmd := CMD_OR_MODE
+  else
+  if (lmAND = Comb) then
+    Cmd := CMD_AND_MODE
+  else
+  if (lmXOR = Comb) then
+    Cmd := CMD_XOR_MODE
   else
     Exit;
   VFDWriteCommand(Cmd);
@@ -848,42 +947,52 @@ Display initialization procedure
 }
 procedure TNTK300.VFDInit;
 const
-  THIS_METHOD_NAME: string = 'VFDInit';
+  THIS_METHOD_NAME: String = 'VFDInit';
 var
-  Text, RecvText: string;
+  Text, RecvText: String;
 begin
 
   // clear port to idle state
 
-  if (itCOM = FInterfaceConfig.IfaceType) then begin
-    Text:= '3' + #10;
+  if (itCOM = FInterfaceConfig.IfaceType) then
+  begin
+    Text := '3' + #10;
 
     try
-      if FSerialInterface.CanWrite(100) then begin
-         FSerialInterface.SendString(Text);
-         Application.ProcessMessages;
-         FSerialInterface.Flush;
-         Sleep(100);
-      end else begin
-        FInterfaceConfig.IfaceType:= itNONE;
-        if Assigned(FLoggingCallback) then begin
-          FLoggingCallback(lvERROR, Self.ClassName  + '.' + THIS_METHOD_NAME + ': Write timeout on ' + FInterfaceConfig.IfaceName, Now);
+      if FSerialInterface.CanWrite(100) then
+      begin
+        FSerialInterface.SendString(Text);
+        Application.ProcessMessages;
+        FSerialInterface.Flush;
+        Sleep(100);
+      end
+      else
+      begin
+        FInterfaceConfig.IfaceType := itNONE;
+        if Assigned(FLoggingCallback) then
+        begin
+          FLoggingCallback(lvERROR, Self.ClassName + '.' + THIS_METHOD_NAME + ': Write timeout on ' + FInterfaceConfig.IfaceName, Now);
         end;
       end;
     except
-      on E: Exception do begin
-        FInterfaceConfig.IfaceType:= itNONE;
-        if Assigned(FLoggingCallback) then begin
-          FLoggingCallback(lvCRITICAL, Self.ClassName  + '.' + THIS_METHOD_NAME + ': Interface exception: ' + E.Message, Now);
+      on E: Exception do
+      begin
+        FInterfaceConfig.IfaceType := itNONE;
+        if Assigned(FLoggingCallback) then
+        begin
+          FLoggingCallback(lvCRITICAL, Self.ClassName + '.' + THIS_METHOD_NAME + ': Interface exception: ' + E.Message, Now);
         end;
       end;
     end;
 
-    if Assigned(FLoggingCallback) then begin
-      if FSerialInterface.CanRead(100) then begin
-        RecvText:= FSerialInterface.Recvstring(100);
-        if (RecvText.StartsWith('Err')) then begin
-          FLoggingCallback(lvWARNING, Self.ClassName  + '.' + THIS_METHOD_NAME + ': Received an error when sending "' + Text + '":' + Trim(RecvText), Now);
+    if Assigned(FLoggingCallback) then
+    begin
+      if FSerialInterface.CanRead(100) then
+      begin
+        RecvText := FSerialInterface.Recvstring(100);
+        if (RecvText.StartsWith('Err')) then
+        begin
+          FLoggingCallback(lvWARNING, Self.ClassName + '.' + THIS_METHOD_NAME + ': Received an error when sending "' + Text + '":' + Trim(RecvText), Now);
         end;
       end;
     end;
@@ -891,26 +1000,30 @@ begin
 
   ClearScreen;
 
-  VFDLayerConfig(true, false, lmXOR);
+  VFDLayerConfig(True, False, lmXOR);
 
   VFDWriteCommand(CMD_CUR_HOLD); // auto increment off
 
   VFDSetCoord(0, 0);
 
   // calculate number of text columns and rows (built-in character set is 8x6)
-  FTxtWidth:= (FGfxWidth div 6);
-  FTxtHeight:= (FGfxHeight div 8);
+  FTxtWidth := (FGfxWidth div 6);
+  FTxtHeight := (FGfxHeight div 8);
 
 end;
 
 procedure TNTK300.VFDSetAddress(Addr: Word; ALayer: Byte);
 begin
-  if (0 = ALayer) then begin
+  if (0 = ALayer) then
+  begin
     VFDWriteCommand(CMD_SET_START0_L);
     VFDWriteData(Addr and $FF);
     VFDWriteCommand(CMD_SET_START0_H);
     VFDWriteData(Addr shr 8);
-  end else if (1 = ALayer) then begin
+  end
+  else
+  if (1 = ALayer) then
+  begin
     VFDWriteCommand(CMD_SET_START1_L);
     VFDWriteData(Addr and $FF);
     VFDWriteCommand(CMD_SET_START1_H);
@@ -920,7 +1033,7 @@ end;
 
 procedure TNTK300.VFDAddressInc(DoInc: Boolean);
 begin
-  FIsAutoInc:= DoInc;
+  FIsAutoInc := DoInc;
   if (FIsAutoInc) then
     VFDWriteCommand(CMD_CUR_INC)
   else
@@ -928,4 +1041,3 @@ begin
 end;
 
 end.
-

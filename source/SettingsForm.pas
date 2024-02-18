@@ -7,7 +7,6 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
   Buttons, ComCtrls, LCLTranslator, Spin, Registry;
-
 type
   TOkEvent = procedure of object;
   TAbortEvent = procedure of object;
@@ -80,11 +79,11 @@ type
     FOkEvent: TOkEvent;
     FAbortEvent: TAbortEvent;
     FColorChangeEvent: TColorChangeEvent;
-    FLanguage: string;
+    FLanguage: String;
     FIconIndex: Integer;
   public
     property IconIndex: Integer read FIconIndex write FIconIndex;
-    property Language: string read FLanguage write FLanguage;
+    property Language: String read FLanguage write FLanguage;
     property OnOkPressed: TOkEvent read FOkEvent write FOkEvent;
     property OnAbortPressed: TAbortEvent read FAbortEvent write FAbortEvent;
     property OnColorChange: TColorChangeEvent read FColorChangeEvent write FColorChangeEvent;
@@ -105,7 +104,7 @@ implementation
 
 procedure TConfigForm.LanguageGroupBoxResize(Sender: TObject);
 begin
-  LanguageGroupBox.ChildSizing.ControlsPerLine:= LanguageGroupBox.Width div (LangDeButton.Width + LanguageGroupBox.ChildSizing.HorizontalSpacing);
+  LanguageGroupBox.ChildSizing.ControlsPerLine := LanguageGroupBox.Width div (LangDeButton.Width + LanguageGroupBox.ChildSizing.HorizontalSpacing);
 end;
 
 procedure TConfigForm.OkButtonClick(Sender: TObject);
@@ -117,27 +116,27 @@ end;
 
 procedure TConfigForm.SpeedButton1Click(Sender: TObject);
 begin
- FIconIndex:= 0;
+  FIconIndex := 0;
 end;
 
 procedure TConfigForm.SpeedButton2Click(Sender: TObject);
 begin
-  FIconIndex:= 1;
+  FIconIndex := 1;
 end;
 
 procedure TConfigForm.SpeedButton3Click(Sender: TObject);
 begin
-  FIconIndex:= 2;
+  FIconIndex := 2;
 end;
 
 procedure TConfigForm.SpeedButton4Click(Sender: TObject);
 begin
-  FIconIndex:= 3;
+  FIconIndex := 3;
 end;
 
 procedure TConfigForm.SpeedButton5Click(Sender: TObject);
 begin
-  FIconIndex:= 4;
+  FIconIndex := 4;
 end;
 
 procedure TConfigForm.AbortButtonClick(Sender: TObject);
@@ -149,7 +148,7 @@ end;
 
 procedure TConfigForm.BrightnessTrackBarChange(Sender: TObject);
 begin
-  BrightnessPercentLabel.Caption:= IntToStr(BrightnessTrackBar.Position) + '%';
+  BrightnessPercentLabel.Caption := IntToStr(BrightnessTrackBar.Position) + '%';
 end;
 
 procedure TConfigForm.ColorButtonColorChanged(Sender: TObject);
@@ -160,13 +159,16 @@ end;
 
 procedure TConfigForm.DspTypeComboChange(Sender: TObject);
 begin
-  if (0 = DspTypeCombo.ItemIndex) then begin
+  if (0 = DspTypeCombo.ItemIndex) then
+  begin
     // NONE display has been selected
-    InterfaceCombo.Enabled:= False;
-    IfCfgCombo.Enabled:= False;
-  end else begin
-    InterfaceCombo.Enabled:= True;
-    IfCfgCombo.Enabled:= True;
+    InterfaceCombo.Enabled := False;
+    IfCfgCombo.Enabled := False;
+  end
+  else
+  begin
+    InterfaceCombo.Enabled := True;
+    IfCfgCombo.Enabled := True;
   end;
 
 end;
@@ -190,21 +192,22 @@ end;
 
 procedure TConfigForm.IdleTrackBarChange(Sender: TObject);
 begin
-  IdlePercentageLabel.Caption:= IntTosTr(IdleTrackBar.Position) + '%';
+  IdlePercentageLabel.Caption := IntToStr(IdleTrackBar.Position) + '%';
 end;
 
 function TConfigForm.GetSerialPortNames: TStringList;
 var
   Reg: TRegistry;
-  AValue: UnicodeString;
+  AValue: Unicodestring;
 begin
-  Result:= TStringList.Create;
+  Result := TStringList.Create;
   Reg := TRegistry.Create;
   try
     Reg.RootKey := HKEY_LOCAL_MACHINE;
     if Reg.OpenKeyReadOnly('HARDWARE\DEVICEMAP\SERIALCOMM') then
     begin
-      for AValue in Reg.GetValueNames do begin
+      for AValue in Reg.GetValueNames do
+      begin
         if (rdString = Reg.GetDataType(AValue)) then
           Result.Add(UTF8Encode(Reg.ReadString(AValue)));
       end;
@@ -217,21 +220,20 @@ end;
 
 procedure TConfigForm.LangDeButtonClick(Sender: TObject);
 begin
-  FLanguage:= 'de';
+  FLanguage := 'de';
   SetDefaultLang(FLanguage);
 end;
 
 procedure TConfigForm.LangEnButtonClick(Sender: TObject);
 begin
-  FLanguage:= 'en';
+  FLanguage := 'en';
   SetDefaultLang(FLanguage);
 end;
 
 procedure TConfigForm.LangItButtonClick(Sender: TObject);
 begin
-  FLanguage:= 'it';
+  FLanguage := 'it';
   SetDefaultLang(FLanguage);
 end;
 
 end.
-
