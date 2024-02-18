@@ -30,7 +30,7 @@ type
 
   public
     { Constructor / Destructor }
-    constructor Create(AOwner: TComponent);
+    constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
     { Overloaded methods }
@@ -298,7 +298,6 @@ var
   IY: Word;
   PixelColor: TColor;
   Block: Byte;
-  Col: Byte;
   NumRemainingPixels: Byte;
 begin
   SelectScreen(0);

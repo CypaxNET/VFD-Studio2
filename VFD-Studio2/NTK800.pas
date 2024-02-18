@@ -43,7 +43,7 @@ type
 
   public
     { Constructor / Destructor }
-    constructor Create(AOwner: TComponent);
+    constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
     { Overloaded methods }
