@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, Forms, Graphics, Controls, ExtCtrls, RegExpr, DateUtils,
   Math, StudioCommon, uSMBIOS, SysInfo, WinampControl,
-  Glyphs, VFDisplay, PreviewDisplay, NTK800, NTK300;
+  Glyphs, VFDisplay, PreviewDisplay, NTK800, NTK300, U8G2;
 type
   TDisplayConfig = record
     DisplayType: String; // e.g. 'NTK800'
@@ -272,6 +272,17 @@ begin
     FDisplays[High(FDisplays)].DspInit(DisplayConfig.ResX, DisplayConfig.ResY);
   end
   else
+  if (DisplayConfig.DisplayType = 'U8G2') then
+  begin
+    if (Assigned(FLoggingCallback)) then
+      FLoggingCallback(lvINFO, Self.ClassName + '.' + THIS_METHOD_NAME + ': Display type: ' + DisplayConfig.DisplayType, Now);
+    SetLength(FDisplays, Length(FDisplays) + 1);
+    FDisplays[High(FDisplays)] := TU8G2.Create(Self);
+    FDisplays[High(FDisplays)].OnDbgMessage := FLoggingCallback;
+    FDisplays[High(FDisplays)].Connect(DisplayConfig.IntName);
+    FDisplays[High(FDisplays)].DspInit(DisplayConfig.ResX, DisplayConfig.ResY);
+  end
+  else
   begin
     if (Assigned(FLoggingCallback)) then
       FLoggingCallback(lvERROR, Self.ClassName + '.' + THIS_METHOD_NAME + ': Unsupported display type: ' + DisplayConfig.DisplayType, Now);
@@ -311,6 +322,8 @@ begin
   begin
     if (Assigned(FDisplays[DspIdx])) then
       FDisplays[DspIdx].ShowScreen(ALayer);
+    if (FDisplays[DspIdx].DisplayType = 'PREVIEW') and (Assigned(FOnPreviewChangedEvent)) then
+      FOnPreviewChangedEvent(TPreviewDisplay(FDisplays[DspIdx]).CombinedBitmap);
   end;
 end;
 
@@ -322,6 +335,8 @@ begin
   begin
     if (Assigned(FDisplays[DspIdx])) then
       FDisplays[DspIdx].SetBrightness(Percent);
+    if (FDisplays[DspIdx].DisplayType = 'PREVIEW') and (Assigned(FOnPreviewChangedEvent)) then
+      FOnPreviewChangedEvent(TPreviewDisplay(FDisplays[DspIdx]).CombinedBitmap);
   end;
 end;
 
@@ -499,6 +514,8 @@ begin
     begin
       if (Assigned(FDisplays[DspIdx])) then
         FDisplays[DspIdx].PaintBitmap(TmpBitmap, X, Y);
+      if (FDisplays[DspIdx].DisplayType = 'PREVIEW') and (Assigned(FOnPreviewChangedEvent)) then
+        FOnPreviewChangedEvent(TPreviewDisplay(FDisplays[DspIdx]).CombinedBitmap);
     end;
     TmpBitmap.Canvas.Pixels[0, 0] := TmpBitmap.Canvas.Pixels[0, 0]; // this seems like nonsense but is required to actually load the bitmap in memory
     ResultPoint.X := TmpBitmap.Width;
@@ -613,6 +630,7 @@ var
   DspIdx: Integer;
 begin
 
+
   for I := 0 to (MAX_VARIABLE_INFO - 1) do
   begin
     S := FVariableInfo[I].Text;
@@ -653,6 +671,8 @@ begin
           begin
             if (Assigned(FDisplays[DspIdx])) then
               FDisplays[DspIdx].PaintString(Subs, FVariableInfo[I].X, FVariableInfo[I].Y);
+            if (FDisplays[DspIdx].DisplayType = 'PREVIEW') and (Assigned(FOnPreviewChangedEvent)) then
+              FOnPreviewChangedEvent(TPreviewDisplay(FDisplays[DspIdx]).CombinedBitmap);
           end;
         end
         else
@@ -666,6 +686,8 @@ begin
           begin
             if (Assigned(FDisplays[DspIdx])) then
               FDisplays[DspIdx].PaintString(S, FVariableInfo[I].X, FVariableInfo[I].Y);
+            if (FDisplays[DspIdx].DisplayType = 'PREVIEW') and (Assigned(FOnPreviewChangedEvent)) then
+              FOnPreviewChangedEvent(TPreviewDisplay(FDisplays[DspIdx]).CombinedBitmap);
           end;
         end;
       end
@@ -1411,6 +1433,8 @@ begin
         begin
           if (Assigned(FDisplays[DspIdx])) then
             FDisplays[DspIdx].PaintString(C, I, FCpuUsageData.BottomRow - Row);
+          if (FDisplays[DspIdx].DisplayType = 'PREVIEW') and (Assigned(FOnPreviewChangedEvent)) then
+            FOnPreviewChangedEvent(TPreviewDisplay(FDisplays[DspIdx]).CombinedBitmap);
         end;
 
       end; // for Row
@@ -1466,6 +1490,8 @@ begin
         begin
           if (Assigned(FDisplays[DspIdx])) then
             FDisplays[DspIdx].PaintString(C, I, FMemUsageData.BottomRow - Row);
+          if (FDisplays[DspIdx].DisplayType = 'PREVIEW') and (Assigned(FOnPreviewChangedEvent)) then
+            FOnPreviewChangedEvent(TPreviewDisplay(FDisplays[DspIdx]).CombinedBitmap);
         end;
 
       end; // for Row
