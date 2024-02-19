@@ -1,3 +1,17 @@
+/*
+ * IMPORTANT!
+ * 1. Select the correct board in the Arduino IDE first:
+ *    Menu > Tools > Board > Arduino AVR Boards > Arduino Nano
+ * 2. Then select the port.
+ * 3. Then compile (Ctrl + R)
+ * 4. Then upload (Ctrl + U)
+ */
+
+#ifndef ARDUINO_AVR_NANO
+  #error Select the Arduino Nano board in the Arduino IDE
+#endif
+
+
 const char idStr[] = "Arduino driver for Noritake GU 300/800 VFD series";
 const char verStr[] = "v0.2.0.0";
 const char helpStr[] = "I = identify driver\nV = Get SW version\n3 = initialize 300 series mode\n8 = initialize 800 series mode\nCxy = send command with xy = hex code\nDxy = send data with xy = hex code\n? = this help text";
@@ -192,71 +206,6 @@ void initDisplay300()
 }
 
 
-
-void setup()
-{
-  PORTD |= B00011100; // set /RD, C/D and /WR to HIGH  
-  
-  DDRB |= B00011111; // set PB0..PB4 which are D0..D4 to output
-  DDRD |= B11100000; // set PD5..PD7 which are D5..D7 to output
-  DDRD |= B00011100; // set PD2..PD4 which are /RD, C/D and /WR to output
-
-  PORTB |= B00011111; // set D0..D4 to HIGH
-  PORTD |= B11100000; // set D5..D7 to HIGH
-  PORTD |= B00011100; // set /RD, C/D and /WR to HIGH  
-
-  pinMode(LED_BUILTIN, OUTPUT);
-
-  /*
-  DDRB |= B00100000; // set PB5 (built-in LED) to output
-  digitalWrite(13, LOW); // built-in LED off
-  */
-  
-  // put your setup code here, to run once:
-  Serial.begin(115200);
-  //Serial.begin(230400);
-  Serial.print(idStr);
-  Serial.print(' ');
-  Serial.println(verStr);
-
-  randomSeed(analogRead(0)+analogRead(1));
-
-}
-
-
-// Cleaning the screen on the 300 series VFD requires a lot of instructions to be sent.
-// To avoid, sending all those via the serial interface, this function exists to do it from the Arduino.
-void clearScreen300(unsigned char screen)
-{
-  if (0 == screen)
-  {
-    // start at 0x0000
-    sendCmd(VFD_300_SET_CURSOR_LOW);
-    sendData(0x00);
-    sendCmd(VFD_300_SET_CURSOR_HIGH);
-    sendData(0x00);
-  } else {
-    // start at 0x0800
-    sendCmd(VFD_300_SET_CURSOR_LOW);
-    sendData(0x00);
-    sendCmd(VFD_300_SET_CURSOR_HIGH);
-    sendData(0x08);
-  }
-  
-  sendCmd(VFD_300_CURSOR_INCR);
-  sendCmd(VFD_300_DATA_WRITE);
-
-  for(int i=0; i<0x800; i++) {
-    sendData(0);
-  }
-  
-  sendCmd(VFD_300_CURSOR_HOLD);  
-
-  Serial.print("Clearscreen ");
-  Serial.println(screen);  
-}
-
-
 void processCommand(String command)
 {
   if (command.length() >= 1 && command.length() <= 3)
@@ -359,6 +308,69 @@ void processCommand(String command)
     Serial.print(" bytes) ");
     Serial.println(command);
   }
+}
+
+// Cleaning the screen on the 300 series VFD requires a lot of instructions to be sent.
+// To avoid, sending all those via the serial interface, this function exists to do it from the Arduino.
+void clearScreen300(unsigned char screen)
+{
+  if (0 == screen)
+  {
+    // start at 0x0000
+    sendCmd(VFD_300_SET_CURSOR_LOW);
+    sendData(0x00);
+    sendCmd(VFD_300_SET_CURSOR_HIGH);
+    sendData(0x00);
+  } else {
+    // start at 0x0800
+    sendCmd(VFD_300_SET_CURSOR_LOW);
+    sendData(0x00);
+    sendCmd(VFD_300_SET_CURSOR_HIGH);
+    sendData(0x08);
+  }
+  
+  sendCmd(VFD_300_CURSOR_INCR);
+  sendCmd(VFD_300_DATA_WRITE);
+
+  for(int i=0; i<0x800; i++) {
+    sendData(0);
+  }
+  
+  sendCmd(VFD_300_CURSOR_HOLD);  
+
+  Serial.print("Clearscreen ");
+  Serial.println(screen);  
+}
+
+
+void setup()
+{
+  PORTD |= B00011100; // set /RD, C/D and /WR to HIGH  
+  
+  DDRB |= B00011111; // set PB0..PB4 which are D0..D4 to output
+  DDRD |= B11100000; // set PD5..PD7 which are D5..D7 to output
+  DDRD |= B00011100; // set PD2..PD4 which are /RD, C/D and /WR to output
+
+  PORTB |= B00011111; // set D0..D4 to HIGH
+  PORTD |= B11100000; // set D5..D7 to HIGH
+  PORTD |= B00011100; // set /RD, C/D and /WR to HIGH  
+
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  /*
+  DDRB |= B00100000; // set PB5 (built-in LED) to output
+  digitalWrite(13, LOW); // built-in LED off
+  */
+  
+  // put your setup code here, to run once:
+  Serial.begin(115200);
+  //Serial.begin(230400);
+  Serial.print(idStr);
+  Serial.print(' ');
+  Serial.println(verStr);
+
+  randomSeed(analogRead(0)+analogRead(1));
+
 }
 
 
