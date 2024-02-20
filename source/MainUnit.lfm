@@ -79,7 +79,7 @@ object MainForm: TMainForm
       Caption = 'Load list...'
       Images = ImageList1
       ImageIndex = 5
-      OnClick = ListTestButtonClick
+      OnClick = OpenListButtonClick
       TabOrder = 1
     end
     object ReloadButton: TBitBtn
