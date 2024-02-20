@@ -533,6 +533,7 @@ object ConfigForm: TConfigForm
         'NONE'
         'Noritake GU-800 Series'
         'Noritake GU-300 Series'
+        'u8g2 compatible'
       )
       ReadOnly = True
       TabOrder = 0

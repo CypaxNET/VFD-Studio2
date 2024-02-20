@@ -929,6 +929,9 @@ begin
   if (FStudioConfig.DisplayConfig.DisplayType = 'NTK300') then
     ConfigForm.DspTypeCombo.ItemIndex := 2
   else
+    if (FStudioConfig.DisplayConfig.DisplayType = 'U8G2') then
+    ConfigForm.DspTypeCombo.ItemIndex := 3
+  else
     ConfigForm.DspTypeCombo.ItemIndex := 0;
 
   ConfigForm.OnAbortPressed := @SettingsAbortPressed;
@@ -1907,6 +1910,9 @@ begin
   else
   if (2 = ConfigForm.DspTypeCombo.ItemIndex) then
     FStudioConfig.DisplayConfig.DisplayType := 'NTK300'
+  else
+  if (3 = ConfigForm.DspTypeCombo.ItemIndex) then
+    FStudioConfig.DisplayConfig.DisplayType := 'U8G2'
   else
     FStudioConfig.DisplayConfig.DisplayType := '';
   FStudioConfig.DisplayConfig.IntName := ConfigForm.InterfaceCombo.Caption;
