@@ -230,6 +230,7 @@ procedure TDisplayManager.AddDisplay(DisplayConfig: TDisplayConfig);
 const
   THIS_METHOD_NAME: String = 'AddDisplay';
 begin
+
   if ((FGfxWidth > 0) and (DisplayConfig.ResX <> FGfxWidth)) or ((FGfxHeight > 0) and (DisplayConfig.ResY <> FGfxHeight)) then
     if (Assigned(FLoggingCallback)) then
       FLoggingCallback(lvERROR, Self.ClassName + '.' + THIS_METHOD_NAME + ': Display dimensions already set to ' + IntToStr(FGfxWidth) + 'x' + IntToStr(FGfxHeight), Now);
@@ -239,10 +240,15 @@ begin
   FTxtWidth := FGfxWidth div (GLYPH_W + GLYPH_GAP);
   FTxtHeight := FGfxHeight div GLYPH_H;
 
+  // log the display type
+  if (Assigned(FLoggingCallback)) then
+    FLoggingCallback(lvINFO, Self.ClassName + '.' + THIS_METHOD_NAME +
+    ': Display type: "' + DisplayConfig.DisplayType + '"' +
+    ', ' + IntToStr(DisplayConfig.ResX) + 'x' + IntToStr(DisplayConfig.ResY) +
+    ', if: "' + DisplayConfig.IntName + '"',  Now);
+
   if (DisplayConfig.DisplayType = 'PREVIEW') then
   begin
-    if (Assigned(FLoggingCallback)) then
-      FLoggingCallback(lvINFO, Self.ClassName + '.' + THIS_METHOD_NAME + ': Display type: ' + DisplayConfig.DisplayType, Now);
     SetLength(FDisplays, Length(FDisplays) + 1);
     FDisplays[High(FDisplays)] := TPreviewDisplay.Create(Self);
     FDisplays[High(FDisplays)].OnDbgMessage := FLoggingCallback;
@@ -252,8 +258,6 @@ begin
   else
   if (DisplayConfig.DisplayType = 'NTK300') then
   begin
-    if (Assigned(FLoggingCallback)) then
-      FLoggingCallback(lvINFO, Self.ClassName + '.' + THIS_METHOD_NAME + ': Display type: ' + DisplayConfig.DisplayType, Now);
     SetLength(FDisplays, Length(FDisplays) + 1);
     FDisplays[High(FDisplays)] := TNTK300.Create(Self);
     FDisplays[High(FDisplays)].OnDbgMessage := FLoggingCallback;
@@ -263,8 +267,6 @@ begin
   else
   if (DisplayConfig.DisplayType = 'NTK800') then
   begin
-    if (Assigned(FLoggingCallback)) then
-      FLoggingCallback(lvINFO, Self.ClassName + '.' + THIS_METHOD_NAME + ': Display type: ' + DisplayConfig.DisplayType, Now);
     SetLength(FDisplays, Length(FDisplays) + 1);
     FDisplays[High(FDisplays)] := TNTK800.Create(Self);
     FDisplays[High(FDisplays)].OnDbgMessage := FLoggingCallback;
@@ -274,8 +276,6 @@ begin
   else
   if (DisplayConfig.DisplayType = 'U8G2') then
   begin
-    if (Assigned(FLoggingCallback)) then
-      FLoggingCallback(lvINFO, Self.ClassName + '.' + THIS_METHOD_NAME + ': Display type: ' + DisplayConfig.DisplayType, Now);
     SetLength(FDisplays, Length(FDisplays) + 1);
     FDisplays[High(FDisplays)] := TU8G2.Create(Self);
     FDisplays[High(FDisplays)].OnDbgMessage := FLoggingCallback;
@@ -287,6 +287,7 @@ begin
     if (Assigned(FLoggingCallback)) then
       FLoggingCallback(lvERROR, Self.ClassName + '.' + THIS_METHOD_NAME + ': Unsupported display type: ' + DisplayConfig.DisplayType, Now);
   end;
+
 end;
 
 procedure TDisplayManager.AddDisplay(DisplayType: String; ResX, ResY: Word; IntName: String; Baudrate: Cardinal);
