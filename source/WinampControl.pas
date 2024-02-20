@@ -254,7 +254,7 @@ var
  i: integer;
 begin
 SendToWAResult(WM_USER,0,105,i);
-Result:=i*1000;
+Result:=i;
 end;
 
 function TWinampControl.Seek(Offset: integer): boolean;
