@@ -1204,6 +1204,21 @@ begin
       end
 
       else
+      if ('WAPLAYBAR' = CMD) then
+      begin
+        // should have three number parameters
+        RegEx.Expression := '^WAPLAYBAR(\s+[+-]?\d+){3}(\s+[01]|\s+TRUE|\s+FALSE)?$';
+        if (RegEx.Exec(S)) then
+        begin
+          Res := 'ok';
+        end
+        else
+        begin
+          Res := 'WAPLAYBAR should have three number parameters, followed by an optional 0/1 or FALSE/TRUE';
+        end;
+      end
+
+      else
       if ('DRIVEUSAGE' = CMD) then
       begin
         // should have a char parameter followed by three number parameters

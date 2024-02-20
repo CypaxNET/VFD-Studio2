@@ -129,6 +129,15 @@ resourcestring
     'Creates an effect like in the movie The Matrix with raining characters.' + LineEnding + LineEnding +
     'Param1:' + LineEnding + '  update interval in ms';
 
+  RsHelpWAPLAYBAR =
+    'Graphical or textual illustration of Winamp play progress.' + LineEnding +
+    'Depending on mode (graphical or textual) the params have different units: character position or pixel position.' + LineEnding +
+    '(Note: a Screen can only have one play bar at a time.)' + LineEnding + LineEnding +
+    'Param1:' + LineEnding + '  text column / x coordinate' + LineEnding +
+    'Param2:' + LineEnding + '  text row / y coordinate' + LineEnding +
+    'Param3:' + LineEnding + '  width in characters / pixels' + LineEnding +
+    'Param4 [optional]:' + LineEnding + '  graphical mode (1 or TRUE)';
+
   RsHelpSCREENTIME =
     'Specifies how long a screen is shown.' + LineEnding +  LineEnding +
     'Param1:' + LineEnding + '  number of seconds the screen is shown';
@@ -525,6 +534,10 @@ const
       Example: 'LINE 0 48 125 48' + LineEnding +
                 'LINE 0 56 125 56' + LineEnding +
                 'CPUMONITOR 2 7'),
+    (Expr: 'WAPLAYBAR';
+      Help: RsHelpWAPLAYBAR;
+      Example: 'WAPLAYBAR 0 0 60 127 1' + LineEnding),
+
     (Expr: 'MATRIX';
       Help: RsHelpMATRIX;
       Example: 'NEWSCREEN' + LineEnding +

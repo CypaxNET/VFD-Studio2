@@ -637,6 +637,22 @@ msgid ""
 "Example: \"3:15\""
 msgstr ""
 
+#: listeditorunit.rshelpwaplaybar
+msgid ""
+"Graphical or textual illustration of Winamp play progress.\n"
+"Depending on mode (graphical or textual) the params have different units: character position or pixel position.\n"
+"(Note: a Screen can only have one play bar at a time.)\n"
+"\n"
+"Param1:\n"
+"  text column / x coordinate\n"
+"Param2:\n"
+"  text row / y coordinate\n"
+"Param3:\n"
+"  width in characters / pixels\n"
+"Param4 [optional]:\n"
+"  graphical mode (1 or TRUE)"
+msgstr ""
+
 #: listeditorunit.rshelpwapos
 msgctxt "listeditorunit.rshelpwapos"
 msgid ""
