@@ -70,6 +70,12 @@ type
     Drops: array of TMatrixDrop;
   end;
 
+  TWinampPlayBarData = record
+    Col, Row, Width: Integer;
+    IsActive: Boolean;
+    IsGraphical: Boolean;
+  end;
+
   TAnimationData = record
     IsAnimationDisplayed: Boolean; // is an animation currently displayed?
     IsAnimationPaused: Boolean;    // is the animation paused?
@@ -198,6 +204,8 @@ type
     procedure DisableClocks;
     procedure RefreshClocks;
     procedure DrawDriveUsage(DriveLetter: Char; Col, Row, BarWidth: Integer);
+    procedure DrawWinampPlayBar;
+    procedure DrawProgressBar(Col, Row, BarWidth: Integer; Percentage: Double);
 
     // settings
     procedure LoadConfig(const AFilePath: String);
@@ -230,6 +238,7 @@ type
     FClocks: array[0..(MAX_CLOCKS - 1)] of TClockData; // holds data of analog clocks
     FAnimationData: TAnimationData; // holds animation data
     FMatrix: TMatrixData; // holds the string drops used to display a Matrix like effect
+    FWinampPlayBar: TWinampPlayBarData; // holds data related to the Winamp play bar
 
     IsCpuMonitorDisplayed: Boolean; // is the CPU usage monitor currently displayed?
     IsMemMonitorDisplayed: Boolean; // is the RAM usage monitor currently displayed?
@@ -704,6 +713,7 @@ begin
   StopAnimation; // this also disables the animation timer
   DisableClocks;
   SetLength(FMatrix.Drops, 0);
+  FWinampPlayBar.IsActive:= False;
   FDisplayMgr.ClearInfoStrings;
   IsCpuMonitorDisplayed := False;
   IsMemMonitorDisplayed := False;
@@ -840,6 +850,11 @@ begin
   begin
     UpdateMatrixDrops;
     Inc(FMatrix.CycleCounter);
+  end;
+
+  if (FWinampPlayBar.IsActive) then
+  begin
+    DrawWinampPlayBar;
   end;
 
 end;
@@ -1435,11 +1450,7 @@ var
   TotalMem: QWord;
   FreeMem: QWord;
   PercentFree: Double;
-  X: Integer;
-  C: Char;
-  UsedNum: Integer;
 begin
-
   // get drive information
   TotalMem := FSysInfo.GetDiskSpace(DriveLetter);
   FreeMem := FSysInfo.GetFreeDiskSpace(DriveLetter);
@@ -1447,12 +1458,54 @@ begin
   // calculate percentage of free bytes
   PercentFree := FreeMem / TotalMem;
 
+  DrawProgressBar(Col, Row, BarWidth, 1.0 - PercentFree);
+end;
+
+
+procedure TMainForm.DrawWinampPlayBar;
+var
+  TrackPos, TrackLen: Integer;
+  PercentPlayed: Double;
+  X, Y: Integer;
+begin
+  // get drive information
+  TrackPos := FWinampControl.GetOffset div 1000;
+  TrackLen := FWinampControl.GetLength;
+
+  // calculate percentage of free bytes
+  if (TrackLen > 0) then
+    PercentPlayed := TrackPos / TrackLen
+  else
+    PercentPlayed := 0.0;
+
+  if (FWinampPlayBar.IsGraphical) then
+  begin
+    X := FWinampPlayBar.Col;
+    Y := FWinampPlayBar.Row;
+    X := X + Round(FWinampPlayBar.Width * PercentPlayed);
+    FDisplayMgr.PaintLine(FWinampPlayBar.Col, Y-2, FWinampPlayBar.Col + FWinampPlayBar.Width, Y-2, True);
+    FDisplayMgr.PaintLine(FWinampPlayBar.Col, Y-1, FWinampPlayBar.Col + FWinampPlayBar.Width, Y-1, True);
+    FDisplayMgr.PaintLine(FWinampPlayBar.Col, Y+2, FWinampPlayBar.Col + FWinampPlayBar.Width, Y+2, True);
+    FDisplayMgr.PaintLine(FWinampPlayBar.Col, Y+1, FWinampPlayBar.Col + FWinampPlayBar.Width, Y+1, True);
+    FDisplayMgr.PaintLine(X, Y-2, X, Y+2, False);
+    X := FWinampPlayBar.Col;
+    FDisplayMgr.PaintLine(X, Y, X + FWinampPlayBar.Width, Y, False);
+  end else
+    DrawProgressBar(FWinampPlayBar.Col, FWinampPlayBar.Row, FWinampPlayBar.Width, PercentPlayed);
+end;
+
+procedure TMainForm.DrawProgressBar(Col, Row, BarWidth: Integer; Percentage: Double);
+var
+  X: Integer;
+  C: Char;
+  FilledNum: Integer;
+begin
   // calculate number of characters in bar which are used
-  UsedNum := Round(BarWidth * (1.0 - PercentFree));
+  FilledNum := Round(BarWidth * Percentage);
 
   for X := 0 to (BarWidth - 1) do
   begin
-    if (X < UsedNum) then
+    if (X < FilledNum) then
       C := Chr($87)
     else
       C := Chr($8E);
@@ -1806,6 +1859,29 @@ begin
           P2 := StrToInt(CmdParts[2]);
           P3 := StrToInt(CmdParts[3]);
           FDisplayMgr.PaintBitmapFromFile(CmdParts[1], P2, P3);
+        end;
+
+      end
+      else
+      if ('WAPLAYBAR' = Cmd) then
+      begin
+        // P1 = x, P2 = y, P3 = width (in characters), P4 = graphical bar? [optional]
+        if (CmdParts.Count >= 4) then
+        begin
+          P1 := StrToInt(CmdParts[1]);
+          P2 := StrToInt(CmdParts[2]);
+          P3 := StrToInt(CmdParts[3]);
+          if ((CmdParts.Count >= 5) and ((CmdParts[4].ToUpper = 'TRUE') or (CmdParts[4] = '1'))) then
+            FWinampPlayBar.IsGraphical:= True
+          else
+            FWinampPlayBar.IsGraphical:= False;
+          FWinampPlayBar.Col := P1;
+          FWinampPlayBar.Row := P2;
+          FWinampPlayBar.Width:= Max(1, P3);
+          FWinampPlayBar.IsActive:= True;
+          DrawWinampPlayBar;
+          ExtraTimer.Interval := 500;
+          ExtraTimer.Enabled := True;
         end;
 
       end
