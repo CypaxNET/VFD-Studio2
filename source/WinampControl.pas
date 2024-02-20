@@ -134,14 +134,20 @@ function TWinampControl.SendToWAResult(Msg: Cardinal; wParam: integer; lParam: i
 var
  Handle: HWND;
 begin
-value:=0;
-Handle:=FindWindow('Winamp v1.x',nil);
-if Handle<>0 then
- begin
-  value:=SendMessage(Handle, Msg, wParam, lParam);
-  Result:=true;
- end
-else Result:=false;
+  value:=0;
+  Handle:=FindWindow('Winamp v1.x',nil);
+  if Handle<>0 then
+  begin
+    try
+      value:=SendMessage(Handle, Msg, wParam, lParam);
+      Result:=true;
+    except
+      on E: Exception do
+        Result:= false;
+    end;
+  end
+  else
+    Result:=false;
 end;
 
 function TWinampControl.GetVersion: string;
