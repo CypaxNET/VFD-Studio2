@@ -150,7 +150,7 @@ type
     procedure HyperlinkLabelClick(Sender: TObject);
     procedure ListBoxDblClick(Sender: TObject);
     procedure MenuItemLoadListClick(Sender: TObject);
-    procedure ListTestButtonClick(Sender: TObject);
+    procedure OpenListButtonClick(Sender: TObject);
     procedure MenuItemReloadClick(Sender: TObject);
     procedure MenuItemNextClick(Sender: TObject);
     procedure NextButtonClick(Sender: TObject);
@@ -162,7 +162,6 @@ type
     procedure StopButtonClick(Sender: TObject);
     procedure TrayIcon1Click(Sender: TObject);
     procedure UsageTimerTimer(Sender: TObject);
-    procedure LoadList(ListFileName: TFileName);
     procedure WaitTimerStartTimer(Sender: TObject);
     procedure WaitTimerStopTimer(Sender: TObject);
     procedure WaitTimerTimer(Sender: TObject);
@@ -176,6 +175,9 @@ type
     procedure HandlePreviewImageUpdate(NewImage: TBitmap);
 
     // methods related to processing lists
+    function LoadListFromFile(const ListFileName: TFileName): Boolean;
+    procedure LoadList(const ListFileName: TFileName);
+
     procedure CreateScreen;
     function InterpreteListCommand(S: String): Integer;
     procedure StopProcessing;
@@ -189,7 +191,7 @@ type
     procedure StopAnimation;
 
     // special display feature stuff
-    procedure InitMATRIX;
+    procedure InitMatrix;
     procedure AddMatrixDrop(const AText: String; MaxTextLen, Row: Integer; SlownessFactor: Byte);
     procedure UpdateMatrixDrops;
     procedure AddClock(Offset: Integer; X, Y, HourHandLength, MinuteHandLength, SecondsHandLength: Word);
@@ -258,57 +260,6 @@ resourcestring
   { TMainForm }
 
 
-
-
-procedure TMainForm.LoadList(ListFileName: TFileName);
-var
-  I: Integer;
-  S: String;
-  FileName: String; // file name of other list
-  J: Integer;
-begin
-  StopProcessing;
-  FListIndex := 0;
-
-  ListGroupBox.Caption := RsCurrentlyDisplayed + ': ' + ExtractFileName(ListFileName);
-
-  //load list
-  ListBox.Items.LoadFromFile(ListFileName);
-
-  //insert external lists
-  I := 0;
-  while (I < ListBox.Items.Count) do
-  begin
-    S := ListBox.items[I];
-    if (Pos('LOADSCREEN', S) = 1) then
-    begin
-      FileName := Copy(S, 12, Length(S) - 11);
-      ExtListBox.Items.LoadFromFile(FileName);
-      ListBox.Items.Delete(I);
-      // insert content from other list at position I
-      for J := (ExtListBox.Items.Count - 1) downto 0 do
-      begin
-        ListBox.Items.Insert(I, ExtListBox.Items[J]);
-      end;
-    end;
-    Inc(I);
-  end;
-
-  // remove all comment lines and empty lines
-  I := 0;
-  while (I <= ListBox.items.Count - 1) do
-  begin
-    S := ListBox.items[I];
-    if (S = '') or (S[1] = ';') then
-    begin
-      ListBox.items.Delete(I);
-      Dec(I);
-    end;
-    Inc(I);
-  end; //while
-
-  CreateScreen;
-end;
 
 
 procedure TMainForm.CreateScreen;
@@ -516,6 +467,13 @@ begin
 
   VersionLabel.Caption := 'v' + FSysInfo.ResourceVersionInfo;
 
+  // load passed file (otherwise just load last used file)
+  if (Paramcount > 0) then begin
+    // load passed list file
+    if FileExists(ParamStr(1)) then
+      FStudioConfig.ListConfig.ListName := ParamStr(1);
+  end;
+
 
   // Starting the application might require quite some (CPU)time, so it's a good
   // idea to give the system some time. That's why loading the list is moved
@@ -527,7 +485,6 @@ end;
 
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 var
-  IniFilePath: String;
   AStringList: TStringList;
   I: Integer;
 begin
@@ -540,8 +497,7 @@ begin
 
   LogEvent(lvINFO, 'Application closed.', Now);
 
-  IniFilePath := ExtractFilePath(application.ExeName) + STUDIO_INIFILE;
-  SaveConfig(IniFilePath);
+  SaveConfig(ExtractFilePath(Application.ExeName) + STUDIO_INIFILE);
 
   AStringList := TStringList.Create;
   try
@@ -577,51 +533,109 @@ begin
     Hide;
 end;
 
+{
+   Checks if the file exists, sets FStudioConfig.ListConfig.ListName accordingly and calls LoadList().
+   Does NOT check if it is an actually readable list file!
+   Returns False if the file could not be found.
+}
+function TMainForm.LoadListFromFile(const ListFileName: TFileName): Boolean;
+var
+  AFilename: TFileName;
+begin
+  Result:= False;
+  AFilename := ListFileName;
+
+  // if the file cannot be found, try the Lists-subdirectory
+  if (not FileExists(AFileName)) then
+    AFilename := ExtractFilePath(Application.ExeName) + 'Lists\' +  ExtractFileName(AFilename);
+
+  if (FileExists(AFileName)) then
+  begin
+    FStudioConfig.ListConfig.ListName := AFileName;
+    LoadList(AFileName);
+    Result:= True;
+  end
+  else
+    LogEvent(lvERROR, 'File "' + ListFileName + '" not found.', Now);
+end;
+
+
+{
+  Loads a list from file and calls CreateScreen().
+  Does NOT check in advance if the file actually exists! Use LoadListFromFile() to do so.
+}
+procedure TMainForm.LoadList(const ListFileName: TFileName);
+var
+  I: Integer;
+  S: String;
+  FileName: String; // file name of other list
+  J: Integer;
+begin
+  StopProcessing;
+  FListIndex := 0;
+
+  ListGroupBox.Caption := RsCurrentlyDisplayed + ': ' + ExtractFileName(ListFileName);
+
+  try
+    //load list
+
+    LogEvent(lvINFO, 'Loading file "' + ListFileName + '"', Now);
+    ListBox.Items.LoadFromFile(ListFileName);
+
+    //insert external lists
+    I := 0;
+    while (I < ListBox.Items.Count) do
+    begin
+      S := ListBox.items[I];
+      if (Pos('LOADSCREEN', S) = 1) then
+      begin
+        FileName := Copy(S, 12, Length(S) - 11);
+        ExtListBox.Items.LoadFromFile(FileName);
+        ListBox.Items.Delete(I);
+        // insert content from other list at position I
+        for J := (ExtListBox.Items.Count - 1) downto 0 do
+        begin
+          ListBox.Items.Insert(I, ExtListBox.Items[J]);
+        end;
+      end;
+      Inc(I);
+    end;
+
+    // remove all comment lines and empty lines
+    I := 0;
+    while (I <= ListBox.items.Count - 1) do
+    begin
+      S := ListBox.items[I];
+      if (S = '') or (S[1] = ';') then
+      begin
+        ListBox.items.Delete(I);
+        Dec(I);
+      end;
+      Inc(I);
+    end; //while
+
+    CreateScreen;
+  except
+    on E: Exception do
+    begin
+      LogEvent(lvError, E.Message, Now);
+    end;
+  end;
+end;
+
+{
+  OnTimer event handling procedure of LoadListTimer.
+}
 procedure TMainForm.LoadListTimerTimer(Sender: TObject);
 begin
   LoadListTimer.Enabled := False; // self-disabling
 
-  // load last list as specified in ini file
-  Mainform.LoadList(ExtractFilePath(Application.ExeName) + 'Lists\' + FStudioConfig.ListConfig.ListName);
+  LoadListFromFile(FStudioConfig.ListConfig.ListName);
 end;
 
 procedure TMainForm.InfoButtonClick(Sender: TObject);
 begin
   InfoForm.Show;
-(*
-var
-  wt, at, ut, it, et: Boolean;
-begin
-  wt:= WaitTimer.Enabled;
-  at:= AnimateTimer.Enabled;
-  ut:= UsageTimer.Enabled;
-  it:= InfoTimer.Enabled;
-  et:= ExtraTimer.Enabled;
-  WaitTimer.Enabled:= False;
-  AnimateTimer.Enabled:= False;
-  UsageTimer.Enabled:= False;
-  InfoTimer. Enabled:= False;
-  ExtraTimer.Enabled:= False;
-  MenuItemMainWindow.Enabled:= False;
-  MenuItemLoadList.Enabled:= False;
-  MenuItemNext.Enabled:= False;
-  MenuItemReload.Enabled:= False;
-  MenuItemStopGo.Enabled:= False;
-
-  InfoForm.ShowModal;
-
-  MenuItemMainWindow.Enabled:= True;
-  MenuItemLoadList.Enabled:= True;
-  MenuItemNext.Enabled:= True;
-  MenuItemReload.Enabled:= True;
-  MenuItemStopGo.Enabled:= True;
-  WaitTimer.Enabled:= wt;
-  AnimateTimer.Enabled:= at;
-  UsageTimer.Enabled:= ut;
-  InfoTimer. Enabled:= it;
-  ExtraTimer.Enabled:= et;
-  *)
-
 end;
 
 procedure TMainForm.UpdateTimeLabel;
@@ -678,7 +692,7 @@ end;
 
 procedure TMainForm.MenuItemLoadListClick(Sender: TObject);
 begin
-  ListTestButtonClick(Self);
+  OpenListButtonClick(Self);
 end;
 
 // Halts all timers related to display output and clears all animation,
@@ -689,6 +703,7 @@ begin
   ExtraTimer.Enabled := False;
   StopAnimation; // this also disables the animation timer
   DisableClocks;
+  SetLength(FMatrix.Drops, 0);
   FDisplayMgr.ClearInfoStrings;
   IsCpuMonitorDisplayed := False;
   IsMemMonitorDisplayed := False;
@@ -696,14 +711,15 @@ begin
   MenuItemStopGo.Caption := RsBtnStop;
 end;
 
-procedure TMainForm.ListTestButtonClick(Sender: TObject);
+procedure TMainForm.OpenListButtonClick(Sender: TObject);
 begin
-  OpenDialog.InitialDir := extractFileDir(application.exename) + '\Lists';
+  OpenDialog.InitialDir := extractFileDir(FStudioConfig.ListConfig.ListName);
   if (OpenDialog.Execute) then
   begin
-    LoadList(OpenDialog.FileName);
-    WaitTimer.Enabled := True;
-    FStudioConfig.ListConfig.ListName := ExtractFileName(OpenDialog.FileName);
+    if (LoadListFromFile(OpenDialog.FileName)) then begin
+      FStudioConfig.ListConfig.ListName := OpenDialog.FileName;
+      WaitTimer.Enabled := True;
+    end;
   end;
 end;
 
@@ -746,7 +762,7 @@ end;
 
 procedure TMainForm.ReloadButtonClick(Sender: TObject);
 begin
-  Mainform.LoadList(ExtractFilePath(application.ExeName) + 'Lists\' + FStudioConfig.ListConfig.ListName);
+  Mainform.LoadListFromFile(FStudioConfig.ListConfig.ListName);
 end;
 
 procedure TMainForm.SaveLogButtonClick(Sender: TObject);
@@ -958,6 +974,7 @@ var
   Process: TProcess;
   H: HWND;
 begin
+  SaveConfig(ExtractFilePath(Application.ExeName) + STUDIO_INIFILE);
 
   H := FindWindowByTitle('List Editor 2');
   if H <> 0 then // if we found notepad
@@ -1392,7 +1409,7 @@ begin
 end;
 
 
-procedure TMainForm.InitMATRIX;
+procedure TMainForm.InitMatrix;
 var
   I: Integer;
   AText: String;
@@ -1439,6 +1456,7 @@ begin
     FDisplayMgr.PaintString(C, X + Col, Row);
   end;
 end;
+
 
 
 // Interpretes a command (from ListBox), given and parameter S.
@@ -1798,7 +1816,6 @@ begin
           P3 := StrToInt(CmdParts[3]);
           P4 := StrToInt(CmdParts[4]);
           DrawDriveUsage(CmdParts[1][1], P2, P3, P4);
-
         end;
 
       end
@@ -1825,12 +1842,10 @@ begin
         if (CmdParts.Count >= 2) then
         begin
           P1 := StrToInt(CmdParts[1]);
-
           // Setting up the drops
-          InitMATRIX;
+          InitMatrix;
           ExtraTimer.Interval := P1;
           ExtraTimer.Enabled := True;
-
         end;
 
       end
@@ -1876,8 +1891,6 @@ begin
 end;
 
 procedure TMainForm.SettingsOkPressed;
-var
-  IniFilePath: String;
 begin
   FStudioConfig.ApplicationConfig.PreviewDisplayColor := ConfigForm.ColorButton.ButtonColor;
   FDisplayMgr.PreviewColor := FStudioConfig.ApplicationConfig.PreviewDisplayColor;
@@ -1907,8 +1920,7 @@ begin
     SetApplicationIcon;
   end;
 
-  IniFilePath := ExtractFilePath(application.ExeName) + STUDIO_INIFILE;
-  SaveConfig(IniFilePath);
+  SaveConfig(ExtractFilePath(Application.ExeName) + STUDIO_INIFILE);
 
 end;
 

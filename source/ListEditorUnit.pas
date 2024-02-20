@@ -231,12 +231,14 @@ begin
   FDisplayMgr.PreviewColor:= FStudioConfig.ApplicationConfig.PreviewDisplayColor;
   FDisplayMgr.AddDisplay('PREVIEW', FStudioConfig.DisplayConfig.ResX, FStudioConfig.DisplayConfig.ResY, '', 0);
 
+
+  AFileName := FStudioConfig.ListConfig.ListName;
+
+  // load passed file (otherwise just load last used file)
   if (Paramcount > 0) then begin
-    // load passed file
-    AFileName:= ParamStr(1);
-  end else begin
-    // Load the list which is currently used by VFD-Studio
-    AFileName:= ExtractFilePath(Application.ExeName) + 'Lists\' + FStudioConfig.ListConfig.ListName;
+    // load passed list file
+    if FileExists(ParamStr(1)) then
+      AFileName := ParamStr(1);
   end;
 
   if (FileExists(AFileName)) then begin
