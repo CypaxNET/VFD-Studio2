@@ -1207,10 +1207,10 @@ begin
     Delete(S, I, Length('$WAPOS$'));
     if (FWinampControl.IsWinampRunning) then
     begin
-      Sec := IntToStr((FWinampControl.GetOffset div 1000000) mod 60);
+      Sec := IntToStr((FWinampControl.GetOffset div 1000) mod 60);
       if (Length(Sec) < 2) then
         Sec := '0' + Sec;
-      Insert(IntToStr((FWinampControl.GetOffset div 1000000) div 60) + ':' + Sec, S, I);
+      Insert(IntToStr((FWinampControl.GetOffset div 1000) div 60) + ':' + Sec, S, I);
     end
     else
       Insert('0:00', S, I);
