@@ -173,6 +173,22 @@ end;
 
 procedure TPreviewDisplay.PaintLine(X0, Y0, X1, Y1: Word; IsInverted: Boolean);
 begin
+  // Canvas from FreePascal does not draw the last bottom right pixel - e.g.
+  // "Line(0,0,10,10) will not draw the pixel at 10,10.
+  // But since u8g2-Lib does so, we need to fix that here:
+  if (X0 <> X1) then begin
+    if (X1 > X0) then
+      X1 := X1 + 1
+    else
+      X0 := X0 + 1
+  end;
+  if (Y0 <> Y1) then begin
+    if (Y1 > Y0) then
+      Y1 := Y1 + 1
+    else
+      Y0 := Y0 + 1;
+  end;
+
   if (IsInverted) then
     FGraphicsLayer.Canvas.Pen.Color := clWhite
   else
