@@ -74,7 +74,7 @@ type
     procedure PaintBitmap(ABitmap: TBitmap; X, Y: Word); virtual; abstract;
     procedure PaintPixel(X, Y: Word; IsInverted: Boolean); virtual; abstract;
     procedure PaintLine(X0, Y0, X1, Y1: Word; IsInverted: Boolean); virtual; abstract;
-    procedure PaintFrame(X0, Y0, X1, Y1: Word; IsInverted: Boolean);
+    procedure PaintFrame(X0, Y0, X1, Y1: Word; IsInverted: Boolean); virtual;
     procedure SetBrightness(Percent: Byte); virtual; abstract;
     procedure SetLayerMode(LayerMode: TLayerMode); virtual abstract;
 
