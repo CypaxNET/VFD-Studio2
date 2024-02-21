@@ -1970,7 +1970,12 @@ begin
 end;
 
 procedure TMainForm.SettingsOkPressed;
+var
+  PreviousDisplayConfig: TDisplayConfig;
+  AProcess: TProcess;
 begin
+  PreviousDisplayConfig := FStudioConfig.DisplayConfig;
+
   FStudioConfig.ApplicationConfig.PreviewDisplayColor := ConfigForm.ColorButton.ButtonColor;
   FDisplayMgr.PreviewColor := FStudioConfig.ApplicationConfig.PreviewDisplayColor;
   FStudioConfig.ApplicationConfig.DoStartMinimized := ConfigForm.StartMinimizedCheckBox.Checked;
@@ -2003,6 +2008,23 @@ begin
   end;
 
   SaveConfig(ExtractFilePath(Application.ExeName) + STUDIO_INIFILE);
+
+  // check if diplay settings have been changed
+  if (PreviousDisplayConfig.DisplayType <> FStudioConfig.DisplayConfig.DisplayType) or
+     (PreviousDisplayConfig.Baudrate <> FStudioConfig.DisplayConfig.Baudrate) or
+     (PreviousDisplayConfig.IntName <> FStudioConfig.DisplayConfig.IntName) or
+     (PreviousDisplayConfig.ResX <> FStudioConfig.DisplayConfig.ResX) or
+     (PreviousDisplayConfig.ResY <> FStudioConfig.DisplayConfig.ResY) then
+  begin
+    if MessageDlg('Display settings changed', 'Restart VFD-Studio?', mtConfirmation, [mbYes, mbNo], 0, mbYes) = mrYes then
+    begin
+      AProcess := TProcess.Create(nil);
+      AProcess.Executable := '"'+Application.ExeName+'"';
+      AProcess.Execute;
+      AProcess.Free;
+      Application.Terminate;
+    end;
+  end;
 
 end;
 
