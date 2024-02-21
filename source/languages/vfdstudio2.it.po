@@ -56,9 +56,17 @@ msgstr "Stop"
 msgid "Currently displayed"
 msgstr "Attualmente in visualizzazione"
 
+#: mainunit.rsdisplaysettingschangeddialog
+msgid "Display settings changed"
+msgstr "Impostazioni di display modificate"
+
 #: mainunit.rsnextscreentext
 msgid "Next screen in"
 msgstr "Prossimo Screen in"
+
+#: mainunit.rsrestartvfdstudio
+msgid "Restart VFD-Studio?"
+msgstr "Riavviare VFD-Studio?"
 
 #: tconfigform.abortbutton.caption
 msgid "Abort"
