@@ -78,8 +78,6 @@ implementation
 
 
 constructor TU8G2.Create(AOwner: TComponent);
-var
-  I: Integer;
 begin
   inherited Create(AOwner);
 
@@ -316,7 +314,6 @@ const
   THIS_METHOD_NAME: String = 'Connect';
 var
   RecvText: String;
-  I: Integer;
 begin
   if (AInterface.StartsWith('COM')) then
   begin
@@ -366,8 +363,6 @@ end;
 }
 
 procedure TU8G2.DspInit(XRes, YRes: Word);
-var
-  Cmd: String;
 begin
   FGfxWidth := XRes;
   FGfxHeight := YRes;
@@ -376,15 +371,6 @@ begin
   FTxtWidth := (FGfxWidth div (FGlyphConfig.Width + FGlyphConfig.Gap));
   FTxtHeight := (FGfxHeight div FGlyphConfig.Height);
 
-  (*
-  if (False = FInterfaceConfig.isConnected) then Exit;
-
-  if (itCOM = FInterfaceConfig.IfaceType) then
-  begin
-    Cmd := 'R';
-    SerialOut(Cmd);
-  end;
-  *)
 end;
 
 
@@ -403,10 +389,8 @@ const
   THIS_METHOD_NAME: String = 'SerialOut';
 var
   RecvText: String;
-  TextLen: Integer;
 begin
   Text := Text + #10;
-  TextLen := Length(Text);
 
   try
     if FSerialInterface.CanWrite(-1) then
