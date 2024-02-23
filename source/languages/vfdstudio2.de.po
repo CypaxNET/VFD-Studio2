@@ -64,9 +64,17 @@ msgstr "Display-Einstellungen verändert"
 msgid "Next screen in"
 msgstr "Nächster Screen in"
 
+#: mainunit.rsno
+msgid "No"
+msgstr "Nein"
+
 #: mainunit.rsrestartvfdstudio
 msgid "Restart VFD-Studio?"
 msgstr "VFD-Studio neu starten?"
+
+#: mainunit.rsyes
+msgid "Yes"
+msgstr "Ja"
 
 #: tconfigform.abortbutton.caption
 msgid "Abort"

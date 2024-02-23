@@ -54,8 +54,16 @@ msgstr ""
 msgid "Next screen in"
 msgstr ""
 
+#: mainunit.rsno
+msgid "No"
+msgstr ""
+
 #: mainunit.rsrestartvfdstudio
 msgid "Restart VFD-Studio?"
+msgstr ""
+
+#: mainunit.rsyes
+msgid "Yes"
 msgstr ""
 
 #: tconfigform.abortbutton.caption

@@ -266,11 +266,15 @@ resourcestring
   { Showing the list name }
   RsCurrentlyDisplayed = 'Currently displayed';
 
-  { TMainForm }
+  { Dialog when display settings have been changed }
+  RsDisplaySettingsChangedDialog = 'Display settings changed';
+  RsRestartVFDStudio = 'Restart VFD-Studio?';
 
+  { General dialog options }
+  RsYes = 'Yes';
+  RsNo = 'No';
 
-
-
+{ TMainForm }
 procedure TMainForm.CreateScreen;
 var
   S: String;
@@ -595,16 +599,25 @@ begin
     I := 0;
     while (I < ListBox.Items.Count) do
     begin
-      S := ListBox.items[I];
-      if (Pos('LOADSCREEN', S) = 1) then
+      S := Trim(ListBox.items[I]);
+      if (S.StartsWith('INCLUDE ')) then
       begin
-        FileName := Copy(S, 12, Length(S) - 11);
-        ExtListBox.Items.LoadFromFile(FileName);
-        ListBox.Items.Delete(I);
-        // insert content from other list at position I
-        for J := (ExtListBox.Items.Count - 1) downto 0 do
-        begin
-          ListBox.Items.Insert(I, ExtListBox.Items[J]);
+        FileName := Trim(S.Replace('INCLUDE ', ''));
+        if FileExists(FileName) then begin
+            LogEvent(lvINFO, 'Including file "' + FileName + '"', Now);
+            ExtListBox.Items.LoadFromFile(FileName);
+            ListBox.Items.Delete(I);
+            // insert content from other list at position I
+            for J := (ExtListBox.Items.Count - 1) downto 0 do
+            begin
+              S:= Trim(ExtListBox.Items[J]);
+              if (S.StartsWith('INCLUDE ')) then
+                LogEvent(lvWARNING, 'Recursive INCLUDE not supported.', Now)
+              else
+                ListBox.Items.Insert(I, S);
+            end;
+        end else begin
+          LogEvent(lvERROR, 'Could not open file "' + FileName + '"', Now);
         end;
       end;
       Inc(I);
@@ -1826,7 +1839,7 @@ begin
           end
           else
           begin
-            FDisplayMgr.DrawFontedText(CmdParts[1], P2, P3, CmdParts[5], P4);
+            FDisplayMgr.DrawFontedText(CmdParts[1], P2, P3, CmdParts[5], P4, 1, 1);
           end;
         end;
 
@@ -2016,7 +2029,7 @@ begin
      (PreviousDisplayConfig.ResX <> FStudioConfig.DisplayConfig.ResX) or
      (PreviousDisplayConfig.ResY <> FStudioConfig.DisplayConfig.ResY) then
   begin
-    if MessageDlg('Display settings changed', 'Restart VFD-Studio?', mtConfirmation, [mbYes, mbNo], 0, mbYes) = mrYes then
+    if QuestionDlg(RsDisplaySettingsChangedDialog, RsRestartVFDStudio, mtConfirmation, [mrYes, RsYes, 'IsDefault', mrNo, RsNo], 0) = mrYes then
     begin
       AProcess := TProcess.Create(nil);
       AProcess.Executable := '"'+Application.ExeName+'"';
