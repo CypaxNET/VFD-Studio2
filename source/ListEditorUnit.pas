@@ -9,7 +9,7 @@ uses
   IniFiles, StudioCommon, Math, PreviewDisplay, uSMBIOS, SysInfo, WinampControl,
   lclintf, Buttons, Menus, ComCtrls, SynEdit, SynCompletion, Glyphs,
   ListHighlighter, SynEditTypes, LConvEncoding, MultiMon,
-  RegExpr, DateUtils, LCLTranslator, LCLType, DisplayManager;
+  RegExpr, DateUtils, LCLTranslator, LCLType, ExtDlgs, DisplayManager;
 const
   APP_TITLE = 'List Editor 2';
 
@@ -38,6 +38,15 @@ type
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
+    CommentLinesMenuItem: TMenuItem;
+    InsertPlaintextMenuItem: TMenuItem;
+    InsertTextMenuItem: TMenuItem;
+    InsertBitmapMenuItem: TMenuItem;
+    InsertAnimationMenuItem: TMenuItem;
+    Separator1: TMenuItem;
+    NewScreenMenuItem: TMenuItem;
+    OpenPictureDialog1: TOpenPictureDialog;
+    UnCommentMenuItem: TMenuItem;
     RedoMenuItem: TMenuItem;
     CloseButton: TSpeedButton;
     ZoomInButton: TSpeedButton;
@@ -65,9 +74,9 @@ type
     ToolGroupBox: TGroupBox;
     ImageList1: TImageList;
     procedure CloseButtonClick(Sender: TObject);
+    procedure CommentLinesMenuItemClick(Sender: TObject);
     procedure EditorChange(Sender: TObject);
     procedure EditorKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure EditorKeyPress(Sender: TObject; var Key: char);
     procedure EditorStatusChange(Sender: TObject; Changes: TSynStatusChanges);
     procedure ExitMenuItemClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -75,10 +84,15 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure EditorSpecialLineColors(Sender: TObject; Line: Integer; var Special: Boolean; var FG, BG: TColor);
     procedure FormResize(Sender: TObject);
+    procedure InsertAnimationMenuItemClick(Sender: TObject);
+    procedure InsertBitmapMenuItemClick(Sender: TObject);
+    procedure InsertPlaintextMenuItemClick(Sender: TObject);
+    procedure InsertTextMenuItemClick(Sender: TObject);
     procedure KeywordListBoxSelectionChange(Sender: TObject; User: Boolean);
     procedure MenuItem2Click(Sender: TObject);
     procedure NewFileButtonClick(Sender: TObject);
     procedure NewFileMenuItemClick(Sender: TObject);
+    procedure NewScreenMenuItemClick(Sender: TObject);
     procedure OpenButtonClick(Sender: TObject);
     procedure RedoButtonClick(Sender: TObject);
     procedure RedoMenuItemClick(Sender: TObject);
@@ -96,7 +110,7 @@ type
     procedure ShowKeywordExplanation(Cmd: String);
 
     procedure AddAutocompleteWords(Sender: TObject);
-    procedure ToolGroupBoxClick(Sender: TObject);
+    procedure UnCommentMenuItemClick(Sender: TObject);
     procedure UndoButtonClick(Sender: TObject);
     procedure UndoMenuItemClick(Sender: TObject);
     procedure ZoomInButtonClick(Sender: TObject);
@@ -106,6 +120,10 @@ type
 
     procedure ChangeMemoHeightToFitLines(Memo: TMemo);
     function AutoSizeMemoY(Memo: TMemo): Word;
+
+
+    procedure CommentCurrentLine;
+    procedure UncommentCurrentLine;
 
     function CheckLine(Line: String): String;
 
@@ -165,6 +183,11 @@ resourcestring
 
   RsDiscardTitle = 'You have unsaved changes.';
   RsDiscardMessage = 'Discard changes?';
+
+  { General dialog options }
+  RsYes = 'Yes';
+  RsNo = 'No';
+
 
   {$include Expressions.pas}
 
@@ -442,7 +465,7 @@ procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   SaveWindowState;
   if (Editor.Modified) then begin
-    if MessageDlg(RsDiscardTitle, RsDiscardMessage, mtConfirmation, [mbYes, mbNo], 0, mbNo) = mrYes then
+    if QuestionDlg(RsDiscardTitle, RsDiscardMessage, mtConfirmation, [mrYes, RsYes, mrNo, RsNo, 'IsDefault', 'IsCancel'], 0) = mrYes then
       CanClose:= True
     else
       CanClose:= False;
@@ -559,16 +582,124 @@ begin
   end;
 end;
 
-procedure TMainForm.EditorKeyPress(Sender: TObject; var Key: char);
-begin
-
-end;
-
 procedure TMainForm.CloseButtonClick(Sender: TObject);
 begin
   MainForm.Close;
 end;
 
+
+{
+ Add a ';' at the begin of each selected line
+}
+procedure TMainForm.CommentLinesMenuItemClick(Sender: TObject);
+var
+  I: Integer;
+  PreviousCaretXY: TPoint;
+  PrevBlockBegin, PrevBlockEnd: TPoint;
+begin
+  PreviousCaretXY := Editor.LogicalCaretXY;
+  PrevBlockBegin := Editor.BlockBegin;
+  PrevBlockEnd := Editor.BlockEnd;
+
+  Editor.BeginUpdate(True);
+  Editor.BeginUndoBlock;
+
+  // check if at least one line is selected
+  if Editor.SelAvail then
+  begin
+    for I := Editor.BlockBegin.Y to Editor.BlockEnd.Y do
+    begin
+      Editor.CaretY:= I;
+      CommentCurrentLine;
+    end;
+  end else begin
+    // handle only current line
+    CommentCurrentLine;
+  end;
+
+  Editor.EndUndoBlock;
+  Editor.EndUpdate;
+
+  Editor.BlockBegin := PrevBlockBegin;
+  Editor.BlockEnd := PrevBlockEnd;
+  Editor.LogicalCaretXY := PreviousCaretXY;
+end;
+
+{
+ Remove a ';' at the begin of each selected line
+}
+procedure TMainForm.UnCommentMenuItemClick(Sender: TObject);
+var
+  I: Integer;
+  PreviousCaretXY: TPoint;
+  PrevBlockBegin, PrevBlockEnd: TPoint;
+begin
+  PreviousCaretXY := Editor.LogicalCaretXY;
+  PrevBlockBegin := Editor.BlockBegin;
+  PrevBlockEnd := Editor.BlockEnd;
+
+  Editor.BeginUpdate(True);
+  Editor.BeginUndoBlock;
+
+  // check if at least one line is selected
+  if Editor.SelAvail then
+  begin
+    for I := Editor.BlockBegin.Y to Editor.BlockEnd.Y do
+    begin
+      if (Editor.Lines[I-1].StartsWith(';')) then begin
+        Editor.CaretY:= I;
+        UncommentCurrentLine;
+      end;
+    end;
+  end else begin
+    UncommentCurrentLine;
+  end;
+
+  Editor.EndUndoBlock;
+  Editor.EndUpdate;
+
+  Editor.BlockBegin := PrevBlockBegin;
+  Editor.BlockEnd := PrevBlockEnd;
+  Editor.LogicalCaretXY := PreviousCaretXY;
+end;
+
+procedure TMainForm.CommentCurrentLine;
+begin
+  Editor.CaretX := 1;
+  Editor.InsertTextAtCaret(';');
+end;
+
+procedure TMainForm.UncommentCurrentLine;
+var
+  P1, P2: TPoint;
+begin
+  if (Editor.Lines[Editor.CaretXY.Y - 1].StartsWith(';')) then begin
+    P1 := Editor.LogicalCaretXY;
+    P1.X:= 1;
+    P2 := P1;
+    // Calculate the byte pos of the next char
+    P2.X := P2.X + 1;
+    // P1 points to the first byte of char to be replaced
+    // P2 points to the first byte of the char after the last replaceable char
+    Editor.TextBetweenPoints[P1, P2] := '';
+  end;
+end;
+
+
+procedure TMainForm.NewScreenMenuItemClick(Sender: TObject);
+begin
+  Editor.CaretX:= 1;
+  Editor.InsertTextAtCaret(';add a description here' + LineEnding +
+                           'NEWSCREEN' + LineEnding +
+                           'CLEARSCREEN' + LineEnding +
+                            LineEnding +
+                            'SCREENTIME 60' + LineEnding +
+                           'ENDSCREEN' + LineEnding);
+
+  // place cursor at end of the SCREENTIME instruction
+  Editor.CaretY:= Editor.CaretY - 2;
+  Editor.CaretX:= 14;
+end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
@@ -604,6 +735,81 @@ begin
   end;
 end;
 
+procedure TMainForm.InsertAnimationMenuItemClick(Sender: TObject);
+var
+  AFilename: String;
+  RegEx: TRegExpr;
+  TmpBitmap: TBitmap;
+  NumFrames: Integer;
+  FrameWidth: Integer;
+  Match1: String;
+begin
+  if OpenPictureDialog1.Execute then begin
+    AFilename:= OpenPictureDialog1.FileName;
+    if (AFilename.StartsWith(ExtractFilePath(Application.ExeName))) then
+      AFilename:= AFilename.Replace(ExtractFilePath(Application.ExeName), '');
+
+    NumFrames:= 2;
+
+    // if the filename ends with something like "_30.bmp" then we extract the number of frames from that
+    RegEx:= TRegExpr.Create();
+    RegEx.Expression := '_(\d+)\.bmp$';
+    if (RegEx.Exec(AFilename)) then
+    begin
+      Match1 := RegEx.Match[1];
+      NumFrames:= Max(2, StrToIntDef(Match1, NumFrames)); // must be at least two frames
+    end;
+    RegEx.Free;
+
+    TmpBitmap:= TBitmap.Create();
+    TmpBitmap.LoadFromFile(AFilename);
+    FrameWidth:= TmpBitmap.Width div NumFrames;
+    TmpBitmap.Free;
+
+    Editor.CaretX:= 1;
+    Editor.InsertTextAtCaret('ANIMATE '''+AFilename+''' 1000 00 00 ' + IntToStr(FrameWidth) + LineEnding);
+
+    Editor.CaretY:= Editor.CaretY - 1;
+    Editor.CaretX:= 12;
+  end;
+end;
+
+procedure TMainForm.InsertBitmapMenuItemClick(Sender: TObject);
+var
+  AFilename: String;
+begin
+  if OpenPictureDialog1.Execute then begin
+    AFilename:= OpenPictureDialog1.FileName;
+    if (AFilename.StartsWith(ExtractFilePath(Application.ExeName))) then
+      AFilename:= AFilename.Replace(ExtractFilePath(Application.ExeName), '');
+    Editor.CaretX:= 1;
+    Editor.InsertTextAtCaret('BITMAP '''+AFilename+''' 00 00' + LineEnding);
+
+    Editor.CaretY:= Editor.CaretY - 1;
+    Editor.CaretX:= 12;
+  end;
+end;
+
+procedure TMainForm.InsertPlaintextMenuItemClick(Sender: TObject);
+begin
+  Editor.CaretX:= 1;
+  Editor.InsertTextAtCaret('PLAINTEXT '''' 00 00' + LineEnding);
+
+  // place cursor at the text position
+  Editor.CaretY:= Editor.CaretY - 1;
+  Editor.CaretX:= 12;
+end;
+
+procedure TMainForm.InsertTextMenuItemClick(Sender: TObject);
+begin
+  Editor.CaretX:= 1;
+  Editor.InsertTextAtCaret('TEXTOUT '''' 00 00 12 ''Arial''' + LineEnding);
+
+  // place cursor at the text position
+  Editor.CaretY:= Editor.CaretY - 1;
+  Editor.CaretX:= 10;
+end;
+
 
 procedure TMainForm.MenuItem2Click(Sender: TObject);
 begin
@@ -614,6 +820,7 @@ procedure TMainForm.NewFileMenuItemClick(Sender: TObject);
 begin
   NewFileButtonClick(Sender);
 end;
+
 
 procedure TMainForm.RedoButtonClick(Sender: TObject);
 begin
@@ -629,7 +836,8 @@ end;
 procedure TMainForm.NewFileButtonClick(Sender: TObject);
 begin
   if (Editor.Modified) then begin
-    if MessageDlg(RsDiscardTitle, RsDiscardMessage, mtConfirmation, [mbYes, mbNo], 0, mbNo) = mrYes then begin
+    if QuestionDlg(RsDiscardTitle, RsDiscardMessage, mtConfirmation, [mrYes, RsYes, mrNo, RsNo, 'IsDefault', 'IsCancel'], 0) = mrYes then
+    begin
       Editor.Lines.Clear;
       Editor.Modified:= False;
       FFileName:= '';
@@ -681,7 +889,7 @@ end;
 procedure TMainForm.OpenButtonClick(Sender: TObject);
 begin
   if (Editor.Modified) then
-    if MessageDlg(RsDiscardTitle, RsDiscardMessage, mtConfirmation, [mbYes, mbNo], 0, mbNo) = mrNo then
+    if QuestionDlg(RsDiscardTitle, RsDiscardMessage, mtConfirmation, [mrYes, RsYes, mrNo, RsNo, 'IsDefault', 'IsCancel'], 0) = mrNo then
       Exit;
 
   if (OpenDialog.Execute) then
@@ -736,10 +944,6 @@ begin
   StringList.Free;
 end;
 
-procedure TMainForm.ToolGroupBoxClick(Sender: TObject);
-begin
-
-end;
 
 procedure TMainForm.UndoButtonClick(Sender: TObject);
 begin
@@ -901,6 +1105,25 @@ begin
         else
         begin
           Res := 'ENDSCREEN should have no parameters';
+        end;
+      end
+
+      else
+      if ('INCLUDE' = CMD) then
+      begin
+        // should have one filename parameter
+        RegEx.Expression := '^INCLUDE\s+(.+)$';
+        if (RegEx.Exec(S)) then
+        begin
+          Match := RegEx.Match[1];
+          if FileExists(Match) then
+            Res := 'ok'
+          else
+            Res := 'File "' + Match + '" not found.';
+        end
+        else
+        begin
+          Res := 'INCLUDE should have one file name parameter';
         end;
       end
 
@@ -1146,7 +1369,7 @@ begin
         end
         else
         begin
-          Res := 'PLAINTEXT should have a text parameter followed by two number parameters';
+          Res := 'PLAINTEXT should have a non-empty text parameter followed by two number parameters';
         end;
       end
 
@@ -1434,7 +1657,7 @@ begin
           end
           else
           begin
-            FDisplayMgr.DrawFontedText(CmdParts[1], P2, P3, CmdParts[5], P4);
+            FDisplayMgr.DrawFontedText(CmdParts[1], P2, P3, CmdParts[5], P4, 1, 1);
             FDisplayMgr.ForcePreviewUpdate;
           end;
         end;

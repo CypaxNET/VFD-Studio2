@@ -5,6 +5,11 @@ resourcestring
     'All lines starting with a ";"-character are considered as comments.' + LineEnding +
     'Comments will not processed and are for your convenience - Example: to describe individual commands or screens.';
 
+  RsHelpINCLUDE =
+    'Includes another VFD-Studio list file at the position of this command.' + LineEnding +
+    'Note that recursive inclusion is not supported: any INCLUDE commands from an included file will be ignored.' + LineEnding + LineEnding +
+    'Param1:' + LineEnding + '  file path and name of another list file';
+
   RsHelpNEWSCREEN =
     'Presentations on the display are shown screen by screen.' + LineEnding +
     'This command starts a new screen. ' + LineEnding +
@@ -412,10 +417,15 @@ const
 
   // COMMANDS
   Commands: array of TExpression = (
+    (Expr: 'INCLUDE';
+      Help: RsHelpINCLUDE;
+      Example: ';insert the content of other file:' +
+                LineEnding +
+                'INCLUDE Lists\MyList.vfdlst'),
     (Expr: 'NEWSCREEN';
       Help: RsHelpNEWSCREEN;
       Example: ';Show only when Winamp runs' +
-      LineEnding +
+                LineEnding +
                 'NEWSCREEN REQUIREWINAMP' + LineEnding +
                 'PLAINTEXT ''Song:'' 0 0' + LineEnding +
                 'PLAINTEXT ''$WATITLE$'' 1 1' + LineEnding +
