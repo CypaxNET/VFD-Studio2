@@ -68,7 +68,7 @@ type
     // utility methods
     procedure ForcePreviewUpdate;
     function GetAverageCpuLoad: Byte;
-    procedure TrimBitmap(var Bmp: TBitmap);
+    procedure TrimBitmap(var Bmp: TBitmap; DoTrimWidth, DoTrimHeight: Boolean);
 
     // display features
     procedure ClearScreen;
@@ -84,7 +84,8 @@ type
 
     // methods related to text output
     procedure ClearInfoStrings;
-    function DrawFontedText(AText: String; X, Y: Byte; FontName: String; FontSize: Integer): TPoint;
+    function GetFontedTextDimensions(AText: String; X, Y: Byte; FontName: String; FontSize: Integer): TPoint;
+    function DrawFontedText(AText: String; X, Y: Byte; FontName: String; FontSize: Integer; MinWidth, MinHeight: Integer): TPoint;
     function AddVariableInfo(AText: String; X, Y: Byte; FontName: String; FontSize: Integer): Boolean;
     procedure HandleTextOutput(AText: String; X, Y: Byte; FontName: String; FontSize: Integer);
     procedure RefreshTextOutputs;
@@ -168,61 +169,66 @@ end;
 
 
 
-procedure TDisplayManager.TrimBitmap(var Bmp: TBitmap);
+procedure TDisplayManager.TrimBitmap(var Bmp: TBitmap; DoTrimWidth, DoTrimHeight: Boolean);
 var
   X, Y: Integer;
   NumberOfWhiteLines: Integer;
   IsNonWhitePixelFound: Boolean;
 begin
-  // trim bottom
-  // start from bottom and count all horizontal lines which are completely white
-  NumberOfWhiteLines := 0;
-  for Y := Bmp.Height - 1 downto 1 do
-  begin // 'downto 1' and not 'downto 0' because the reaining image should be at least 1 pixel in height
-    IsNonWhitePixelFound := False;
-    for X := 0 to (Bmp.Width - 1) do
-    begin
-      if (Bmp.Canvas.Pixels[X, Y] <> clWhite) then
+  if (DoTrimHeight) then
+  begin
+    // trim bottom
+    // start from bottom and count all horizontal lines which are completely white
+    NumberOfWhiteLines := 0;
+    for Y := Bmp.Height - 1 downto 1 do
+    begin // 'downto 1' and not 'downto 0' because the reaining image should be at least 1 pixel in height
+      IsNonWhitePixelFound := False;
+      for X := 0 to (Bmp.Width - 1) do
       begin
-        IsNonWhitePixelFound := True;
-        Break; // abort X loop
-      end;
-    end; // for X
-    if (IsNonWhitePixelFound) then
-    begin
-      Break; // abort Y loop
-    end
-    else
-    begin
-      Inc(NumberOfWhiteLines);
-    end;
-  end; // for Y
-  Bmp.Height := Bmp.Height - NumberOfWhiteLines;
-
-  // trim right
-  // start from right and count all vertical lines which are completely white
-  NumberOfWhiteLines := 0;
-  for X := Bmp.Width - 1 downto 1 do
-  begin // 'downto 1' and not 'downto 0' because the reaining image should be at least 1 pixel in width
-    IsNonWhitePixelFound := False;
-    for Y := 0 to (Bmp.Height - 1) do
-    begin
-      if (Bmp.Canvas.Pixels[X, Y] <> clWhite) then
+        if (Bmp.Canvas.Pixels[X, Y] <> clWhite) then
+        begin
+          IsNonWhitePixelFound := True;
+          Break; // abort X loop
+        end;
+      end; // for X
+      if (IsNonWhitePixelFound) then
       begin
-        IsNonWhitePixelFound := True;
         Break; // abort Y loop
+      end
+      else
+      begin
+        Inc(NumberOfWhiteLines);
       end;
     end; // for Y
-    if (IsNonWhitePixelFound) then
-    begin
-      Break; // abort X loop
-    end
-    else
-    begin
-      Inc(NumberOfWhiteLines);
-    end;
-  end; // for Y
-  Bmp.Width := Bmp.Width - NumberOfWhiteLines;
+    Bmp.Height := Bmp.Height - NumberOfWhiteLines;
+  end;
+  if (DoTrimWidth) then
+  begin
+    // trim right
+    // start from right and count all vertical lines which are completely white
+    NumberOfWhiteLines := 0;
+    for X := Bmp.Width - 1 downto 1 do
+    begin // 'downto 1' and not 'downto 0' because the reaining image should be at least 1 pixel in width
+      IsNonWhitePixelFound := False;
+      for Y := 0 to (Bmp.Height - 1) do
+      begin
+        if (Bmp.Canvas.Pixels[X, Y] <> clWhite) then
+        begin
+          IsNonWhitePixelFound := True;
+          Break; // abort Y loop
+        end;
+      end; // for Y
+      if (IsNonWhitePixelFound) then
+      begin
+        Break; // abort X loop
+      end
+      else
+      begin
+        Inc(NumberOfWhiteLines);
+      end;
+    end; // for Y
+    Bmp.Width := Bmp.Width - NumberOfWhiteLines;
+  end;
 end;
 
 
@@ -484,9 +490,8 @@ begin
   end;
 end;
 
-function TDisplayManager.DrawFontedText(AText: String; X, Y: Byte; FontName: String; FontSize: Integer): TPoint;
+function TDisplayManager.GetFontedTextDimensions(AText: String; X, Y: Byte; FontName: String; FontSize: Integer): TPoint;
 var
-  DspIdx: Integer;
   TmpBitmap: TBitmap;
   ResultPoint: TPoint;
 begin
@@ -503,7 +508,60 @@ begin
     TmpBitmap.SetSize(TmpBitmap.Canvas.TextWidth(AText), TmpBitmap.Canvas.TextHeight(AText));
     TmpBitmap.Canvas.AntialiasingMode := amOff;
     TmpBitmap.Canvas.TextOut(0, 0, AText);
-    //TrimBitmap(TmpBitmap);
+    TrimBitmap(TmpBitmap, True, True);
+
+    // clip bitmap to display if needed
+    if (TmpBitmap.Width + X >= FGfxWidth) then
+      TmpBitmap.Width := TmpBitmap.Width - (TmpBitmap.Width + X - FGfxWidth);
+    if (TmpBitmap.Height + Y >= FGfxHeight) then
+      TmpBitmap.Height := TmpBitmap.Height - (TmpBitmap.Height + Y - FGfxHeight);
+
+    TmpBitmap.Canvas.Pixels[0, 0] := TmpBitmap.Canvas.Pixels[0, 0]; // this seems like nonsense but is required to actually load the bitmap in memory
+    ResultPoint.X := TmpBitmap.Width;
+    ResultPoint.Y := TmpBitmap.Height;
+  finally
+    TmpBitmap.Free;
+  end;
+
+  Result := ResultPoint;
+end;
+
+
+function TDisplayManager.DrawFontedText(AText: String; X, Y: Byte; FontName: String; FontSize: Integer; MinWidth, MinHeight: Integer): TPoint;
+var
+  DspIdx: Integer;
+  TmpBitmap: TBitmap;
+  ResultPoint: TPoint;
+  ARect: TRect;
+begin
+  ResultPoint := Point(0, 0);
+
+  TmpBitmap := TBitmap.Create;
+  try
+    TmpBitmap.Monochrome := True;
+    TmpBitmap.Canvas.Font.Color := clblack;
+    TmpBitmap.Canvas.Font.Name := FontName;
+    TmpBitmap.Canvas.Font.Size := FontSize;
+    TmpBitmap.Canvas.Font.Bold := False;
+    TmpBitmap.Canvas.Font.Italic := False;
+    TmpBitmap.SetSize(TmpBitmap.Canvas.TextWidth(AText), TmpBitmap.Canvas.TextHeight(AText));
+    TmpBitmap.Canvas.AntialiasingMode := amOff;
+    TmpBitmap.Canvas.TextOut(0, 0, AText);
+
+    // always trim the bitmap but make sure the minimum dimensions are met
+    TrimBitmap(TmpBitmap, True, True);
+    if (TmpBitmap.Width < MinWidth) then begin
+      ARect:= Rect(TmpBitmap.Width, 0, MinWidth, TmpBitmap.Height);
+      TmpBitmap.Width := MinWidth;
+      TmpBitmap.Canvas.Brush.Color:= clWhite;
+      TmpBitmap.Canvas.FillRect(ARect);
+    end;
+    if (TmpBitmap.Height < MinHeight) then begin
+      ARect:= Rect(0, TmpBitmap.Height, TmpBitmap.Width, MinHeight);
+      TmpBitmap.Height := MinHeight;
+      TmpBitmap.Canvas.Brush.Color:= clWhite;
+      TmpBitmap.Canvas.FillRect(ARect);
+    end;
 
     // clip bitmap to display if needed
     if (TmpBitmap.Width + X >= FGfxWidth) then
@@ -524,7 +582,6 @@ begin
   finally
     TmpBitmap.Free;
   end;
-
   Result := ResultPoint;
 end;
 
@@ -595,7 +652,7 @@ begin
       end
       else
       begin
-        Self.DrawFontedText(S, X, Y, FontName, FontSize);
+        Self.DrawFontedText(S, X, Y, FontName, FontSize, 1, 1);
       end;
     end;
 
@@ -609,7 +666,7 @@ begin
     end
     else
     begin
-      Self.DrawFontedText(S, X, Y, FontName, FontSize);
+      Self.DrawFontedText(S, X, Y, FontName, FontSize, 1, 1);
     end;
   end;
 
@@ -694,17 +751,9 @@ begin
       end
       else
       begin // it is text with font
-        BmpDimensions := DrawFontedText(S, FVariableInfo[I].X, FVariableInfo[I].Y, FVariableInfo[I].FontName, FVariableInfo[I].FontSize);
-        if (BmpDimensions.X < FVariableInfo[I].PrevWidth) then
-        begin
-          // the previous text was longer
-          // TODO
-        end;
-        if (BmpDimensions.Y < FVariableInfo[I].PrevHeight) then
-        begin
-          // the previous text was higher
-          // TODO
-        end;
+        DrawFontedText(S, FVariableInfo[I].X, FVariableInfo[I].Y, FVariableInfo[I].FontName, FVariableInfo[I].FontSize, FVariableInfo[I].PrevWidth, FVariableInfo[I].PrevHeight);
+        // get the dimensions the actual text would take (without white spaces at bootom or right)
+        BmpDimensions := GetFontedTextDimensions(S, FVariableInfo[I].X, FVariableInfo[I].Y, FVariableInfo[I].FontName, FVariableInfo[I].FontSize);
         FVariableInfo[I].PrevWidth := BmpDimensions.X;
         FVariableInfo[I].PrevHeight := BmpDimensions.Y;
       end;
