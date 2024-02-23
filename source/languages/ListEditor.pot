@@ -323,6 +323,15 @@ msgid ""
 "Example: \"08\""
 msgstr ""
 
+#: listeditorunit.rshelpinclude
+msgid ""
+"Includes another VFD-Studio list file at the position of this command.\n"
+"Note that recursive inclusion is not supported: any INCLUDE commands from an included file will be ignored.\n"
+"\n"
+"Param1:\n"
+"  file path and name of another list file"
+msgstr ""
+
 #: listeditorunit.rshelpip
 msgctxt "listeditorunit.rshelpip"
 msgid ""
@@ -691,8 +700,20 @@ msgid ""
 "Example: \"2024\""
 msgstr ""
 
+#: listeditorunit.rsno
+msgid "No"
+msgstr ""
+
+#: listeditorunit.rsyes
+msgid "Yes"
+msgstr ""
+
 #: tmainform.caption
 msgid "List Editor 2"
+msgstr ""
+
+#: tmainform.commentlinesmenuitem.caption
+msgid "&Comment line(s)"
 msgstr ""
 
 #: tmainform.examplelabel.caption
@@ -701,6 +722,22 @@ msgstr ""
 
 #: tmainform.exitmenuitem.caption
 msgid "E&xit"
+msgstr ""
+
+#: tmainform.insertanimationmenuitem.caption
+msgid "Insert &Animation"
+msgstr ""
+
+#: tmainform.insertbitmapmenuitem.caption
+msgid "Insert &BITMAP"
+msgstr ""
+
+#: tmainform.insertplaintextmenuitem.caption
+msgid "Insert &PLAINTEXT"
+msgstr ""
+
+#: tmainform.inserttextmenuitem.caption
+msgid "Insert &TEXTOUT"
 msgstr ""
 
 #: tmainform.menuitem1.caption
@@ -716,15 +753,23 @@ msgid "&View"
 msgstr ""
 
 #: tmainform.menuitem4.caption
-msgid "Edit"
+msgid "&Edit"
 msgstr ""
 
 #: tmainform.newfilemenuitem.caption
-msgid "New"
+msgid "&New"
+msgstr ""
+
+#: tmainform.newscreenmenuitem.caption
+msgid "Insert &NEWSCREEN"
 msgstr ""
 
 #: tmainform.opendialog.title
 msgid "Open file"
+msgstr ""
+
+#: tmainform.openpicturedialog1.title
+msgid "Open image file"
 msgstr ""
 
 #: tmainform.previewgroupbox.caption
@@ -773,6 +818,10 @@ msgstr ""
 
 #: tmainform.toolgroupbox.caption
 msgid "Commands and keywords"
+msgstr ""
+
+#: tmainform.uncommentmenuitem.caption
+msgid "&Uncomment line(s)"
 msgstr ""
 
 #: tmainform.undomenuitem.caption
