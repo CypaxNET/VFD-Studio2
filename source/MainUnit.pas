@@ -93,6 +93,7 @@ type
   { TMainForm }
   TMainForm = class(TForm)
     CfgButton: TBitBtn;
+    DisplayTypeLabel: TLabel;
     ListEditorButton: TBitBtn;
     ClearLogButton: TBitBtn;
     ExpertViewButton: TBitBtn;
@@ -224,6 +225,7 @@ type
 
     // settings
     FStudioConfig: TStudioConfig;
+    FIniFileName: String;
 
     // display stuff
     FDisplayMgr: TDisplayManager;
@@ -257,6 +259,10 @@ implementation
 {$R *.lfm}
 
 resourcestring
+
+  { DisplayTypeLabel }
+  RsDspType = 'Display: ';
+
   { stop / play button }
   RsBtnStop = 'Stop';
   RsBtnGo = 'Go';
@@ -447,32 +453,83 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 var
-  IniFilePath: String;
+  IniFilePath: String; // Inifile to load
+  ListName: String; // List file to load
+  I: Integer;
 begin
-  Randomize;
+
+// --- Set defaults ---
 
   // current directory shall always be where the exe is
   ChDir(ExtractFilePath(Application.ExeName));
 
-  LogEvent(lvINFO, 'Application started. Version ' + FSysInfo.ResourceVersionInfo, Now);
+  FIniFileName := ExtractFilePath(Application.ExeName) + STUDIO_INIFILE; // default ini file
+
+  ListName:= '';
+
+  Randomize;
+
+// --- Create and initialize objects ---
 
   FDisplayMgr := TDisplayManager.Create(Self);
   FDisplayMgr.OnDbgMessage := @LogEvent;
   FDisplayMgr.OnPreviewChanged := @HandlePreviewImageUpdate;
 
-
   FWinampControl := TWinampControl.Create(Self);
 
-  IniFilePath := ExtractFilePath(application.ExeName) + STUDIO_INIFILE;
-  LoadConfig(IniFilePath);
+  FSysInfo := TSysInfo.Create(Self);
 
-  // set controls accordingly to loaded settings
+  FAnimationData.AnimationBitmap := TBitmap.Create;
+
+  LogEvent(lvINFO, 'Application started. Version ' + FSysInfo.ResourceVersionInfo, Now);
+
+
+
+// --- Check parameters ---
+
+  for I:= 1 to ParamCount do begin
+    if FileExists(ParamStr(I)) then begin
+      if (ParamStr(I).EndsWith('.ini')) then begin
+        FIniFileName:= ParamStr(I);
+        LogEvent(lvINFO, 'Settings file is set by parameter.', Now);
+      end
+      else if (ParamStr(I).EndsWith('.vfdlst')) then begin
+        ListName:= ParamStr(I);
+        LogEvent(lvINFO, 'List file is set by parameter.', Now);
+      end
+      else
+        LogEvent(lvWARNING, 'Parameter'+IntToStr(I)+' discarded. File format not supported: "'+ParamStr(I)+'"', Now);
+    end else
+      LogEvent(lvWARNING, 'Parameter'+IntToStr(I)+' discarded. Cannot open file: "'+ParamStr(I)+'"', Now);
+  end;
+
+
+// --- Load settings ---
+
+  IniFilePath := FIniFileName;
+  if (ExtractFileName(IniFilePath) = IniFilePath) then
+    IniFilePath := ExtractFilePath(Application.ExeName) + FIniFileName;
+  if (FileExists(IniFilePath)) then begin
+    LogEvent(lvINFO, 'Loading settings from "'+IniFilePath+'"', Now);
+    LoadConfig(IniFilePath);
+  end else
+    LogEvent(lvERROR, 'Could not load settings from file "'+IniFilePath+'"', Now);
+
+  // overwrite List file from parameters if applicable
+  if ('' <> ListName) then
+    FStudioConfig.ListConfig.ListName:= ListName;
+
+
+// --- Do all the stuff which is depending on ini settings ---
+
   if (FStudioConfig.ApplicationConfig.DoStartMinimized) then
     Hide;
 
   SetApplicationIcon;
 
   FDisplayMgr.PreviewColor := FStudioConfig.ApplicationConfig.PreviewDisplayColor;
+
+  LogEvent(lvINFO, 'Application language "'+FStudioConfig.ApplicationConfig.Language+'"', Now);
   SetDefaultLang(FStudioConfig.ApplicationConfig.Language);
 
   FDisplayMgr.AddDisplay('PREVIEW', FStudioConfig.DisplayConfig.ResX, FStudioConfig.DisplayConfig.ResY, '', 0);
@@ -484,21 +541,17 @@ begin
   PreviewImage.Picture.Bitmap.Width := FStudioConfig.DisplayConfig.ResX;
   PreviewImage.Picture.Bitmap.Height := FStudioConfig.DisplayConfig.ResY;
 
-  FSysInfo := TSysInfo.Create(Self);
+  TrayIcon1.Hint := FStudioConfig.DisplayConfig.DisplayType + '@' + FStudioConfig.DisplayConfig.IntName;
 
-  FAnimationData.AnimationBitmap := TBitmap.Create;
-
-  TrayIcon1.Hint := 'VFD-Studio 2: ' + FStudioConfig.DisplayConfig.DisplayType + '@' + FStudioConfig.DisplayConfig.IntName;
+  if (('NONE' = FStudioConfig.DisplayConfig.DisplayType.ToUpper) or ('' = FStudioConfig.DisplayConfig.DisplayType)) then
+    DisplayTypeLabel.Caption:= RsDspType + 'NONE'
+  else
+    DisplayTypeLabel.Caption:= RsDspType + FStudioConfig.DisplayConfig.DisplayType + '@' + FStudioConfig.DisplayConfig.IntName;
 
   VersionLabel.Caption := 'v' + FSysInfo.ResourceVersionInfo;
 
-  // load passed file (otherwise just load last used file)
-  if (Paramcount > 0) then begin
-    // load passed list file
-    if FileExists(ParamStr(1)) then
-      FStudioConfig.ListConfig.ListName := ParamStr(1);
-  end;
 
+// -- Load the list ---
 
   // Starting the application might require quite some (CPU)time, so it's a good
   // idea to give the system some time. That's why loading the list is moved
@@ -512,6 +565,7 @@ procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 var
   AStringList: TStringList;
   I: Integer;
+  LogFileName: String;
 begin
 
   if (FStudioConfig.ApplicationConfig.DoClearOnExit) then
@@ -522,7 +576,7 @@ begin
 
   LogEvent(lvINFO, 'Application closed.', Now);
 
-  SaveConfig(ExtractFilePath(Application.ExeName) + STUDIO_INIFILE);
+  SaveConfig(FIniFileName);
 
   AStringList := TStringList.Create;
   try
@@ -533,7 +587,11 @@ begin
         LogListView.Items[i].SubItems[1] + ';' +           // Level
         LogListView.Items[i].SubItems[2]);                 // Time
     try
-      AStringList.SaveToFile(ExtractFilePath(application.ExeName) + 'vfdstudio.log');
+      // log file is stored in the application directory with same file name as the ini file:
+      LogFileName := ExtractFileName(FIniFileName);
+      LogFileName:= LogFileName.Replace('.ini', '.log');
+      LogFileName:= ExtractFilePath(Application.ExeName) + LogFileName;
+      AStringList.SaveToFile(LogFileName);
     finally
     end;
   finally
@@ -581,7 +639,7 @@ begin
     Result:= True;
   end
   else
-    LogEvent(lvERROR, 'File "' + ListFileName + '" not found.', Now);
+    LogEvent(lvERROR, 'Could not load List from file "' + AFileName + '"', Now);
 end;
 
 
@@ -598,6 +656,11 @@ var
 begin
   StopProcessing;
   FListIndex := 0;
+
+  if (not FileExists(ListFileName)) then begin
+    LogEvent(lvERROR, 'Could not load List from file "' + ListFileName + '"', Now);
+    Exit;
+  end;
 
   ListGroupBox.Caption := RsCurrentlyDisplayed + ': ' + ExtractFileName(ListFileName);
 
@@ -1032,7 +1095,7 @@ var
   Process: TProcess;
   H: HWND;
 begin
-  SaveConfig(ExtractFilePath(Application.ExeName) + STUDIO_INIFILE);
+  SaveConfig(FIniFileName);
 
   H := FindWindowByTitle('List Editor 2');
   if H <> 0 then // if we found notepad
@@ -2013,6 +2076,7 @@ procedure TMainForm.SettingsOkPressed;
 var
   PreviousDisplayConfig: TDisplayConfig;
   AProcess: TProcess;
+  I: Integer;
 begin
   PreviousDisplayConfig := FStudioConfig.DisplayConfig;
 
@@ -2047,7 +2111,7 @@ begin
     SetApplicationIcon;
   end;
 
-  SaveConfig(ExtractFilePath(Application.ExeName) + STUDIO_INIFILE);
+  SaveConfig(FIniFileName);
 
   // check if diplay settings have been changed
   if (PreviousDisplayConfig.DisplayType <> FStudioConfig.DisplayConfig.DisplayType) or
@@ -2059,7 +2123,9 @@ begin
     if QuestionDlg(RsDisplaySettingsChangedDialog, RsRestartVFDStudio, mtConfirmation, [mrYes, RsYes, 'IsDefault', mrNo, RsNo], 0) = mrYes then
     begin
       AProcess := TProcess.Create(nil);
-      AProcess.Executable := '"'+Application.ExeName+'"';
+      for I:= 1 to ParamCount do
+        AProcess.Parameters.Add(ParamStr(I)); // restart with same parameters
+      AProcess.Executable := '"' + Application.ExeName + '"';
       AProcess.Execute;
       AProcess.Free;
       Application.Terminate;

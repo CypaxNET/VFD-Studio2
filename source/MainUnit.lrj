@@ -23,6 +23,7 @@
 {"hash":372789,"name":"tmainform.loglistview.columns[3].caption","sourcebytes":[84,105,109,101],"value":"Time"},
 {"hash":194691758,"name":"tmainform.savelogbutton.caption","sourcebytes":[83,97,118,101,32,108,111,103,32,102,105,108,101,46,46,46],"value":"Save log file..."},
 {"hash":193214839,"name":"tmainform.clearlogbutton.caption","sourcebytes":[67,108,101,97,114,32,108,111,103],"value":"Clear log"},
+{"hash":175294400,"name":"tmainform.displaytypelabel.caption","sourcebytes":[68,105,115,112,108,97,121,58,32],"value":"Display: "},
 {"hash":91081575,"name":"tmainform.menuitemmainwindow.caption","sourcebytes":[38,77,97,105,110,32,119,105,110,100,111,119],"value":"&Main window"},
 {"hash":171911006,"name":"tmainform.menuitemloadlist.caption","sourcebytes":[38,76,111,97,100,32,108,105,115,116,46,46,46],"value":"&Load list..."},
 {"hash":86918366,"name":"tmainform.menuitemnext.caption","sourcebytes":[38,78,101,120,116,32,115,99,114,101,101,110],"value":"&Next screen"},

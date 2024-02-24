@@ -23,7 +23,7 @@ object MainForm: TMainForm
     AnchorSideRight.Side = asrBottom
     Left = 184
     Height = 15
-    Top = 159
+    Top = 178
     Width = 64
     Anchors = [akTop, akRight]
     BorderSpacing.Top = 8
@@ -32,11 +32,11 @@ object MainForm: TMainForm
   end
   object PreviewImage: TImage
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = VersionLabel
+    AnchorSideTop.Control = DisplayTypeLabel
     AnchorSideTop.Side = asrBottom
     Left = 0
     Height = 128
-    Top = 23
+    Top = 42
     Width = 256
     BorderSpacing.Top = 4
     Proportional = True
@@ -50,7 +50,7 @@ object MainForm: TMainForm
     AnchorSideRight.Side = asrBottom
     Left = 4
     Height = 65
-    Top = 182
+    Top = 201
     Width = 248
     Anchors = [akTop, akLeft, akRight]
     AutoSize = True
@@ -136,7 +136,7 @@ object MainForm: TMainForm
     AnchorSideRight.Side = asrBottom
     Left = 4
     Height = 36
-    Top = 298
+    Top = 317
     Width = 248
     Anchors = [akTop, akLeft, akRight]
     AutoSize = True
@@ -218,7 +218,7 @@ object MainForm: TMainForm
     AnchorSideRight.Side = asrBottom
     Left = 4
     Height = 35
-    Top = 255
+    Top = 274
     Width = 248
     Anchors = [akTop, akLeft, akRight]
     AutoSize = True
@@ -386,7 +386,7 @@ object MainForm: TMainForm
     AnchorSideBottom.Control = OkButtonPanel
     AnchorSideBottom.Side = asrBottom
     Left = 264
-    Height = 330
+    Height = 349
     Top = 4
     Width = 320
     Anchors = [akTop, akLeft, akBottom]
@@ -394,7 +394,7 @@ object MainForm: TMainForm
     BorderSpacing.Top = 4
     BorderSpacing.Right = 8
     Caption = 'Currently displayed:'
-    ClientHeight = 310
+    ClientHeight = 329
     ClientWidth = 316
     Constraints.MinWidth = 320
     TabOrder = 3
@@ -420,7 +420,7 @@ object MainForm: TMainForm
       AnchorSideBottom.Control = ListGroupBox
       AnchorSideBottom.Side = asrBottom
       Left = 8
-      Height = 294
+      Height = 313
       Top = 8
       Width = 300
       Anchors = [akTop, akLeft, akRight, akBottom]
@@ -443,7 +443,7 @@ object MainForm: TMainForm
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 235
-    Top = 334
+    Top = 353
     Width = 576
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
@@ -606,13 +606,24 @@ object MainForm: TMainForm
     AnchorSideRight.Side = asrBottom
     Left = 264
     Height = 8
-    Top = 569
+    Top = 588
     Width = 320
     Anchors = [akTop, akLeft, akRight]
     BevelOuter = bvNone
     ParentBackground = False
     ParentColor = False
     TabOrder = 5
+  end
+  object DisplayTypeLabel: TLabel
+    AnchorSideLeft.Control = VersionLabel
+    AnchorSideTop.Control = VersionLabel
+    AnchorSideTop.Side = asrBottom
+    Left = 4
+    Height = 15
+    Top = 23
+    Width = 44
+    BorderSpacing.Top = 4
+    Caption = 'Display: '
   end
   object TrayIcon1: TTrayIcon
     PopUpMenu = PopupMenu1

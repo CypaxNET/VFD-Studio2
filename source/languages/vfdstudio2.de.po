@@ -64,6 +64,11 @@ msgstr "Display-Einstellungen verändert"
 msgid "No, don't ask again"
 msgstr "Nein, nicht wieder fragen"
 
+#: mainunit.rsdsptype
+msgctxt "mainunit.rsdsptype"
+msgid "Display: "
+msgstr "Display: "
+
 #: mainunit.rsnextscreentext
 msgid "Next screen in"
 msgstr "Nächster Screen in"

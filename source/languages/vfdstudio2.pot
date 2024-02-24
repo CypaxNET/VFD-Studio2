@@ -54,6 +54,11 @@ msgstr ""
 msgid "No, don't ask again"
 msgstr ""
 
+#: mainunit.rsdsptype
+msgctxt "mainunit.rsdsptype"
+msgid "Display: "
+msgstr ""
+
 #: mainunit.rsnextscreentext
 msgid "Next screen in"
 msgstr ""

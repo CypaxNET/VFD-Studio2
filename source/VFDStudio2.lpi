@@ -18,22 +18,23 @@
     <i18n>
       <EnableI18N Value="True"/>
       <OutDir Value="languages"/>
-      <ExcludedIdentifiers Count="15">
+      <ExcludedIdentifiers Count="16">
         <Item1 Value="TMainForm.Caption"/>
         <Item2 Value="TMainForm.VersionLabel.Caption"/>
         <Item3 Value="TMainForm.ByLabel.Caption"/>
         <Item4 Value="TMainForm.DevelopmentYearsLabel.Caption"/>
         <Item5 Value="TMainForm.LogListView.Columns[0].Caption"/>
         <Item6 Value="TMainForm.HyperlinkLabel.Caption"/>
-        <Item7 Value="TConfigForm.DspTypeCombo.Text"/>
-        <Item8 Value="TConfigForm.BrightnessPercentLabel.Caption"/>
-        <Item9 Value="TConfigForm.IdlePercentageLabel.Caption"/>
-        <Item10 Value="TConfigForm.IfCfgCombo.Text"/>
-        <Item11 Value="TConfigForm.InterfaceCombo.Text"/>
-        <Item12 Value="TConfigForm.LangDeButton.caption"/>
-        <Item13 Value="TConfigForm.LangEnButton.caption"/>
-        <Item14 Value="TConfigForm.LangItButton.caption"/>
-        <Item15 Value="TConfigForm.XLabel.caption"/>
+        <Item7 Value="TMainForm.DisplayTypeLabel.Caption"/>
+        <Item8 Value="TConfigForm.DspTypeCombo.Text"/>
+        <Item9 Value="TConfigForm.BrightnessPercentLabel.Caption"/>
+        <Item10 Value="TConfigForm.IdlePercentageLabel.Caption"/>
+        <Item11 Value="TConfigForm.IfCfgCombo.Text"/>
+        <Item12 Value="TConfigForm.InterfaceCombo.Text"/>
+        <Item13 Value="TConfigForm.LangDeButton.caption"/>
+        <Item14 Value="TConfigForm.LangEnButton.caption"/>
+        <Item15 Value="TConfigForm.LangItButton.caption"/>
+        <Item16 Value="TConfigForm.XLabel.caption"/>
       </ExcludedIdentifiers>
     </i18n>
     <VersionInfo>
