@@ -60,6 +60,10 @@ msgstr "Attualmente in visualizzazione"
 msgid "Display settings changed"
 msgstr "Impostazioni di display modificate"
 
+#: mainunit.rsdontaskagain
+msgid "No, don't ask again"
+msgstr "No, non chiederlo più"
+
 #: mainunit.rsnextscreentext
 msgid "Next screen in"
 msgstr "Prossimo Screen in"
@@ -68,9 +72,17 @@ msgstr "Prossimo Screen in"
 msgid "No"
 msgstr "No"
 
+#: mainunit.rsnodisplayselected
+msgid "No display is selected"
+msgstr "Non è selezionato alcun display"
+
 #: mainunit.rsrestartvfdstudio
 msgid "Restart VFD-Studio?"
 msgstr "Riavviare VFD-Studio?"
+
+#: mainunit.rsselectdisplay
+msgid "Select a display now?"
+msgstr "Selezionare un display adesso?"
 
 #: mainunit.rsyes
 msgid "Yes"

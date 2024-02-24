@@ -21,6 +21,7 @@ type
     DisplayBrightness: Byte; // display brightness in percent, unless brightness is controlled by list commands
     DoClearOnExit: Boolean; // clear the display when closing the application (otherwise it is left as it is)
     IconIndex: Integer; // which icon shall be shown in system tray?
+    DontAskAgainDisplay: Boolean; // do not ask again to select a display
   end;
 
   TListConfig = record
@@ -270,9 +271,14 @@ resourcestring
   RsDisplaySettingsChangedDialog = 'Display settings changed';
   RsRestartVFDStudio = 'Restart VFD-Studio?';
 
+  { Dialog when no display is selected }
+  RsNoDisplaySelected = 'No display is selected';
+  RsSelectDisplay = 'Select a display now?';
+
   { General dialog options }
   RsYes = 'Yes';
   RsNo = 'No';
+  RsDontAskAgain = 'No, don''t ask again';
 
 { TMainForm }
 procedure TMainForm.CreateScreen;
@@ -375,6 +381,7 @@ begin
     FStudioConfig.ApplicationConfig.PreviewDisplayColor := StringToColor(ColorString);
     FStudioConfig.ApplicationConfig.DoStartMinimized := IniFile.ReadBool('APPLICATION', 'StartMinimized', False);
     FStudioConfig.ApplicationConfig.IconIndex := IniFile.ReadInteger('APPLICATION', 'IconIndex', 0);
+    FStudioConfig.ApplicationConfig.DontAskAgainDisplay:= IniFile.ReadBool('APPLICATION', 'DontAskForDisplay', False);
 
     FStudioConfig.ApplicationConfig.DoClearOnExit := IniFile.ReadBool('APPLICATION', 'DspClearOnExit', False);
     FStudioConfig.ApplicationConfig.IsBrightnessControlledByList := IniFile.ReadBool('APPLICATION', 'DspBrightnessByList', True);
@@ -412,6 +419,8 @@ begin
     ColorString := Format('$%.6x', [FStudioConfig.ApplicationConfig.PreviewDisplayColor]);
     IniFile.WriteBool('APPLICATION', 'StartMinimized', FStudioConfig.ApplicationConfig.DoStartMinimized);
     IniFile.WriteInteger('APPLICATION', 'IconIndex', FStudioConfig.ApplicationConfig.IconIndex);
+    IniFile.WriteBool('APPLICATION', 'DontAskForDisplay', FStudioConfig.ApplicationConfig.DontAskAgainDisplay);
+
     IniFile.WriteString('APPLICATION', 'DspColor', ColorString);
     IniFile.WriteBool('APPLICATION', 'DspClearOnExit', FStudioConfig.ApplicationConfig.DoClearOnExit);
     IniFile.WriteBool('APPLICATION', 'DspBrightnessByList', FStudioConfig.ApplicationConfig.IsBrightnessControlledByList);
@@ -652,8 +661,23 @@ end;
   OnTimer event handling procedure of LoadListTimer.
 }
 procedure TMainForm.LoadListTimerTimer(Sender: TObject);
+var
+  Res: TModalResult;
 begin
   LoadListTimer.Enabled := False; // self-disabling
+
+  if ( (not FStudioConfig.ApplicationConfig.DontAskAgainDisplay) and
+     (('NONE' = FStudioConfig.DisplayConfig.DisplayType.ToUpper) or ('' = FStudioConfig.DisplayConfig.DisplayType)) ) then
+  begin
+    // no display selected
+    Res := QuestionDlg(RsNoDisplaySelected, RsSelectDisplay, mtConfirmation, [mrYes, RsYes, 'IsDefault', mrNo, RsNo, mrIgnore, RsDontAskAgain], 0);
+    if (Res = mrYes) then begin
+      CfgButtonClick(Self);
+    end
+    else if (Res = mrIgnore) then begin
+      FStudioConfig.ApplicationConfig.DontAskAgainDisplay:= True;
+    end;
+  end;
 
   LoadListFromFile(FStudioConfig.ListConfig.ListName);
 end;

@@ -50,6 +50,10 @@ msgstr ""
 msgid "Display settings changed"
 msgstr ""
 
+#: mainunit.rsdontaskagain
+msgid "No, don't ask again"
+msgstr ""
+
 #: mainunit.rsnextscreentext
 msgid "Next screen in"
 msgstr ""
@@ -58,8 +62,16 @@ msgstr ""
 msgid "No"
 msgstr ""
 
+#: mainunit.rsnodisplayselected
+msgid "No display is selected"
+msgstr ""
+
 #: mainunit.rsrestartvfdstudio
 msgid "Restart VFD-Studio?"
+msgstr ""
+
+#: mainunit.rsselectdisplay
+msgid "Select a display now?"
 msgstr ""
 
 #: mainunit.rsyes
