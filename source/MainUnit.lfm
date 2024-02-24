@@ -1443,14 +1443,14 @@ object MainForm: TMainForm
   object UsageTimer: TTimer
     OnTimer = UsageTimerTimer
     Left = 608
-    Top = 336
+    Top = 344
   end
   object ExtraTimer: TTimer
     Enabled = False
     Interval = 4000
     OnTimer = ExtraTimerTimer
     Left = 680
-    Top = 336
+    Top = 344
   end
   object WaitTimer: TTimer
     Enabled = False

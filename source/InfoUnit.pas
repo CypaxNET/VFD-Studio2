@@ -5,7 +5,7 @@ unit InfoUnit;
 interface
 
 uses
-  SysUtils, Forms, Dialogs, ExtCtrls, StdCtrls,
+  SysUtils, Forms, Dialogs, ExtCtrls, StdCtrls, LCLTranslator,
   Buttons, HtmlView, HTMLUn2, HtmlGlobals, lclintf;
 type
 

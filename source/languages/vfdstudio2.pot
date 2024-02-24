@@ -161,7 +161,6 @@ msgid "Config"
 msgstr ""
 
 #: tmainform.clearlogbutton.caption
-msgctxt "tmainform.clearlogbutton.caption"
 msgid "Clear log"
 msgstr ""
 
@@ -183,7 +182,6 @@ msgid "Editor"
 msgstr ""
 
 #: tmainform.listgroupbox.caption
-msgctxt "tmainform.listgroupbox.caption"
 msgid "Currently displayed:"
 msgstr ""
 
@@ -192,12 +190,10 @@ msgid "Load list..."
 msgstr ""
 
 #: tmainform.logfilegroupbox.caption
-msgctxt "tmainform.logfilegroupbox.caption"
 msgid "Log file:"
 msgstr ""
 
 #: tmainform.loglistview.columns[1].caption
-msgctxt "tmainform.loglistview.columns[1].caption"
 msgid "Message"
 msgstr ""
 
@@ -206,27 +202,22 @@ msgid "Level"
 msgstr ""
 
 #: tmainform.loglistview.columns[3].caption
-msgctxt "tmainform.loglistview.columns[3].caption"
 msgid "Time"
 msgstr ""
 
 #: tmainform.menuitemexit.caption
-msgctxt "tmainform.menuitemexit.caption"
 msgid "&Exit"
 msgstr ""
 
 #: tmainform.menuitemloadlist.caption
-msgctxt "tmainform.menuitemloadlist.caption"
 msgid "&Load list..."
 msgstr ""
 
 #: tmainform.menuitemmainwindow.caption
-msgctxt "tmainform.menuitemmainwindow.caption"
 msgid "&Main window"
 msgstr ""
 
 #: tmainform.menuitemnext.caption
-msgctxt "tmainform.menuitemnext.caption"
 msgid "&Next screen"
 msgstr ""
 
@@ -236,7 +227,6 @@ msgid "Reload"
 msgstr ""
 
 #: tmainform.menuitemstopgo.caption
-msgctxt "tmainform.menuitemstopgo.caption"
 msgid "&Stop"
 msgstr ""
 
@@ -267,7 +257,6 @@ msgid "Save log file..."
 msgstr ""
 
 #: tmainform.screentimelabel.caption
-msgctxt "tmainform.screentimelabel.caption"
 msgid "ScreenTime:"
 msgstr ""
 

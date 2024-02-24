@@ -599,10 +599,10 @@ object InfoForm: TInfoForm
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = InfoOkButton
-    Left = 4
-    Height = 271
-    Top = 124
-    Width = 352
+    Left = 0
+    Height = 287
+    Top = 116
+    Width = 360
     BorderStyle = htSingle
     DefFontName = 'sans-serif'
     HistoryMaxCount = 0
@@ -619,9 +619,9 @@ object InfoForm: TInfoForm
   object Memo1: TMemo
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Side = asrBottom
-    Left = 64
+    Left = 72
     Height = 180
-    Top = 152
+    Top = 160
     Width = 208
     Anchors = []
     BorderSpacing.Left = 4
