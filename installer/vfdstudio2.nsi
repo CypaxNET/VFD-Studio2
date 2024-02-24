@@ -1,11 +1,20 @@
 !include "MUI2.nsh"
 
+!getdllversion "..\source\VFDStudio2.exe" ver
+
+!define INSTALLERVERSION "1.0.0.0"
+
 !define NAME "VFD-Studio 2"
+!define DESCRIPTION "My awesome application"
+
 !define REGPATH_UNINSTSUBKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${NAME}"
 
 Name "${NAME}"
 
-OutFile "vfdstudio-installer-2-0-0-0.exe"
+
+OutFile "vfdstudio-installer_v${ver1}-${ver2}-${ver3}-${ver4}.exe"
+
+
 RequestExecutionLevel User ; We don't need UAC elevation
 InstallDir "" ; Don't set a default $InstDir so we can detect /D= and InstallDirRegKey
 
@@ -21,12 +30,44 @@ LicenseData "..\LICENSE"
 !define MUI_HEADERIMAGE_BITMAP "..\resources\logo.bmp"
 !define MUI_HEADERIMAGE_RIGHT
 
+!define MUI_WELCOMEPAGE_TITLE  "VFD-Studio v${ver1}.${ver2}.${ver3}.${ver4} Setup"
 
-;!insertmacro MUI_PAGE_WELCOME
+!define MUI_WELCOMEPAGE_TEXT  "Setup will install VFD-Studio version ${ver1}.${ver2}.${ver3}.${ver4}.$\r$\n$\r$\nCheck the GitHub project page from the link below for newer versions.$\r$\n$\r$\nClick Next to continue."
+
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW WelcomePageShow
+!insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "../LICENSE"
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
+
+
+; Function to be called when the Welcome page is shown
+Function WelcomePageShow
+  Pop $0 ; don't forget to pop HWND of the stack
+  
+  ; place a link at the bottom of the page
+  ${NSD_CreateLink} 120u 90% -100u 12u "https://github.com/CypaxNET/VFD-Studio2/"
+  Pop $R9
+  ${NSD_OnClick} $R9 onLinkClick
+
+  ; Make the background color of the link transparent
+  SetCtlColors $R9 0x0066CC transparent
+
+  ; ^Font and ^FontSize are LangString vars containing the installer's set font and font size
+  ;Create a new font based on it that is underlined ( Font 'weight' of 400 = regular )
+  CreateFont $1 "$(^Font)" "$(^FontSize)" "400" /UNDERLINE
+  ; and assign the font to the link
+  SendMessage $R9 ${WM_SETFONT} $1 1
+
+FunctionEnd
+
+; Function to be called when the Link on the Welcome page is clicked
+Function onLinkClick
+  Pop $0 ; don't forget to pop HWND of the stack
+  ExecShell "open" "https://github.com/CypaxNET/VFD-Studio2/"
+FunctionEnd
+
 
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
@@ -36,6 +77,20 @@ LicenseData "..\LICENSE"
 !insertmacro MUI_PAGE_FINISH
 
 !insertmacro MUI_LANGUAGE "English"
+
+
+;--------------------------------
+;Version Information
+
+  VIProductVersion "${INSTALLERVERSION}"  ; file version
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "VFD-Studio 2"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "cypax.net"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright by cypax.net"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "VFD-Studio Installer"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${INSTALLERVERSION}"
+
+;--------------------------------
+
 
 Function .onInit
   SetShellVarContext Current
