@@ -442,6 +442,9 @@ var
 begin
   Randomize;
 
+  // current directory shall always be where the exe is
+  ChDir(ExtractFilePath(Application.ExeName));
+
   LogEvent(lvINFO, 'Application started. Version ' + FSysInfo.ResourceVersionInfo, Now);
 
   FDisplayMgr := TDisplayManager.Create(Self);

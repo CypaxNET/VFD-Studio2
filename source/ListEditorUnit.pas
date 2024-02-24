@@ -205,6 +205,9 @@ var
 begin
   Randomize;
 
+  // current directory shall always be where the exe is
+  ChDir(ExtractFilePath(Application.ExeName));
+
   FSynHighlighter := TSynDemoHlFold.Create(Self);
   FExampleHighlighter := TSynDemoHlFold.Create(Self);
   Editor.Highlighter := FSynHighlighter;
