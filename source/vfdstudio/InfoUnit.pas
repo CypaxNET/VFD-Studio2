@@ -6,18 +6,19 @@ interface
 
 uses
   SysUtils, Forms, Dialogs, ExtCtrls, StdCtrls, LCLTranslator,
-  Buttons, HtmlView, HTMLUn2, HtmlGlobals, lclintf;
+  Buttons, HtmlView, HTMLUn2, HtmlGlobals, lclintf, Classes;
 type
 
   { TInfoForm }
 
   TInfoForm = class(TForm)
-    Bevel1: TBevel;
     HtmlViewer1: THtmlViewer;
     InfoOkButton: TBitBtn;
     Image1: TImage;
     Memo1: TMemo;
+    Shape1: TShape;
     procedure HtmlViewer1HotSpotClick(Sender: TObject; const SRC: ThtString; var Handled: Boolean);
+    procedure Image1Click(Sender: TObject);
     procedure InfoOkButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
   private
@@ -43,6 +44,11 @@ end;
 procedure TInfoForm.HtmlViewer1HotSpotClick(Sender: TObject; const SRC: ThtString; var Handled: Boolean);
 begin
   OpenURL(SRC);
+end;
+
+procedure TInfoForm.Image1Click(Sender: TObject);
+begin
+
 end;
 
 procedure TInfoForm.FormCreate(Sender: TObject);
