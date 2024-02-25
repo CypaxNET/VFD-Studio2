@@ -24,9 +24,6 @@ type
 
   protected
 
-    // shadowed screen data
-    FShadowLayer0: array[0..255, 0..31] of Byte;
-
     FSerialInterface: TBlockSerial;
 
     FPosX, FPosY: Word;
@@ -86,7 +83,7 @@ begin
   FNumBytesSent := 0;
   FDbgLastSent := '';
 
-  FInterfaceConfig.IfaceType := itNONE;
+  FInterfaceConfig.IfaceType := itNONE; // will be set during Connect()
 
   FNumLayers := 1; // this display has only one layer
 
