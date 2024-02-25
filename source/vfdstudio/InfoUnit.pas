@@ -6,7 +6,7 @@ interface
 
 uses
   SysUtils, Forms, Dialogs, ExtCtrls, StdCtrls, LCLTranslator,
-  Buttons, HtmlView, HTMLUn2, HtmlGlobals, lclintf, Classes;
+  Buttons, HtmlView, HtmlGlobals, lclintf, Classes;
 type
 
   { TInfoForm }
