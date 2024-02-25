@@ -15,8 +15,8 @@ type
   protected
 
     // shadowed screen data
-    FShadowLayer0: array[0..255, 0..31] of Byte;
-    FShadowLayer1: array[0..255, 0..31] of Byte;
+    FShadowLayer0: Array of Array of Byte;
+    FShadowLayer1: Array of Array of Byte;
 
     FSerialInterface: TBlockSerial;
 
@@ -124,7 +124,7 @@ begin
   FNumBytesSent := 0;
   FDbgLastSent := '';
 
-  FInterfaceConfig.IfaceType := itNONE;
+  FInterfaceConfig.IfaceType := itNONE; // will be set during Connect()
 
   FNumLayers := 2; // this display has two layers
 
@@ -141,6 +141,9 @@ begin
     FSerialInterface.CloseSocket;
     FSerialInterface.Free;
   end;
+
+  SetLength(FShadowLayer0, 0, 0);
+  SetLength(FShadowLayer1, 0, 0);
 
   inherited; // Also called parent class destroyer
 end;
@@ -163,7 +166,7 @@ begin
   PaintLine(8, 0, 16, 0, False);
   PaintLine(16, 0, 16, 20, False);
   *)
-  ;
+
   SetBrightness(50);
   PaintString('Hallo Welt!', 2, 1);
 
@@ -676,6 +679,10 @@ procedure TNTK300.DspInit(XRes, YRes: Word);
 begin
   FGfxWidth := XRes;
   FGfxHeight := YRes;
+
+  SetLength(FShadowLayer0, FGfxWidth, FGfxHeight div 8);
+  SetLength(FShadowLayer1, FGfxWidth, FGfxHeight div 8);
+
   VFDInit;
 end;
 
@@ -802,8 +809,8 @@ end;
 
 
 {
-  X is a Pixel position
-  Y is a Pixel position 0..63 but expected to match a Byte block address (0, 8, 16, ..)
+  X is a Pixel position 0..
+  Y is a Pixel position 0.. but expected to match a Byte block address (0, 8, 16, ..)
 }
 procedure TNTK300.VFDSetCoord(X, Y: Byte);
 var
@@ -831,7 +838,7 @@ begin
 end;
 
 {
-  X is a Pixel position
+  X is a Pixel position 0..
 }
 procedure TNTK300.VFDSetXCoord(X: Byte);
 begin
@@ -847,7 +854,7 @@ begin
 end;
 
 {
-  Y is a Pixel position 0..63 but expected to match a Byte block address (0, 8, 16, ..)
+  Y is a Pixel position 0.. but expected to match a Byte block address (0, 8, 16, ..)
 }
 procedure TNTK300.VFDSetYCoord(Y: Byte);
 begin
@@ -866,8 +873,8 @@ end;
 
 {
   Writes a Byte to the display GRAM.
-  X is a Pixel position 0..127,
-  Y is a Pixel position 0..63 but expected to match a Byte block address (0, 8, 16, ..)
+  X is a Pixel position 0..,
+  Y is a Pixel position 0.. but expected to match a Byte block address (0, 8, 16, ..)
 }
 procedure TNTK300.VFDWriteByteXY(Value, X, Y: Byte);
 begin

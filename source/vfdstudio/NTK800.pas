@@ -25,8 +25,8 @@ type
   protected
 
     // shadowed screen data
-    FShadowLayer0: array[0..255, 0..31] of Byte;
-    FShadowLayer1: array[0..255, 0..31] of Byte;
+    FShadowLayer0: Array of Array of Byte;
+    FShadowLayer1: Array of Array of Byte;
 
     FSerialInterface: TBlockSerial;
 
@@ -38,7 +38,7 @@ type
     FIsAutoIncX: Boolean;
     FIsAutoIncY: Boolean;
 
-    FGlyphConfig: TGlyphConfig;         // all data related to glyphs
+    FGlyphConfig: TGlyphConfig; // all data related to glyphs
 
   public
     { Constructor / Destructor }
@@ -141,7 +141,7 @@ begin
   FNumBytesSent := 0;
   FDbgLastSent := '';
 
-  FInterfaceConfig.IfaceType := itNONE;
+  FInterfaceConfig.IfaceType := itNONE; // will be set during Connect()
 
   FNumLayers := 2; // this display has two layers
 
@@ -163,6 +163,9 @@ begin
     FSerialInterface.CloseSocket;
     FSerialInterface.Free;
   end;
+
+  SetLength(FShadowLayer0, 0, 0);
+  SetLength(FShadowLayer1, 0, 0);
 
   inherited; // Also called parent class destroyer
 end;
@@ -645,6 +648,10 @@ procedure TNTK800.DspInit(XRes, YRes: Word);
 begin
   FGfxWidth := XRes;
   FGfxHeight := YRes;
+
+  SetLength(FShadowLayer0, FGfxWidth, FGfxHeight div 8);
+  SetLength(FShadowLayer1, FGfxWidth, FGfxHeight div 8);
+
   VFDInit;
 end;
 
@@ -891,8 +898,8 @@ end;
 
 
 {
-  X is a Pixel position 0..(FGfxWidth-1),
-  Y is a Pixel position 0..(FGfxHeight-1) but expected to match a Byte block address (0, 8, 16, ..)
+  X is a Pixel position 0..
+  Y is a Pixel position 0.. but expected to match a Byte block address (0, 8, 16, ..)
 }
 procedure TNTK800.VFDSetCoord(X, Y: Byte);
 begin
@@ -901,7 +908,7 @@ begin
 end;
 
 {
-  X is a Pixel position 0..(FGfxWidth-1),
+  X is a Pixel position 0..
 }
 procedure TNTK800.VFDSetXCoord(X: Byte);
 begin
@@ -911,7 +918,7 @@ begin
 end;
 
 {
-  Y is a Pixel position 0..63 but expected to match a Byte block address (0, 8, 16, ..)
+  Y is a Pixel position 0.. but expected to match a Byte block address (0, 8, 16, ..)
 }
 procedure TNTK800.VFDSetYCoord(Y: Byte);
 begin
