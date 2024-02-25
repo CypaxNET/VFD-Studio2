@@ -1,6 +1,6 @@
 !include "MUI2.nsh"
 
-!getdllversion "..\source\VFDStudio2.exe" ver
+!getdllversion "..\vfdstudio\VFDStudio2.exe" ver
 
 !define INSTALLERVERSION "1.0.0.0"
 
@@ -22,12 +22,12 @@ InstallDir "" ; Don't set a default $InstDir so we can detect /D= and InstallDir
 !include WinCore.nsh
 !include Integration.nsh
 
-LicenseData "..\LICENSE"
+LicenseData "..\..\LICENSE"
 
 
-!define MUI_ICON "..\source\VFDStudio2.ico"
+!define MUI_ICON "..\vfdstudio\VFDStudio2.ico"
 !define MUI_HEADERIMAGE
-!define MUI_HEADERIMAGE_BITMAP "..\resources\logo.bmp"
+!define MUI_HEADERIMAGE_BITMAP "..\..\resources\logo.bmp"
 !define MUI_HEADERIMAGE_RIGHT
 
 !define MUI_WELCOMEPAGE_TITLE  "VFD-Studio v${ver1}.${ver2}.${ver3}.${ver4} Setup"
@@ -36,11 +36,10 @@ LicenseData "..\LICENSE"
 
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW WelcomePageShow
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE "../LICENSE"
+!insertmacro MUI_PAGE_LICENSE "../../LICENSE"
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
-
 
 ; Function to be called when the Welcome page is shown
 Function WelcomePageShow
@@ -111,13 +110,13 @@ FunctionEnd
 
 /* INSTALL */
 
-Section "Program files (Required)"
+Section "Program files (Required)"  SecPrg
   SectionIn Ro
   
   SetOutPath $INSTDIR
   
-  File "..\source\VFDStudio2.exe"
-  File "..\source\ListEditor.exe"
+  File "..\vfdstudio\VFDStudio2.exe"
+  File "..\vfdstudio\ListEditor.exe"
   
   SetOverwrite off ; we don't want to overwrite user settings
     File "vfdstudio.ini"
@@ -136,32 +135,51 @@ Section "Program files (Required)"
   
 SectionEnd
 
+Section "Add to autostart" SecAutostart
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "VFD-Studio 2" "$INSTDIR\VFDStudio2.exe"
+SectionEnd
+
 ; LISTS
 Section ""
   SetOutPath $INSTDIR\Lists 
-  File "..\source\Lists\Default.vfdlst"
+  File "..\vfdstudio\Lists\Default.vfdlst"
 SectionEnd
 
 ; BITMAPS / ANIMATIONS
 Section ""
   SetOutPath $INSTDIR\Bitmaps 
-  File "..\source\Bitmaps\VFDStudio128x17.bmp"
+  File "..\vfdstudio\Bitmaps\VFDStudio128x17.bmp"
 SectionEnd
-
 
 ; LANGUAGES
 Section ""
   SetOutPath $INSTDIR\languages 
-  File "..\source\languages\*.mo"
+  File "..\vfdstudio\languages\*.mo"
 SectionEnd
 
-
-Section "Start Menu Shortcuts"
+Section "Start Menu Shortcuts" SecStartMenu
   CreateDirectory "$SMPROGRAMS\${NAME}"
   CreateShortCut "$SMPROGRAMS\${NAME}\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
   CreateShortCut "$SMPROGRAMS\${NAME}\VFD-Studio2.lnk" "$INSTDIR\VFDStudio2.exe" "" "$INSTDIR\VFDStudio2.exe" 0
   CreateShortCut "$SMPROGRAMS\${NAME}\ListEditor.lnk" "$INSTDIR\ListEditor.exe" "" "$INSTDIR\ListEditor.exe" 0
 SectionEnd
+
+
+;--------------------------------
+;Descriptions
+
+  ;Language strings
+  LangString DESC_SecPrg ${LANG_ENGLISH} "VFD-Studio2 application, Editor for list files, a set of predefined lists and bitmaps."
+  LangString DESC_SecStartMenu ${LANG_ENGLISH} "Add VFD-Studio 2 to the Windows start menu."
+  LangString DESC_SecAutostart ${LANG_ENGLISH} "Start VFD-Studio 2 when Windows starts."
+
+  ;Assign language strings to sections
+  !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecPrg} $(DESC_SecPrg)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecStartMenu} $(DESC_SecStartMenu)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecAutostart} $(DESC_SecAutostart)
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
+
 
 
 /* UNINSTALL */
@@ -176,6 +194,7 @@ Section "Uninstall"
   Delete "Bitmaps\VFDStudio128x17.bmp"
   RMDir $INSTDIR
   DeleteRegKey HKCU "${REGPATH_UNINSTSUBKEY}"
+  DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "VFD-Studio 2"
 
   ${UnpinShortcut} "$SMPrograms\${NAME}.lnk"
   Delete "$SMPrograms\${NAME}.lnk"
