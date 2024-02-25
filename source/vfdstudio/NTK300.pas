@@ -147,10 +147,8 @@ end;
 
 
 procedure TNTK300.Dbg(Value: Byte);
-const
-  THIS_METHOD_NAME: String = 'Dbg';
 begin
-  FLoggingCallback(lvINFO, Self.ClassName + '.' + THIS_METHOD_NAME + ': Debug procedure entered', Now);
+  FLoggingCallback(lvINFO, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Debug procedure entered', Now);
   //VFDPutGlyphText('HALLO');
   //VFDSetCoord(1, 8);
   //VFDWriteCommand(CMD_DATA_WRITE);
@@ -172,8 +170,6 @@ begin
 end;
 
 procedure TNTK300.SendClearScreenRequest(ALayer: Word);
-const
-  THIS_METHOD_NAME: String = 'SendClearScreenRequest';
 var
   Text, RecvText: String;
   Row, Col: Word;
@@ -205,7 +201,7 @@ begin
         FInterfaceConfig.IfaceType := itNONE;
         if Assigned(FLoggingCallback) then
         begin
-          FLoggingCallback(lvERROR, Self.ClassName + '.' + THIS_METHOD_NAME + ': Write timeout on ' + FInterfaceConfig.IfaceName, Now);
+          FLoggingCallback(lvERROR, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Write timeout on ' + FInterfaceConfig.IfaceName, Now);
         end;
       end;
     except
@@ -214,7 +210,7 @@ begin
         FInterfaceConfig.IfaceType := itNONE;
         if Assigned(FLoggingCallback) then
         begin
-          FLoggingCallback(lvCRITICAL, Self.ClassName + '.' + THIS_METHOD_NAME + ': Interface exception: ' + E.Message, Now);
+          FLoggingCallback(lvCRITICAL, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Interface exception: ' + E.Message, Now);
         end;
       end;
     end;
@@ -226,7 +222,7 @@ begin
         RecvText := FSerialInterface.Recvstring(100);
         if (RecvText.StartsWith('Err')) then
         begin
-          FLoggingCallback(lvWARNING, Self.ClassName + '.' + THIS_METHOD_NAME + ': Received an error when sending "' + Text + '":' + Trim(RecvText), Now);
+          FLoggingCallback(lvWARNING, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Received an error when sending "' + Text + '":' + Trim(RecvText), Now);
         end;
       end;
     end;
@@ -626,8 +622,6 @@ begin
 end;
 
 procedure TNTK300.Connect(AInterface: String);
-const
-  THIS_METHOD_NAME: String = 'Connect';
 var
   RecvText: String;
 begin
@@ -651,12 +645,12 @@ begin
           RecvText := FSerialInterface.RecvPacket(1);
           if (RecvText.StartsWith('Err')) then
           begin
-            FLoggingCallback(lvWARNING, Self.ClassName + '.' + THIS_METHOD_NAME + ': Received an error during connection: ' + Trim(RecvText), Now);
+            FLoggingCallback(lvWARNING, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Received an error during connection: ' + Trim(RecvText), Now);
           end
           else
           if Length(RecvText) > 0 then
           begin
-            FLoggingCallback(lvINFO, Self.ClassName + '.' + THIS_METHOD_NAME + ': Received: ' + Trim(RecvText), Now);
+            FLoggingCallback(lvINFO, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Received: ' + Trim(RecvText), Now);
           end;
         end;
       end;
@@ -667,7 +661,7 @@ begin
         FInterfaceConfig.IsConnected := False;
         FInterfaceConfig.IfaceType := itNONE;
         if Assigned(FLoggingCallback) then
-          FLoggingCallback(lvCRITICAL, Self.ClassName + '.' + THIS_METHOD_NAME + ': Interface exception: ' + E.Message, Now);
+          FLoggingCallback(lvCRITICAL, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Interface exception: ' + E.Message, Now);
       end;
     end;
   end;
@@ -687,8 +681,6 @@ end;
 
 
 procedure TNTK300.SerialOut(Text: String);
-const
-  THIS_METHOD_NAME: String = 'SerialOut';
 var
   RecvText: String;
   TextLen: Integer;
@@ -699,11 +691,11 @@ begin
   begin
     if (TextLen < 4) then
     begin
-      FLoggingCallback(lvERROR, Self.ClassName + '.' + THIS_METHOD_NAME + ': Invalid text length in command "' + Text + '"', Now);
+      FLoggingCallback(lvERROR, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Invalid text length in command "' + Text + '"', Now);
     end;
     if (Text.ToUpper.Chars[0] <> 'C') and (Text.Chars[0] <> 'D') and (Text.Chars[0] <> 'R') then
     begin
-      FLoggingCallback(lvERROR, Self.ClassName + '.' + THIS_METHOD_NAME + ': Invalid command "' + Text + '"', Now);
+      FLoggingCallback(lvERROR, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Invalid command "' + Text + '"', Now);
     end;
   end;
 
@@ -720,7 +712,7 @@ begin
       FInterfaceConfig.IfaceType := itNONE;
       if Assigned(FLoggingCallback) then
       begin
-        FLoggingCallback(lvERROR, Self.ClassName + '.' + THIS_METHOD_NAME + ': Write timeout on ' + FInterfaceConfig.IfaceName, Now);
+        FLoggingCallback(lvERROR, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Write timeout on ' + FInterfaceConfig.IfaceName, Now);
       end;
     end;
   except
@@ -729,7 +721,7 @@ begin
       FInterfaceConfig.IfaceType := itNONE;
       if Assigned(FLoggingCallback) then
       begin
-        FLoggingCallback(lvCRITICAL, Self.ClassName + '.' + THIS_METHOD_NAME + ': Interface exception: ' + E.Message, Now);
+        FLoggingCallback(lvCRITICAL, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Interface exception: ' + E.Message, Now);
       end;
     end;
   end;
@@ -946,8 +938,6 @@ end;
 Display initialization procedure
 }
 procedure TNTK300.VFDInit;
-const
-  THIS_METHOD_NAME: String = 'VFDInit';
 var
   Text, RecvText: String;
 begin
@@ -971,7 +961,7 @@ begin
         FInterfaceConfig.IfaceType := itNONE;
         if Assigned(FLoggingCallback) then
         begin
-          FLoggingCallback(lvERROR, Self.ClassName + '.' + THIS_METHOD_NAME + ': Write timeout on ' + FInterfaceConfig.IfaceName, Now);
+          FLoggingCallback(lvERROR, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Write timeout on ' + FInterfaceConfig.IfaceName, Now);
         end;
       end;
     except
@@ -980,7 +970,7 @@ begin
         FInterfaceConfig.IfaceType := itNONE;
         if Assigned(FLoggingCallback) then
         begin
-          FLoggingCallback(lvCRITICAL, Self.ClassName + '.' + THIS_METHOD_NAME + ': Interface exception: ' + E.Message, Now);
+          FLoggingCallback(lvCRITICAL, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Interface exception: ' + E.Message, Now);
         end;
       end;
     end;
@@ -992,7 +982,7 @@ begin
         RecvText := FSerialInterface.Recvstring(100);
         if (RecvText.StartsWith('Err')) then
         begin
-          FLoggingCallback(lvWARNING, Self.ClassName + '.' + THIS_METHOD_NAME + ': Received an error when sending "' + Text + '":' + Trim(RecvText), Now);
+          FLoggingCallback(lvWARNING, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Received an error when sending "' + Text + '":' + Trim(RecvText), Now);
         end;
       end;
     end;

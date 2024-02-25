@@ -310,8 +310,6 @@ end;
 
 
 procedure TU8G2.Connect(AInterface: String);
-const
-  THIS_METHOD_NAME: String = 'Connect';
 var
   RecvText: String;
 begin
@@ -335,12 +333,12 @@ begin
           RecvText := FSerialInterface.RecvPacket(1);
           if (RecvText.StartsWith('Err')) then
           begin
-            FLoggingCallback(lvWARNING, Self.ClassName + '.' + THIS_METHOD_NAME + ': Received an error during connection: ' + Trim(RecvText), Now);
+            FLoggingCallback(lvWARNING, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Received an error during connection: ' + Trim(RecvText), Now);
           end
           else
           if Length(RecvText) > 0 then
           begin
-            FLoggingCallback(lvINFO, Self.ClassName + '.' + THIS_METHOD_NAME + ': Received: ' + Trim(RecvText), Now);
+            FLoggingCallback(lvINFO, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Received: ' + Trim(RecvText), Now);
           end;
         end;
       end;
@@ -351,7 +349,7 @@ begin
         FInterfaceConfig.IsConnected := False;
         FInterfaceConfig.IfaceType := itNONE;
         if Assigned(FLoggingCallback) then
-          FLoggingCallback(lvCRITICAL, Self.ClassName + '.' + THIS_METHOD_NAME + ': Interface exception: ' + E.Message, Now);
+          FLoggingCallback(lvCRITICAL, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Interface exception: ' + E.Message, Now);
       end;
     end;
   end;
@@ -385,8 +383,6 @@ begin
 end;
 
 procedure TU8G2.SerialOut(Text: String);
-const
-  THIS_METHOD_NAME: String = 'SerialOut';
 var
   RecvText: String;
 begin
@@ -405,7 +401,7 @@ begin
       FInterfaceConfig.IfaceType := itNONE;
       if Assigned(FLoggingCallback) then
       begin
-        FLoggingCallback(lvERROR, Self.ClassName + '.' + THIS_METHOD_NAME + ': Write timeout on ' + FInterfaceConfig.IfaceName, Now);
+        FLoggingCallback(lvERROR, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Write timeout on ' + FInterfaceConfig.IfaceName, Now);
       end;
     end;
   except
@@ -414,7 +410,7 @@ begin
       FInterfaceConfig.IfaceType := itNONE;
       if Assigned(FLoggingCallback) then
       begin
-        FLoggingCallback(lvCRITICAL, Self.ClassName + '.' + THIS_METHOD_NAME + ': Interface exception: ' + E.Message, Now);
+        FLoggingCallback(lvCRITICAL, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Interface exception: ' + E.Message, Now);
       end;
     end;
   end;

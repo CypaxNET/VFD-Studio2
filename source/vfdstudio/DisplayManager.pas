@@ -233,13 +233,11 @@ end;
 
 
 procedure TDisplayManager.AddDisplay(DisplayConfig: TDisplayConfig);
-const
-  THIS_METHOD_NAME: String = 'AddDisplay';
 begin
 
   if ((FGfxWidth > 0) and (DisplayConfig.ResX <> FGfxWidth)) or ((FGfxHeight > 0) and (DisplayConfig.ResY <> FGfxHeight)) then
     if (Assigned(FLoggingCallback)) then
-      FLoggingCallback(lvERROR, Self.ClassName + '.' + THIS_METHOD_NAME + ': Display dimensions already set to ' + IntToStr(FGfxWidth) + 'x' + IntToStr(FGfxHeight), Now);
+      FLoggingCallback(lvERROR, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Display dimensions already set to ' + IntToStr(FGfxWidth) + 'x' + IntToStr(FGfxHeight), Now);
 
   FGfxWidth := DisplayConfig.ResX;
   FGfxHeight := DisplayConfig.ResY;
@@ -248,7 +246,7 @@ begin
 
   // log the display type
   if (Assigned(FLoggingCallback)) then
-    FLoggingCallback(lvINFO, Self.ClassName + '.' + THIS_METHOD_NAME +
+    FLoggingCallback(lvINFO, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} +
     ': Display type: "' + DisplayConfig.DisplayType + '"' +
     ', ' + IntToStr(DisplayConfig.ResX) + 'x' + IntToStr(DisplayConfig.ResY) +
     ', if: "' + DisplayConfig.IntName + '"',  Now);
@@ -291,7 +289,7 @@ begin
   else
   begin
     if (Assigned(FLoggingCallback)) then
-      FLoggingCallback(lvERROR, Self.ClassName + '.' + THIS_METHOD_NAME + ': Unsupported display type: ' + DisplayConfig.DisplayType, Now);
+      FLoggingCallback(lvERROR, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Unsupported display type: ' + DisplayConfig.DisplayType, Now);
   end;
 
 end;
