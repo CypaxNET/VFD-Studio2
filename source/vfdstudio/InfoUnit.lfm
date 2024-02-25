@@ -593,8 +593,8 @@ object InfoForm: TInfoForm
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = InfoOkButton
     Left = 0
-    Height = 283
-    Top = 116
+    Height = 291
+    Top = 112
     Width = 360
     BorderStyle = htSingle
     DefFontName = 'sans-serif'
