@@ -946,7 +946,7 @@ begin
 
   if (itCOM = FInterfaceConfig.IfaceType) then
   begin
-    Text := '3' + #10;
+    Text := '3 ' + IntToHex(FGfxWidth) + ' ' + IntToHex(FGfxHeight) + #10;
 
     try
       if FSerialInterface.CanWrite(100) then

@@ -11,6 +11,7 @@
   #error Select the Arduino Nano board in the Arduino IDE
 #endif
 
+#include <Arduino.h>
 
 const char idStr[] = "Arduino driver for Noritake GU 300/800 VFD series";
 const char verStr[] = "v0.2.0.0";
@@ -68,6 +69,43 @@ const byte XOFF = 0x13; // ASCII value of XOFF
 
 #define VFD_300_SET_LUMINANCE 0x18 // full brightness
 
+
+uint16_t u16DspWidth = 128;
+uint16_t u16DspHeight = 64;
+
+
+void splitString(String input, char separator, String* parts, int maxParts) {
+  int index = 0;
+  int lastIndex = 0;
+  int partCount = 0;
+
+  while (index < input.length() && partCount < maxParts - 1) {
+    if (input[index] == separator) {
+      parts[partCount++] = input.substring(lastIndex, index);
+      lastIndex = index + 1;
+    }
+    index++;
+  }
+
+  if (lastIndex < input.length() && partCount < maxParts) {
+    parts[partCount++] = input.substring(lastIndex);
+  }
+
+  while (partCount < maxParts) {
+    parts[partCount++] = "";
+  }
+}
+
+
+void sendInvalidInputResponse(String command)
+{
+  Serial.print(errorStr);
+  Serial.print(" invalid input (");
+  Serial.print(command);
+  Serial.println(")");
+}
+
+
 void sendCmd(unsigned char cmd)
 {
   // set direction to output
@@ -82,7 +120,6 @@ void sendCmd(unsigned char cmd)
   PORTD |= (MASK_PORTD & cmd);
 
   asm("nop");
-
   
   // Pulse /WR
   digitalWrite(PIN_WR, LOW);
@@ -109,17 +146,21 @@ void sendData(unsigned char dat)
   // Pulse /WR
   digitalWrite(PIN_WR, LOW);
   asm("nop");
-  digitalWrite(PIN_WR, HIGH);
-  
+  digitalWrite(PIN_WR, HIGH); 
 }
 
 
-void initDisplay800()
+void initDisplay800(uint16_t width, uint16_t height)
 {
+  u16DspWidth = width;
+  u16DspHeight = height;
+    
+  Serial.println("800 mode");
+    
   sendCmd(VFD_800_DSP_CLEAR);
   delay(2);
   // initialize display areas
-  for (unsigned char n=0; n < 8; n++)
+  for (unsigned char n=0; n < (u16DspHeight / 8); n++)
   {
     sendCmd(VFD_800_AREA_SET);
     sendCmd(n); // index of area
@@ -130,7 +171,7 @@ void initDisplay800()
   
   sendCmd(VFD_800_BRIGHTNESS); // full brightness
 
-  for (unsigned char y=0; y < 8; y++) // for each row (0..7)
+  for (unsigned char y=0; y < (u16DspHeight / 8); y++) // for each row
   {
     sendCmd(VFD_800_SET_X);
     sendCmd(0x00); // xpos = 0
@@ -138,7 +179,7 @@ void initDisplay800()
     sendCmd(y);    // ypos = y
     sendCmd(VFD_800_ADRMODE | VFD_800_ADRMODE_INCX); // auto inc x
     
-    for(unsigned char x=0; x < 128; x++) // for each x position (0..127)
+    for(unsigned char x=0; x < u16DspWidth; x++) // for each x position
     {
       sendData(1<<random(8));
     }
@@ -146,20 +187,26 @@ void initDisplay800()
 
 }
 
-void initDisplay300()
+void initDisplay300(uint16_t width, uint16_t height)
 {
+  u16DspWidth = width;
+  u16DspHeight = height;
+   
   Serial.println("300 mode");
 
-  // screen0 starts at 0x0000
+  uint16_t screen0_addr = 0x0000;
+  uint16_t screen1_addr = u16DspHeight / 8 * u16DspWidth; // e.g. 256x64 => 2048 (0x0800)
+
+  // screen0 starts at screen0_addr
   sendCmd(VFD_300_SET_LOWER_ADDR_1);
-  sendData(0x00);
+  sendData(screen0_addr & 0x00FF);
   sendCmd(VFD_300_SET_UPPER_ADDR_1);
-  sendData(0x00);
+  sendData(screen0_addr >> 8);
   // screen1 starts at 0x0800
   sendCmd(VFD_300_SET_LOWER_ADDR_2);
-  sendData(0x00);
+  sendData(screen1_addr & 0x00FF);
   sendCmd(VFD_300_SET_UPPER_ADDR_2);
-  sendData(0x08);
+  sendData(screen1_addr >> 8);
 
   sendCmd(VFD_300_CURSOR_HOLD);
   sendCmd(VFD_300_SET_LUMINANCE);
@@ -176,7 +223,7 @@ void initDisplay300()
   sendCmd(VFD_300_DATA_WRITE);
 
   // create random pixel pattern on screen0
-  for(int i=0; i < 0x800; i++) {
+  for(int i=0; i < screen1_addr; i++) {
     sendData(1<<random(8));
   }
   
@@ -185,9 +232,9 @@ void initDisplay300()
   delay(1);
 
   sendCmd(VFD_300_SET_CURSOR_LOW);
-  sendData(0x00);
+  sendData(screen1_addr & 0x00FF);
   sendCmd(VFD_300_SET_CURSOR_HIGH);
-  sendData(0x08);
+  sendData(screen1_addr >> 8);
 
   sendCmd(VFD_300_CURSOR_INCR);
   sendCmd(VFD_300_DATA_WRITE);
@@ -208,24 +255,39 @@ void initDisplay300()
 
 void processCommand(String command)
 {
-  if (command.length() >= 1 && command.length() <= 3)
+  if (command.length() >= 1)
   {  
     char action = command.charAt(0);
 
     switch (action)
     {
       case '3':
-        // display reinitialization
-        initDisplay300();
-        break;
       case '8':
-        // display reinitialization
-        initDisplay800();
-        break;
-      case 'r':
+        // display (re)initialization
+        {
+          String tokens[3] = {"", "", ""}; // should be 3 parts: [8] [WIDTH] [HEIGHT]
+          char* endptr[2];
+          uint16_t width = u16DspWidth; 
+          uint16_t height = u16DspHeight;
+          splitString(command, ' ', tokens, 3);            
+          width = strtoul(tokens[1].c_str(), &endptr[0], 16);
+          height =    strtoul(tokens[2].c_str(), &endptr[1], 16);
+          if (('\0' == *endptr[0]) && ('\0' == *endptr[1]))
+          {
+            if ('3' == action) {
+              initDisplay300(width, height);
+            } else {
+              initDisplay800(width, height);
+            }
+          } else {          
+            sendInvalidInputResponse(command);
+          }
+        }
+        break;        
+      case 'r':  
       case 'R':
         // display reinitialization
-        initDisplay800();
+        initDisplay800(u16DspWidth, u16DspHeight);
         break;
       case 'x':
       case 'X':
@@ -311,7 +373,7 @@ void processCommand(String command)
 }
 
 // Cleaning the screen on the 300 series VFD requires a lot of instructions to be sent.
-// To avoid, sending all those via the serial interface, this function exists to do it from the Arduino.
+// To avoid, sending all those via the serial interface, this function exists to do it from here directly on the Arduino.
 void clearScreen300(unsigned char screen)
 {
   if (0 == screen)

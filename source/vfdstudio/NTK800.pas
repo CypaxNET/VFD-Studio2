@@ -1005,7 +1005,7 @@ begin
 
   if (itCOM = FInterfaceConfig.IfaceType) then
   begin
-    Text := '8' + #10;
+    Text := '8 ' + IntToHex(FGfxWidth) + ' ' + IntToHex(FGfxHeight) + #10;
 
     try
       if FSerialInterface.CanWrite(100) then
