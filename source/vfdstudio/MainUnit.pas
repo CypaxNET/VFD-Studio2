@@ -548,7 +548,7 @@ begin
   else
     DisplayTypeLabel.Caption:= RsDspType + FStudioConfig.DisplayConfig.DisplayType + '@' + FStudioConfig.DisplayConfig.IntName;
 
-  VersionLabel.Caption := 'v' + FSysInfo.ResourceVersionInfo;
+  VersionLabel.Caption := 'v' + {$I ..\BUNDLEVERSION.txt};
 
 
 // -- Load the list ---

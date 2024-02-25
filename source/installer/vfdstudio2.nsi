@@ -1,8 +1,10 @@
 !include "MUI2.nsh"
 
-!getdllversion "..\vfdstudio\VFDStudio2.exe" ver
-
 !define INSTALLERVERSION "1.0.0.0"
+
+!define /file BUNDLEVERSION "..\BUNDLEVERSION.txt"
+!searchreplace BUNDLEVERSION_HYPENATED ${BUNDLEVERSION} "." "-"
+!searchreplace BUNDLEVERSION_NOQUOTES ${BUNDLEVERSION} "'" ""
 
 !define NAME "VFD-Studio 2"
 !define DESCRIPTION "My awesome application"
@@ -11,8 +13,7 @@
 
 Name "${NAME}"
 
-
-OutFile "vfdstudio-installer_v${ver1}-${ver2}-${ver3}-${ver4}.exe"
+OutFile "vfdstudio-installer_${BUNDLEVERSION_HYPENATED}.exe"
 
 
 RequestExecutionLevel User ; We don't need UAC elevation
@@ -30,9 +31,9 @@ LicenseData "..\..\LICENSE"
 !define MUI_HEADERIMAGE_BITMAP "..\..\resources\logo.bmp"
 !define MUI_HEADERIMAGE_RIGHT
 
-!define MUI_WELCOMEPAGE_TITLE  "VFD-Studio v${ver1}.${ver2}.${ver3}.${ver4} Setup"
+!define MUI_WELCOMEPAGE_TITLE  "VFD-Studio ${BUNDLEVERSION_NOQUOTES} Setup"
 
-!define MUI_WELCOMEPAGE_TEXT  "Setup will install VFD-Studio version ${ver1}.${ver2}.${ver3}.${ver4}.$\r$\n$\r$\nCheck the GitHub project page from the link below for newer versions.$\r$\n$\r$\nClick Next to continue."
+!define MUI_WELCOMEPAGE_TEXT  "Setup will install VFD-Studio version ${BUNDLEVERSION_NOQUOTES}.$\r$\n$\r$\nCheck the GitHub project page from the link below for newer versions.$\r$\n$\r$\nClick Next to continue."
 
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW WelcomePageShow
 !insertmacro MUI_PAGE_WELCOME
