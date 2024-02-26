@@ -4,9 +4,9 @@ Windows application to show various system information on a graphics-capable VFD
 
 If you would like to keep an eye on CPU load and memory usage during gaming, if you are a fan of (retro) case modding or if you just appreciate to have a little fancy additional display for your computer, then you've come to the right place.
 
-<mark>Download here</mark>
+[Download here](./releases)
 
-<mark>Documentation here</mark>
+[Documentation here](./doc)
 
 <mark>Examples here</mark>
 
