@@ -1,12 +1,20 @@
-# Contents
+# Installation
 
-[VFD-Studio usage](#VFD-Studio usage)
+[Installation via installer](./Installer.md)
+
+[Portable installation](./Install_portable.md)
+
+# Setup
+
+[Setup](./Setup.md)
 
 # VFD-Studio usage
 
+Troubleshooting
+
 ## Multiple displays
 
-# Displays
+# Display
 
 # FAQ
 
