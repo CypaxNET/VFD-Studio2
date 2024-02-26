@@ -6,7 +6,7 @@ If you would like to keep an eye on CPU load and memory usage during gaming, if 
 
 [Download here](https://github.com/CypaxNET/VFD-Studio2/releases)
 
-[Documentation here](https://github.com/CypaxNET/VFD-Studio2/doc)
+[Documentation here](./doc)
 
 <mark>Examples here</mark>
 
