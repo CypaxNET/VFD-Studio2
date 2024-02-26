@@ -19,4 +19,5 @@ Installation using the installer is downright easy and straightforward:
    <img title="" src="install_finish.png" alt="install_finish.png" width="340">
 
 Note: The installer will **not** overwrite existing settings from a previous installation. So you don't need to worry about having to reconfigure your display again 😉
+
 Although not required, you might consider to <mark>uninstall </mark>a previous installation of VFD-Studio 2 prior installation into the same destination folder.
