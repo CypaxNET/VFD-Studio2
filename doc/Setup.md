@@ -2,7 +2,7 @@
 
 The settings window can be opened anytime via the "*Config*" button from the applications main window:
 
-![settings_window.png](E:\Projekte\VFD-Studio2\git\doc\settings_window.png)
+![settings_window.png](settings_window.png)
 
 ## Application settings
 
@@ -10,7 +10,7 @@ The settings window can be opened anytime via the "*Config*" button from the app
 
 You can select whether or not VFD-Studio 2 shall start minimized. If so, it will be hidden and only be visible as an icon in the system tray of Windows:
 
-![system_tray.png](E:\Projekte\VFD-Studio2\git\doc\system_tray.png)
+![system_tray.png](system_tray.png)
 
 ### Icon
 
