@@ -21,6 +21,7 @@ begin
   Application.Title:='VFD-Studio 2';
   Application.Scaled:=True;
   Application.Initialize;
+  Application.ShowMainForm := False;
   Application.CreateForm(TMainForm, MainForm);
   Application.CreateForm(TConfigForm, ConfigForm);
   Application.CreateForm(TInfoForm, InfoForm);
