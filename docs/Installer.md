@@ -20,4 +20,5 @@ Installation using the installer is downright easy and straightforward:
 
 > [!NOTE]
 > The installer will **not** overwrite existing settings from a previous installation. So you don't need to worry about having to reconfigure your display again 😉
-> Although not required, you might consider to <mark>uninstall</mark> a previous installation of VFD-Studio 2 prior installation into the same destination folder.
+> 
+> However, to start with a clean install, you can <mark>uninstall</mark> VFD-Studio 2.
