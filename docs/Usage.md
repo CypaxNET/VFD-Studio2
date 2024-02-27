@@ -18,7 +18,7 @@ It is neither possible nor desirable to show all information on a small display 
 
 A prominent part of the main window is filled out with a *Preview Display*, which imitates what is currently being shown on the physical display.
 
-The preview display adapts in size and color to the [display settings](./Setup.md#Display settings) from the settings window.
+The preview display adapts in size and color to the [display settings](./Setup.md#display-settings) from the settings window.
 
 ## List control buttons
 
