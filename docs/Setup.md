@@ -23,7 +23,7 @@ Klick on any language button to change the application language of VFD-Studio.
 > [!NOTE]
 > Some dialogs (e.g. when opening files) might still use the respective system language as configured in Windows.
 
-## Display selection
+## Display settings
 
 Changing display settings requires a restart of VFD-Studio 2 to take effect. The application will ask you to restart automatically if any changes in this section have been made.
 
