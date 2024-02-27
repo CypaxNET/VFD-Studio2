@@ -14,7 +14,7 @@ Most of these displays can only show certain symbols or digits. However, there a
 * A Noritake Itron 800 or 300 series VFD
   * Unfortunately those VFDs are as pricey as rare. The best approach is to look on eBay for cheap used ones.
   * VFD-Studio 2 is tested with a GU128x64-800B display (800 or 800A should do too) and a GU256x64-372 display, which has the same datasheet as the GU256X64F-9900.
-* An Arduino Nano board, incl. USB cable
+* An [Arduino Nano board](https://docs.arduino.cc/hardware/nano/), incl. USB cable
 * A 2x13 pin female connector, 2.54mm pitch
 * Two 1x15 male connectors, 2.54mm pitch
 * Two 1x15 female connectors, 2.54mm pitch \[optional, if you want the Arduino Nano to be removable\]
