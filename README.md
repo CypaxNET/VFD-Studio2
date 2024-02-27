@@ -16,11 +16,6 @@ Greetings everyone and welcome to VFD-Studio 2! This is a free and open-source p
 
 <img title="" src="./docs/vfdstudio_screenshot1.png" alt="Application screenshot" width="191">  <img title="" src=".\docs\screen_example_mainboard.jpg" alt="Graphics output on a VFD" width="506">  <mark>TODO: YT-Video</mark>
 
-A VFD is a kind of display you've probably seen before on HiFi devices or supermarket checkouts. Here's an example from a cassette player:
-
-<img title="Example of a VFD from a cassette player" src="./docs/vfd_example2.jpg" alt="" width="482" data-align="inline">
-
-And although somewhat less common, VFDs are also available as graphic displays - which makes them nice gadgets for your PC to show pictures, animations or various system information using VFD-Studio.
 
 ### Features
 
