@@ -5,7 +5,7 @@ A [*VFD*](https://en.wikipedia.org/wiki/Vacuum_fluorescent_display) is a kind of
 
 ![Closeup photo from the front of a hifi cassette deck with its glowing display.](./vfd_example2.jpg)
 
-Most of these displays can only show certain symbols or digits. However, there are also graphics-capable VFDs. Much less common and much more expensive, but they make very fascinating gadgets for your PC to show pictures, animations or various system information using VFD-Studio.
+Most of these displays can only show certain symbols or digits. However, there are also graphics-capable VFDs. Much less common and much more expensive, but they make very fascinating gadgets for your PC to show pictures, animations or various system information using VFD-Studio 2.
 
 ## What you'll need
 
@@ -15,7 +15,9 @@ Most of these displays can only show certain symbols or digits. However, there a
   * Unfortunately those VFDs are as pricey as rare. The best approach is to look on eBay for cheap used ones.
   * VFD-Studio 2 is tested with a GU128x64-800B display (800 or 800A should do too) and a GU256x64-372 display, which has the same datasheet as the GU256X64F-9900.
 * An [Arduino Nano board](https://docs.arduino.cc/hardware/nano/), incl. USB cable
-* A 2x13 pin female connector, 2.54mm pitch
+* A 5V power supply for the display
+  * A VFD requires a lot of power. A 256X64 display may take more than 2A which is far more than a typical USB port can deliver.
+* A 2x13 pin female connector, 2.54mm pitch, 90° angulated
 * Two 1x15 male connectors, 2.54mm pitch
 * Two 1x15 female connectors, 2.54mm pitch \[optional, if you want the Arduino Nano to be removable\]
 * A prototype PCB
@@ -30,8 +32,6 @@ Most of these displays can only show certain symbols or digits. However, there a
   * Download from [arduino.cc](https://www.arduino.cc/en/software)
   
   * I have to admit that personally I still mess around with version 1.8 of the Arduino IDE. But there should be no reason why it wouldn't work with version 2.x too.
-
-* A Windows computer, with USB. Apparently.
 
 **Skills:**
 
