@@ -32,46 +32,26 @@ The preview display adapts in size and color to the [display settings](./Setup.m
 
 ### Buttons
 
-* *Load list...*
-  
-  Opens a file dialog to load a \*.vfdlst List File.
+* *Load list...*: Opens a file dialog to load a \*.vfdlst List File.
 
-* *Reload*
+* *Reload*: Reload the current List File again.
 
-  Reload the current List File again.
-
-* *Stop*
-
-  Toggles between staying at the current Screen and continuing to the next Screen once its remaining display time has elapsed.
+* *Stop*: Toggles between staying at the current Screen and continuing to the next Screen once its remaining display time has elapsed.
   Right below the Preview Display the remaining time of the currently displayed Screen is shown.
 
-* *Next screen*
+* *Next screen*: Skip to the next Screen.
 
-  Skip to the next Screen.
+* *Editor*: Open the <mark>List Editor</mark>, a separate application to edit Lists Files.
 
-* *Editor*
+* *Config*: Open the [settings window](./Setup.md).
 
-  Open the <mark>List Editor</mark>, a separate application to edit Lists Files.
+* *View*: Toggle between standard and [expanded view](#expanded-view).
 
-* *Config*
+* *OK*: Minimizes the main window to an [icon in the task bar](#taskbar-icon).
 
-  Open the [settings window](./Setup.md).
+* *Info*: Open a window with licence and copyright information.
 
-* *View*
-
-  Toggle between standard and [expanded view](#expanded-view).
-
-* *OK*
-
-  Minimizes the main window to an [icon in the task bar](#taskbar-icon).
-
-* *Info*
-
-  Open a window with licence and copyright information.
-
-* *Exit*
-
-  Closes the application. Note that you can configure VFD-Studio 2 to [clear the display content on exit](./Setup.md#clear-display-on-exit).
+* *Exit*: Closes the application. Note that you can configure VFD-Studio 2 to [clear the display content on exit](./Setup.md#clear-display-on-exit).
 
 ### Expanded view
 
