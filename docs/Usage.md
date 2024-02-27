@@ -13,7 +13,9 @@ It is neither possible nor desirable to show all information on a small display 
 ## Taskbar icon
 
 VFD-Studio 2 will be shown as an icon in the Windows task bar. Hovering the mouse cursor above the item will display the selected display type and interface: 
+
 ![Screenshot of the Windows task bar showing the VFD-Studio icon with a hint "U8G2@COM9", which informas about selectzd display and interface.](screenshot_icon.png)
+
 By clicking on the icon, a menu will open from where the *main window* of VFD-Studio 2 can be opened.
 
 The other menu options are used to control the list.
