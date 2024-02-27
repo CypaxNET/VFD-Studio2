@@ -20,13 +20,15 @@ The icon can be selected in the settings window, which is useful when running <m
 
 Klick on any language button to change the application language of VFD-Studio.
 
-Note: Some dialogs (e.g. when opening files) might still use the respective system language as configured in Windows.
+> [!NOTE]
+> Some dialogs (e.g. when opening files) might still use the respective system language as configured in Windows.
 
 ## Display selection
 
 Changing display settings requires a restart of VFD-Studio 2 to take effect. The application will ask you to restart automatically if any changes in this section have been made.
 
-Make sure the display settings match the display connected to the computer and that no other applications such as the <mark>Arduino IDE</mark> are blocking the interface.
+> [!IMPORTANT]  
+> Make sure the display settings match the display connected to the computer and that no other applications such as the <mark>Arduino IDE</mark> are blocking the interface.
 
 ### Display type
 
@@ -45,7 +47,8 @@ Usually the predefined baud rate of 115200 is correct and should not be changed.
 
 VFD-Studio 2 cannot guess the specific display resolution (in pixels) of your display, so you'll have to configure it here. In fact, if using the <mark>VF-displays</mark>, the application will send the display resolution to the <mark>Arduino display driver</mark> during initialization.
 
-Note: The **vertical resolution must be divisible by 8** for VFD-Studio 2 to work properly!
+> [!IMPORTANT]  
+> The **vertical resolution must be divisible by 8** for VFD-Studio 2 to work properly!
 
 ## Options
 
@@ -61,7 +64,8 @@ You can decide whether to clear the display content when VFD-Studio 2 closes or 
 
 The main window of VFD-Studio features a preview display. In the settings you can adjust the color of the preview display to match the color of the physical display.
 
-Note: This settings takes effect as soon as something is updated on the preview display. If you slide the settings window away from the main window, you might see the effect immediately.
+> [!NOTE]
+> This settings takes effect as soon as something is updated on the preview display. If you slide the settings window away from the main window, you might see the effect immediately.
 
 ### Play animations only when the CPU is idle
 

@@ -6,4 +6,5 @@
 
 That's all.
 
-If you like to add VFD-Studio 2 to the Windows start menu or having it to autostart, you might consider using the [installer](./Installer.md).
+> [!TIP]
+> If you like to add VFD-Studio 2 to the Windows start menu or having it to autostart, you might consider using the [installer](./Installer.md).
