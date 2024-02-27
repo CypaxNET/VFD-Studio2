@@ -522,8 +522,8 @@ begin
 
 // --- Do all the stuff which is depending on ini settings ---
 
-  if (FStudioConfig.ApplicationConfig.DoStartMinimized) then
-    Hide;
+  if (not FStudioConfig.ApplicationConfig.DoStartMinimized) then
+    MainForm.Show;
 
   SetApplicationIcon;
 
