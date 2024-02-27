@@ -2,15 +2,15 @@
 
 The settings window can be opened anytime via the "*Config*" button from the applications main window:
 
-![settings_window.png](settings_window.png)
+![Screenshot of the settings window showing the various configuration options.](settings_window.png)
 
 ## Application settings
 
 ### Start minimized
 
-You can select whether or not VFD-Studio 2 shall start minimized. If so, it will be hidden and only be visible as an icon in the system tray of Windows:
+You can select whether or not VFD-Studio 2 shall start minimized. If so, it will be hidden and only be visible as an icon in the taskbar of Windows:
 
-![system_tray.png](system_tray.png)
+![Screenshot of a part of a Windows taskbar with the clock and the VFD-Studio icon.](system_tray.png)
 
 ### Icon
 
