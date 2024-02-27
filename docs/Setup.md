@@ -1,6 +1,6 @@
 # Setup
 
-The settings window can be opened anytime via the *Config* button from the applications main window. It features the following opt
+The settings window can be opened anytime via the *Config* button from the applications main window. It features the following options:
 
 ![Screenshot of the settings window showing the various configuration options.](settings_window.png)
 
