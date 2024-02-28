@@ -16,7 +16,6 @@ Greetings everyone and welcome to VFD-Studio 2! This is a free and open-source p
 
 <img title="" src="./docs/vfdstudio_screenshot1.png" alt="Application screenshot" width="191">  <img title="" src=".\docs\screen_example_mainboard.jpg" alt="Graphics output on a VFD" width="506">  <mark>TODO: YT-Video</mark>
 
-
 ### Features
 
 - Displays images, animations, charts, etc.
