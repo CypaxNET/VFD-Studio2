@@ -1,3 +1,20 @@
+* [What you'll need](#what-youll-need)
+* [Instructions](#instructions)
+  * [Adapter board](#adapter-board)
+    * [Soldering the connectors](#soldering-the-connectors)
+    * [Wiring](#wiring)
+    * [Check](#check)
+  * [Assembly](#assembly)
+  * [Firmware installation](#firmware-inbstallation)
+  * [Launch](#launch)
+* [Troubleshooting](troubleshooting)
+
+
+
+___
+
+
+
 # Noritake Itron VFDs
 
 First of all, for those who wonder:
@@ -111,13 +128,11 @@ Let's go:
 
 4. Connect the display pin 23 (*/CS*) with ground (a drop of solder connects it to the opposite pin 24).
 
-
-
 Follow the instructions in the image. **Remember: The image shows the adapter board from the bottom side.** Click the image to enlarge it:
 
 <img src="./images/wiring-notitake-nano-adapter.png" title="Step by step instruction for wiring" alt="Photo showing the adapter board bottom side with labeled pins." width="800">
 
-### Checks
+#### Check
 
 1. With the Arduino still unplugged, take a continuity tester and check that all wires are connected properly and do not conduct with neighbor pins.
 
