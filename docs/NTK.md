@@ -80,6 +80,11 @@ Turn the adapter board bottom side up. What we want to achieve is something like
 
 <img src="./images/photo-adapter-board-bottomside.jpg" title="Bottomside of the adapter board with the pins labeled" alt="Photo showing the adapter board bottom side with labeled pins." width="300">
 
+> [!NOTE] 
+> I used a prototype PCB here with 1x3 pads which I had to manually cut to get 1x1 ones. There are prototype PCB with 1x1 pads - try to get one of those.
+
+
+
 1. Start by connecting the display pins 2..24 to ground of the Arduino.
 
 2. Connect the data pins of the display 1..15 with the Arduino.
@@ -87,6 +92,8 @@ Turn the adapter board bottom side up. What we want to achieve is something like
 3. Connect the control pins 17 (*/WR*), 19 (*C/D*) and 21 (*/RD*) with the Arduino.
 
 4. Connect the display pin 23 (*/CS*) with ground (a drop of solder connects it to the opposite pin 24).
+
+
 
 Follow the instructions in the image. **The image shows the adapter board from the bottom side.** Click the image to enlarge it:
 
