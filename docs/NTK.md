@@ -1,17 +1,3 @@
-* [Noritake Itron VFDs](#noritake-itron-vfds)
-  * [What you'll need](#what-youll-need)
-  * [Instructions](#instructions)
-    * [Adapter board](#adapter-board)
-      * [Soldering the connectors](#soldering-the-connectors)
-      * [Wiring](#wiring)
-      * [Checking](#checking)
-    * [Assembly](#assembly)
-    * [Firmware installation](#firmware-installation)
-    * [Launch](#launch)
-  * [Troubleshooting](#troubleshooting)
-
-___
-
 # Noritake Itron VFDs
 
 First of all, for those who wonder:
