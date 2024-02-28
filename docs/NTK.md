@@ -58,7 +58,7 @@ The VF-display cannot just be plugged into a computer so we need to build an ada
 
 #### Soldering the connectors
 
-1. Start by soldering the 1x15 male connectors to the bottom side of the Arduino Nano. The PCB might be a good help to keep the connectors aligned. Do not solder to the PCB though. 
+1. Start by soldering the 1x15 male connectors to the bottom side of the Arduino Nano. The PCB might be a good help to keep the connectors aligned. Do not solder the connectors to the PCB though. 
    
    <img src="./images/photo-soldering-arduino-pins.jpg" title="Soldering the Arduino pins" alt="Photo showing the pins of the Arduino being soldered." width="662">
 
