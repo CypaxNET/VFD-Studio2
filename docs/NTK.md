@@ -5,9 +5,9 @@
     * [Wiring](#wiring)
     * [Check](#check)
   * [Assembly](#assembly)
-  * [Firmware installation](#firmware-inbstallation)
+  * [Firmware installation](#firmware-installation)
   * [Launch](#launch)
-* [Troubleshooting](troubleshooting)
+* [Troubleshooting](#troubleshooting)
 
 
 
