@@ -5,7 +5,9 @@ A [*VFD*](https://en.wikipedia.org/wiki/Vacuum_fluorescent_display) is a kind of
 
 ![Closeup photo from the front of a hifi cassette deck with its glowing display.](./vfd_example2.jpg)
 
-Most of these displays can only show certain symbols or digits. However, there are also graphics-capable VFDs. Much less common and much more expensive, but they make very fascinating gadgets for your PC to show pictures, animations or various system information using VFD-Studio 2.
+Most of these displays can only show certain symbols or digits. However, there are also graphics-capable VFDs. Much less common and much more expensive, but they make very fascinating gadgets for your PC to show pictures, animations or various system information using VFD-Studio 2:
+
+<img src="./images/photo-gu256x64-clock.jpg" title="256x64 VFD running a digital clock" alt="Photo showing a graphical VFD in action." width="662">
 
 ## What you'll need
 
@@ -30,11 +32,11 @@ Most of these displays can only show certain symbols or digits. However, there a
 > 
 > <img src="./images/photo-glass-tube.jpg" title="Protect this at all costs!" alt="Photo showing the fragile glass evacuation tube of a VFD." width="400">
 
-
-
 **Tools:**
 
 * A soldering iron with a fine tip
+
+* A continuity tester
 
 * The Arduino IDE
   
@@ -42,15 +44,11 @@ Most of these displays can only show certain symbols or digits. However, there a
   
   * I have to admit that personally I still mess around with version 1.8 of the Arduino IDE. But there should be no reason why it wouldn't work with newer versions too.
 
-
-
 **Skills:**
 
 * Reading/understanding schematics
 * Some soldering work (no SMD parts though)
 * Actually no programming skills. But you'll have to compile and upload a program to the Arduino Nano. So it would be quite beneficial if this was not your very first project with an Arduino.
-
-
 
 ## Instructions
 
@@ -79,6 +77,7 @@ The VF-display cannot just be plugged into a computer so we need to build an ada
 Now to the "fun" part.
 
 Turn the adapter board bottom side up. What we want to achieve is something like this:
+
 <img src="./images/photo-adapter-board-bottomside.jpg" title="Bottomside of the adapter board with the pins labeled" alt="Photo showing the adapter board bottom side with labeled pins." width="300">
 
 1. Start by connecting the display pins 2..24 to ground of the Arduino.
@@ -90,4 +89,111 @@ Turn the adapter board bottom side up. What we want to achieve is something like
 4. Connect the display pin 23 (*/CS*) with ground (a drop of solder connects it to the opposite pin 24).
 
 Follow the instructions in the image. **The image shows the adapter board from the bottom side.** Click the image to enlarge it:
+
 <img src="./images/wiring-notitake-nano-adapter.png" title="Step by step instruction for wiring" alt="Photo showing the adapter board bottom side with labeled pins." width="800">
+
+### Checks
+
+1. With the Arduino still unplugged, take a continuity tester and check that all wires are connected properly and do not conduct with neighbor pins.
+
+### Assembly
+
+1. Plug the Arduino Nano into the adapter board.
+   
+   <img src="./images/photo-finished-nano-adapter.jpg" title="Assembled adapter board with the Arduino Nano" alt="Photo showing the adapter board ready to use." width="600">
+
+2. Plug the adapter board into the display. Make sure it is plugged in the right way up.
+   
+   <img src="./images/photo-adapter-plugged-in.jpg" title="Adapter board plugged in" alt="Photo showing the adapter board plugged into the display." width="600">
+
+3. Connect the display to the separate power supply.
+
+4. Connect the Arduino on the adapter board to a USB port of the computer.
+
+5. 🎉🎆 Congratulations - you are done with hardware! 🎆🎉
+
+### Firmware installation
+
+1. Start the Arduino IDE.
+
+2. Open the [ArduinoNTKDriver.ino](../source/ArduinoNTKDriver/ArduinoNTKDriver.ino) file in the Arduino IDE.
+
+3. Select Menu > Tools > Boards > Arduino AVR Boards > Arduino Nano
+
+4. Select Menu > Tools > Processor > ATmega328 (Old Bootloader)
+
+5. Select Menu > Tools > Port > the port your Arduino Nano connects to
+
+6. Press Ctrl+R to compile.
+
+7. Press Ctrl+U to upload to the Arduino Nano.
+
+### Launch
+
+1. Start VFD-Studio.
+
+2. Got to the [settings window](./Setup.md) and select:
+   
+   * *Noritake GU-300 Series* or *Noritake GU-800 Series* (depending on your display)
+   * The port, which you selected in the Arduino IDE
+   * Baud rate 115200
+
+3. After a restart of VFD-Studio 2 you should be able to see something on the display.
+
+## Troubleshooting
+
+**The Arduino doesn't connect with the computer.**
+
+* Open the Windows device manager and open the *Ports (COM & LPT)* section. Unplug and plug in the USB cable. Observe if a new interface shows up.
+  
+  If the interface shows up with an error indicator, you might have to change the driver.
+
+**The Arduino IDE doesn't upload the firmware.**
+
+* Make sure you have selected the correct port:
+  
+  Select Menu > Tools > Port > the port your Arduino Nano connects to
+
+* Maybe try another bootloader:
+  
+  Select Menu > Tools > Processor > ATmega328 or ATmega328 (Old Bootloader)
+
+**The display doesn't show anything.**
+
+* Make sure the display is powered. You cannot use the 5V from the Arduino's USB supply but you'll need a separate and strong power supply for the VFD.
+
+* Have you [checked](#checks) the wiring of the adapter board and the [assembly](#assembly)?
+
+* Make sure the correct display type and interface is selected in VFD-Studio.
+
+* In some cases the display controller might be stuck. This helps:
+  
+  1. Unplug the USB cable
+  2. Unplug the display power supply
+  3. Unplug the adapter board from the display
+  4. Plug in the display power supply
+  5. Plug in the adapter board to the display
+  6. Plug in the USB cable
+  7. Try again using it with VFD-Studio 2
+
+* Make sure the problem is not located within the Arduino:
+  
+  1. Unplug the adapter board from the display
+  2. Open the Arduino IDE
+  3. Compile and upload the *Blink* example. If this works, the Arduino is not the problem.
+  4. Upload the [ArduinoNTKDriver.ino](../source/ArduinoNTKDriver/ArduinoNTKDriver.ino) file again
+
+* Check if we can communicate with the ArduinoNTKDriver.ino firmware on the Arduino:
+  
+  1. Close VFD-Studio 2
+  2. Open the Arduino IDE
+  3. Select Menu > Tools > Serial Monitor
+  4. Configure baud rate 115200
+  5. Send "i" (without quotation marks)
+  6. The Arduino should respond with something like "Arduino driver for Noritake GU 300/800 VFD series v1.0.0.0"
+
+If none of that helps, ask the following questions:
+
+* Did this display work before? What has changed since?
+* Did this Arduino Nano work before? Did it work while plugged into the adapter board too? What did change since?
+* Are we 100% sure the wiring and assembly is correct
