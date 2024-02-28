@@ -218,7 +218,7 @@ type
 
     // logging
     procedure LogEvent(const LogLevel: TLogLevel; const AText: String; const Timestamp: TDateTime);
-
+    procedure SaveLogFile(FileName: TFileName);
 
   private
   protected
@@ -455,6 +455,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
 var
   IniFilePath: String; // Inifile to load
   ListName: String; // List file to load
+  LogFileName: String;
   I: Integer;
 begin
 
@@ -559,12 +560,18 @@ begin
   // itself afterwards.
   LoadListTimer.Enabled := True;
 
+
+// -- log what we have so far ---
+LogFileName := ExtractFileName(FIniFileName);
+LogFileName:= LogFileName.Replace('.ini', '.log');
+LogFileName:= ExtractFilePath(Application.ExeName) + LogFileName;
+SaveLogFile(LogFileName); // store log file in the application directory with same file name as the ini file:
+
+
 end;
 
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 var
-  AStringList: TStringList;
-  I: Integer;
   LogFileName: String;
 begin
 
@@ -578,25 +585,11 @@ begin
 
   SaveConfig(FIniFileName);
 
-  AStringList := TStringList.Create;
-  try
-    AStringList.Add('#;Message;Level;Time');
-    for I := 0 to (LogListView.Items.Count - 1) do
-      AStringList.Add(LogListView.Items[I].Caption + ',' + // #
-        '"' + LogListView.Items[i].SubItems[0] + '";' +    // Message
-        LogListView.Items[i].SubItems[1] + ';' +           // Level
-        LogListView.Items[i].SubItems[2]);                 // Time
-    try
-      // log file is stored in the application directory with same file name as the ini file:
-      LogFileName := ExtractFileName(FIniFileName);
-      LogFileName:= LogFileName.Replace('.ini', '.log');
-      LogFileName:= ExtractFilePath(Application.ExeName) + LogFileName;
-      AStringList.SaveToFile(LogFileName);
-    finally
-    end;
-  finally
-    AStringList.Free;
-  end;
+  // store log file in the application directory with same file name as the ini file:
+  LogFileName := ExtractFileName(FIniFileName);
+  LogFileName:= LogFileName.Replace('.ini', '.log');
+  LogFileName:= ExtractFilePath(Application.ExeName) + LogFileName;
+  SaveLogFile(LogFileName);
 
   CanClose := True;
 end;
@@ -878,32 +871,35 @@ begin
   Mainform.LoadListFromFile(FStudioConfig.ListConfig.ListName);
 end;
 
-procedure TMainForm.SaveLogButtonClick(Sender: TObject);
+procedure TMainForm.SaveLogFile(FileName: TFileName);
 var
   AStringList: TStringList;
   I: Integer;
 begin
+  AStringList := TStringList.Create;
+  try
+    AStringList.Add('#;Message;Level;Time');
+    for I := 0 to (LogListView.Items.Count - 1) do
+      AStringList.Add(LogListView.Items[I].Caption + ',' + // #
+        '"' + LogListView.Items[i].SubItems[0] + '";' +    // Message
+        LogListView.Items[i].SubItems[1] + ';' +           // Level
+        LogListView.Items[i].SubItems[2]);                 // Time
+    try
+      AStringList.SaveToFile(FileName);
+    except
+      on E: Exception do
+        LogEvent(lvERROR, 'Could not save log file. Error: ' + E.Message, Now);
+    end;
+  finally
+    AStringList.Free;
+  end;
+end;
+
+procedure TMainForm.SaveLogButtonClick(Sender: TObject);
+begin
   if (SaveDialog.Execute) then
   begin
-
-    AStringList := TStringList.Create;
-    try
-      AStringList.Add('#;Message;Level;Time');
-      for I := 0 to (LogListView.Items.Count - 1) do
-        AStringList.Add(LogListView.Items[I].Caption + ',' + // #
-          '"' + LogListView.Items[i].SubItems[0] + '";' +    // Message
-          LogListView.Items[i].SubItems[1] + ';' +           // Level
-          LogListView.Items[i].SubItems[2]);                 // Time
-      try
-        AStringList.SaveToFile(SaveDialog.FileName);
-      except
-        on E: Exception do
-          LogEvent(lvERROR, 'Could not save log file. Error: ' + E.Message, Now);
-      end;
-    finally
-      AStringList.Free;
-    end;
-
+    SaveLogFile(SaveDialog.FileName);
   end;
 end;
 
