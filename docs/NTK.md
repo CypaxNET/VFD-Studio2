@@ -76,7 +76,7 @@ The VF-display cannot just be plugged into a computer so we need to build an ada
 
 Now to the "fun" part.
 
-Turn the adapter board bottom side up. What we want to achieve is something like this:
+Turn the adapter board <u>bottom side up</u>. What we want to achieve is something like this:
 
 <img src="./images/photo-adapter-board-bottomside.jpg" title="Bottomside of the adapter board with the pins labeled" alt="Photo showing the adapter board bottom side with labeled pins." width="300">
 
@@ -85,21 +85,21 @@ Turn the adapter board bottom side up. What we want to achieve is something like
 
 In words, the schematics are like following:
 
-| Display pin (function)| Arduino Nano pin (function) |
-| -------- | ------- |
-| 1  (Data7) | D7  (PD7) |
-| 3  (Data6) | D6  (PD6) |
-| 5  (Data5) | D5  (PD5) |
-| 7  (Data4) | D12 (PB4) |
-| 9  (Data3) | D11 (PB3) |
-| 11 (Data2) | D10 (PB2) |
-| 13 (Data1) | D9  (PB1) |
-| 15 (Data0) | D8  (PB0) |
-| 17 (/WR)   | D4  (PD4) |
-| 19 (C/D)   | D3  (PD3) |
-| 21 (/RD)   | D2  (PD2) |
-| 23 (/CS)   | GND       |
-| 2..24      | GND       |
+| Display pin (function) | Arduino Nano pin (function) |
+| ---------------------- | --------------------------- |
+| 1  (Data7)             | D7  (PD7)                   |
+| 3  (Data6)             | D6  (PD6)                   |
+| 5  (Data5)             | D5  (PD5)                   |
+| 7  (Data4)             | D12 (PB4)                   |
+| 9  (Data3)             | D11 (PB3)                   |
+| 11 (Data2)             | D10 (PB2)                   |
+| 13 (Data1)             | D9  (PB1)                   |
+| 15 (Data0)             | D8  (PB0)                   |
+| 17 (/WR)               | D4  (PD4)                   |
+| 19 (C/D)               | D3  (PD3)                   |
+| 21 (/RD)               | D2  (PD2)                   |
+| 23 (/CS)               | GND                         |
+| 2..24                  | GND                         |
 
 Let's go:
 
@@ -111,7 +111,9 @@ Let's go:
 
 4. Connect the display pin 23 (*/CS*) with ground (a drop of solder connects it to the opposite pin 24).
 
-Follow the instructions in the image. **The image shows the adapter board from the bottom side.** Click the image to enlarge it:
+
+
+Follow the instructions in the image. **Remember: The image shows the adapter board from the bottom side.** Click the image to enlarge it:
 
 <img src="./images/wiring-notitake-nano-adapter.png" title="Step by step instruction for wiring" alt="Photo showing the adapter board bottom side with labeled pins." width="800">
 
