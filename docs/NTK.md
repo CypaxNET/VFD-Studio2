@@ -1,19 +1,16 @@
-* [What you'll need](#what-youll-need)
-* [Instructions](#instructions)
-  * [Adapter board](#adapter-board)
-    * [Soldering the connectors](#soldering-the-connectors)
-    * [Wiring](#wiring)
-    * [Check](#check)
-  * [Assembly](#assembly)
-  * [Firmware installation](#firmware-installation)
-  * [Launch](#launch)
-* [Troubleshooting](#troubleshooting)
-
-
+* [Noritake Itron VFDs](#noritake-itron-vfds)
+  * [What you'll need](#what-youll-need)
+  * [Instructions](#instructions)
+    * [Adapter board](#adapter-board)
+      * [Soldering the connectors](#soldering-the-connectors)
+      * [Wiring](#wiring)
+      * [Checking](#checking)
+    * [Assembly](#assembly)
+    * [Firmware installation](#firmware-installation)
+    * [Launch](#launch)
+  * [Troubleshooting](#troubleshooting)
 
 ___
-
-
 
 # Noritake Itron VFDs
 
@@ -132,7 +129,7 @@ Follow the instructions in the image. **Remember: The image shows the adapter bo
 
 <img src="./images/wiring-notitake-nano-adapter.png" title="Step by step instruction for wiring" alt="Photo showing the adapter board bottom side with labeled pins." width="800">
 
-#### Check
+#### Checking
 
 1. With the Arduino still unplugged, take a continuity tester and check that all wires are connected properly and do not conduct with neighbor pins.
 
@@ -202,7 +199,7 @@ Follow the instructions in the image. **Remember: The image shows the adapter bo
 
 * Make sure the display is powered. You cannot use the 5V from the Arduino's USB supply but you'll need a separate and strong power supply for the VFD.
 
-* Have you [checked](#checks) the wiring of the adapter board and the [assembly](#assembly)?
+* Have you [checked](#checking) the wiring of the adapter board and the [assembly](#assembly)?
 
 * Make sure the correct display type and interface is selected in VFD-Studio.
 
