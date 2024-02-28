@@ -83,17 +83,33 @@ Turn the adapter board bottom side up. What we want to achieve is something like
 > [!NOTE] 
 > I used a prototype PCB here with 1x3 pads which I had to manually cut to get 1x1 ones. There are prototype PCB with 1x1 pads - try to get one of those.
 
+In words, the schematics are like following:
 
+| Display pin (function)| Arduino Nano pin (function) |
+| -------- | ------- |
+| 1  (Data7) | D7  (PD7) |
+| 3  (Data6) | D6  (PD6) |
+| 5  (Data5) | D5  (PD5) |
+| 7  (Data4) | D12 (PB4) |
+| 9  (Data3) | D11 (PB3) |
+| 11 (Data2) | D10 (PB2) |
+| 13 (Data1) | D9  (PB1) |
+| 15 (Data0) | D8  (PB0) |
+| 17 (/WR)   | D4  (PD4) |
+| 19 (C/D)   | D3  (PD3) |
+| 21 (/RD)   | D2  (PD2) |
+| 23 (/CS)   | GND       |
+| 2..24      | GND       |
 
-1. Start by connecting the display pins 2..24 to ground of the Arduino.
+Let's go:
+
+1. Start by connecting the display pins 2..24 to ground (GND) of the Arduino.
 
 2. Connect the data pins of the display 1..15 with the Arduino.
 
 3. Connect the control pins 17 (*/WR*), 19 (*C/D*) and 21 (*/RD*) with the Arduino.
 
 4. Connect the display pin 23 (*/CS*) with ground (a drop of solder connects it to the opposite pin 24).
-
-
 
 Follow the instructions in the image. **The image shows the adapter board from the bottom side.** Click the image to enlarge it:
 
