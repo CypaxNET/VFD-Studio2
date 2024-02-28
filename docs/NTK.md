@@ -27,6 +27,7 @@ Most of these displays can only show certain symbols or digits. However, there a
 
 > [!CAUTION]
 > Be super careful when handling the VFD! Do not damage the fragile glass evacuation tube on the side or you risk expensive hardware ending up as useless trash just because of a small mishap.
+> 
 > <img src="./images/photo-glass-tube.jpg" title="Protect this at all costs!" alt="Photo showing the fragile glass evacuation tube of a VFD." width="400">
 
 
