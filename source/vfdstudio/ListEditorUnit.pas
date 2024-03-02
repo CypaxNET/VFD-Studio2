@@ -845,6 +845,10 @@ begin
       Editor.Modified:= False;
       FFileName:= '';
     end;
+  end else begin
+    Editor.Lines.Clear;
+    Editor.Modified:= False;
+    FFileName:= '';
   end;
 end;
 
