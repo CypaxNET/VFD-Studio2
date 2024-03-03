@@ -1479,6 +1479,8 @@ object MainForm: TMainForm
   object AnimateTimer: TTimer
     Enabled = False
     OnTimer = AnimateTimerTimer
+    OnStartTimer = AnimateTimerStartTimer
+    OnStopTimer = AnimateTimerStopTimer
     Left = 680
     Top = 272
   end
@@ -1600,5 +1602,20 @@ object MainForm: TMainForm
     Options = [ofPathMustExist, ofEnableSizing, ofViewDetail]
     Left = 680
     Top = 16
+  end
+  object SimpleIPCClient1: TSimpleIPCClient
+    Active = False
+    ServerID = 'VFDSTUDIO2'
+    Left = 680
+    Top = 416
+  end
+  object SimpleIPCServer1: TSimpleIPCServer
+    Active = False
+    ServerID = 'VFDSTUDIO2'
+    Global = True
+    OnMessageQueued = SimpleIPCServer1MessageQueued
+    Threaded = False
+    Left = 616
+    Top = 416
   end
 end

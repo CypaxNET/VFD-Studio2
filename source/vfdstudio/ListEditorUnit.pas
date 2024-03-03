@@ -1399,7 +1399,7 @@ begin
       if ('ANIMATE' = CMD) then
       begin
         // should have a text parameter followed by four number parameters
-        RegEx.Expression := '^ANIMATE\s+\''(.+?)\''(\s+\d+)(\s+[+-]?\d+){2}(\s+\d+)$';
+        RegEx.Expression := '^ANIMATE\s+\''(.+?)\''(\s+\d+)(\s+[+-]?\d+){2}(\s+\d+)(\s+[01]|\s+TRUE|\s+FALSE)$';
         if (RegEx.Exec(S)) then
         begin
           Match := RegEx.Match[1];
@@ -1410,7 +1410,7 @@ begin
         end
         else
         begin
-          Res := 'ANIMATE should have a text parameter followed by four number parameters';
+          Res := 'ANIMATE should have a text parameter followed by four number parameters, followed by an optional 0 or FALSE';
         end;
       end
 

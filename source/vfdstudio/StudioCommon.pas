@@ -7,6 +7,8 @@ interface
 uses
   Classes, SysUtils, Graphics;
 type
+  TSyncSetting = (ssNONE, ssSENDER, ssRECEIVER);
+
   TLogLevel = (lvINFO, lvWARNING, lvERROR, lvCRITICAL);
 
   TLayerMode = (lmOR, lmAND, lmXOR);

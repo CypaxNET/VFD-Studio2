@@ -125,6 +125,12 @@
     </RunParams>
     <RequiredPackages>
       <Item>
+        <PackageName Value="FCL"/>
+      </Item>
+      <Item>
+        <PackageName Value="pl_SynapseVS"/>
+      </Item>
+      <Item>
         <PackageName Value="FrameViewer09"/>
       </Item>
       <Item>

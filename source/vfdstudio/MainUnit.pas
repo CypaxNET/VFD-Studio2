@@ -5,10 +5,11 @@ unit MainUnit;
 interface
 
 uses
-  Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
-  VFDisplay, IniFiles, Menus, ExtCtrls, InfoUnit, uSMBIOS,
-  SysInfo, WinampControl, LCLTranslator, ComCtrls, DateUtils, Math,
-  StudioCommon, Glyphs, lclintf, RegExpr, Process, DisplayManager, SettingsForm;
+  Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
+  Buttons, VFDisplay, IniFiles, Menus, ExtCtrls, InfoUnit, uSMBIOS,
+  SysInfo, WinampControl, LCLTranslator, ComCtrls, DateUtils,
+  Math, blcksock, StudioCommon, Glyphs, lclintf, RegExpr,
+  Process, simpleipc, DisplayManager, SettingsForm;
 type
 
   TSearchDirection = (sdForward, sdBackward);
@@ -22,6 +23,7 @@ type
     DoClearOnExit: Boolean; // clear the display when closing the application (otherwise it is left as it is)
     IconIndex: Integer; // which icon shall be shown in system tray?
     DontAskAgainDisplay: Boolean; // do not ask again to select a display
+    SyncSetting: TSyncSetting;  // how this application behaves concerning synchronization with other instances
   end;
 
   TListConfig = record
@@ -86,6 +88,7 @@ type
     FrameCount: Word;              // total number of frames
     XPos: Word;                    // x position in display
     YPos: Word;                    // y position in display
+    IsContinuous: Boolean;     // is the animation stopped after one sequence?
   end;
 
 
@@ -107,6 +110,8 @@ type
     byLabel: TLabel;
     LogListView: TListView;
     MenuItemReload: TMenuItem;
+    SimpleIPCClient1: TSimpleIPCClient;
+    SimpleIPCServer1: TSimpleIPCServer;
     SpacerPanel: TPanel;
     SaveDialog: TSaveDialog;
     SaveLogButton: TBitBtn;
@@ -140,6 +145,8 @@ type
     TrayIcon1: TTrayIcon;
     UsageTimer: TTimer;
     WaitTimer: TTimer;
+    procedure AnimateTimerStartTimer(Sender: TObject);
+    procedure AnimateTimerStopTimer(Sender: TObject);
     procedure AnimateTimerTimer(Sender: TObject);
     procedure CfgButtonClick(Sender: TObject);
     procedure ListEditorButtonClick(Sender: TObject);
@@ -167,6 +174,7 @@ type
     procedure ReloadButtonClick(Sender: TObject);
     procedure SaveLogButtonClick(Sender: TObject);
     procedure MenuItemMainWindowClick(Sender: TObject);
+    procedure SimpleIPCServer1MessageQueued(Sender: TObject);
     procedure StopButtonClick(Sender: TObject);
     procedure TrayIcon1Click(Sender: TObject);
     procedure UsageTimerTimer(Sender: TObject);
@@ -175,6 +183,9 @@ type
     procedure WaitTimerTimer(Sender: TObject);
 
     function FindWindowByTitle(WindowTitle: String): Hwnd;
+
+    // Screen synchronization stuff
+    procedure SendSyncMessage(AMessage: String);
 
     // Icon handling
     procedure SetApplicationIcon;
@@ -193,7 +204,7 @@ type
     procedure UpdateTimeLabel;
 
     // Bitmaps and animations
-    procedure Animate(FileName: TFilename; AnimationSpeed, XPosition, YPosition, FrameWidth: Word);
+    procedure Animate(FileName: TFilename; AnimationSpeed, XPosition, YPosition, FrameWidth: Word; IsContinuous: Boolean);
     procedure DrawAnimationFrame(ABitmap: TBitmap; X, Y, Frame, FrameWidth: Word);
     procedure PauseAnimation;
     procedure StopAnimation;
@@ -287,6 +298,23 @@ resourcestring
   RsDontAskAgain = 'No, don''t ask again';
 
 { TMainForm }
+
+
+procedure TMainForm.SendSyncMessage(AMessage: String);
+begin
+  if (ssSENDER = FStudioConfig.ApplicationConfig.SyncSetting) then
+  begin
+    if (SimpleIPCClient1.ServerRunning) then begin
+      SimpleIPCClient1.Connect;
+      SimpleIPCClient1.SendStringMessage(AMessage);
+      SimpleIPCClient1.Disconnect;
+    end;
+  end;
+end;
+
+
+
+
 procedure TMainForm.CreateScreen;
 var
   S: String;
@@ -304,6 +332,9 @@ begin
   end
   else
   begin
+
+    if (ssSENDER = FStudioConfig.ApplicationConfig.SyncSetting) then
+       SendSyncMessage('TRIGGER');
 
     StartIndex := I;
     FListIndex := I;
@@ -334,6 +365,7 @@ begin
             LogEvent(lvERROR, 'List does not end with a ENDSCREEN command.', Now);
           end;
           FListIndex := 0;
+          SendSyncMessage('SEEK0');
           Break;
         end;
 
@@ -368,7 +400,8 @@ procedure TMainForm.WaitTimerTimer(Sender: TObject);
 begin
   WaitTimer.Enabled := False;
 
-  CreateScreen;
+  if (ssRECEIVER <> FStudioConfig.ApplicationConfig.SyncSetting) then
+    CreateScreen;
 end;
 
 
@@ -388,6 +421,7 @@ begin
     FStudioConfig.ApplicationConfig.DoStartMinimized := IniFile.ReadBool('APPLICATION', 'StartMinimized', False);
     FStudioConfig.ApplicationConfig.IconIndex := IniFile.ReadInteger('APPLICATION', 'IconIndex', 0);
     FStudioConfig.ApplicationConfig.DontAskAgainDisplay:= IniFile.ReadBool('APPLICATION', 'DontAskForDisplay', False);
+    FStudioConfig.ApplicationConfig.SyncSetting:= TSyncSetting(IniFile.ReadInteger('APPLICATION', 'Sync', Ord(ssNONE)));
 
     FStudioConfig.ApplicationConfig.DoClearOnExit := IniFile.ReadBool('APPLICATION', 'DspClearOnExit', False);
     FStudioConfig.ApplicationConfig.IsBrightnessControlledByList := IniFile.ReadBool('APPLICATION', 'DspBrightnessByList', True);
@@ -426,6 +460,7 @@ begin
     IniFile.WriteBool('APPLICATION', 'StartMinimized', FStudioConfig.ApplicationConfig.DoStartMinimized);
     IniFile.WriteInteger('APPLICATION', 'IconIndex', FStudioConfig.ApplicationConfig.IconIndex);
     IniFile.WriteBool('APPLICATION', 'DontAskForDisplay', FStudioConfig.ApplicationConfig.DontAskAgainDisplay);
+    IniFile.WriteInteger('APPLICATION', 'Sync', Ord(FStudioConfig.ApplicationConfig.SyncSetting));
 
     IniFile.WriteString('APPLICATION', 'DspColor', ColorString);
     IniFile.WriteBool('APPLICATION', 'DspClearOnExit', FStudioConfig.ApplicationConfig.DoClearOnExit);
@@ -522,6 +557,18 @@ begin
 
 
 // --- Do all the stuff which is depending on ini settings ---
+
+  if (ssSENDER = FStudioConfig.ApplicationConfig.SyncSetting) then
+  begin
+    LogEvent(lvINFO, 'Started as a sync sender.', Now);
+  end
+  else
+  if (ssRECEIVER = FStudioConfig.ApplicationConfig.SyncSetting) then
+  begin
+    LogEvent(lvINFO, 'Started as a sync receiver.', Now);
+    SimpleIPCServer1.StartServer(True);
+  end;
+
 
   if (not FStudioConfig.ApplicationConfig.DoStartMinimized) then
     MainForm.Show;
@@ -650,6 +697,9 @@ begin
   StopProcessing;
   FListIndex := 0;
 
+  if (ssSENDER = FStudioConfig.ApplicationConfig.SyncSetting) then
+    SendSyncMessage('SEEK0');
+
   if (not FileExists(ListFileName)) then begin
     LogEvent(lvERROR, 'Could not load List from file "' + ListFileName + '"', Now);
     Exit;
@@ -736,6 +786,7 @@ begin
   end;
 
   LoadListFromFile(FStudioConfig.ListConfig.ListName);
+
 end;
 
 procedure TMainForm.InfoButtonClick(Sender: TObject);
@@ -909,6 +960,22 @@ begin
   Show;
 end;
 
+procedure TMainForm.SimpleIPCServer1MessageQueued(Sender: TObject);
+var
+  AMessage: String;
+begin
+  if (SimpleIPCServer1.ReadMessage) then begin
+    AMessage:= Trim(SimpleIPCServer1.StringMessage);
+    if ('TRIGGER' = AMessage) then begin
+      CreateScreen;
+    end
+    else
+    if ('SEEK0' = AMessage) then begin
+      FListIndex:= 0;
+    end;
+  end;
+end;
+
 procedure TMainForm.StopButtonClick(Sender: TObject);
 begin
   WaitTimer.Enabled := not WaitTimer.Enabled;
@@ -967,7 +1034,7 @@ end;
 
 
 
-procedure TMainForm.Animate(FileName: TFilename; AnimationSpeed, XPosition, YPosition, FrameWidth: Word);
+procedure TMainForm.Animate(FileName: TFilename; AnimationSpeed, XPosition, YPosition, FrameWidth: Word; IsContinuous: Boolean);
 begin
   try
     AnimateTimer.Enabled := False;
@@ -979,6 +1046,7 @@ begin
     FAnimationData.FrameWidth := FrameWidth;
     FAnimationData.XPos := XPosition;
     FAnimationData.YPos := YPosition;
+    FAnimationData.IsContinuous:= IsContinuous;
     AnimateTimer.Interval := AnimationSpeed;
     AnimateTimer.Enabled := True;
   except
@@ -1006,16 +1074,32 @@ end;
 
 procedure TMainForm.AnimateTimerTimer(Sender: TObject);
 begin
+  // check if CPU usage allows playing animations
   if (not FStudioConfig.AnimationConfig.PlayOnlyOnIdle) or (FStudioConfig.AnimationConfig.IdlePercent > FDisplayMgr.GetAverageCpuLoad) then
   begin
+    // check if we play continuously or if the end of the animation is not yet reached
+    if (FAnimationData.IsContinuous) or (FAnimationData.FrameIndex < FAnimationData.FrameCount) then
+    begin
+      if (nil <> FAnimationData.AnimationBitmap) then
+      begin
+        DrawAnimationFrame(FAnimationData.AnimationBitmap, FAnimationData.XPos, FAnimationData.YPos, FAnimationData.FrameIndex, FAnimationData.FrameWidth);
 
-    DrawAnimationFrame(FAnimationData.AnimationBitmap, FAnimationData.XPos, FAnimationData.YPos, FAnimationData.FrameIndex, FAnimationData.FrameWidth);
-
-    Inc(FAnimationData.FrameIndex);
-    if (FAnimationData.FrameIndex >= FAnimationData.FrameCount) then
-      FAnimationData.FrameIndex := 0;
-
+        Inc(FAnimationData.FrameIndex);
+        if (FAnimationData.FrameIndex >= FAnimationData.FrameCount) and (FAnimationData.IsContinuous) then
+          FAnimationData.FrameIndex := 0;
+      end;
+    end;
   end;
+end;
+
+procedure TMainForm.AnimateTimerStartTimer(Sender: TObject);
+begin
+  SendSyncMessage('ANISTART');
+end;
+
+procedure TMainForm.AnimateTimerStopTimer(Sender: TObject);
+begin
+  SendSyncMessage('ANISTOP');
 end;
 
 procedure TMainForm.CfgButtonClick(Sender: TObject);
@@ -1169,6 +1253,7 @@ begin
       Item.Subitems.Add('CRITICAL');
   end;
   Item.Subitems.Add(Format('%.04d-%.02d-%.02d %.02d:%.02d:%.02d.%.03d', [AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond]));
+  Item.MakeVisible(False);  // scroll to new entry
 end;
 
 // Starting at StartIndex this function seeks forward/backward to the next line in ListBox which starts with the questioned string.
@@ -1623,6 +1708,7 @@ var
   CmdParts: TStringList;
   Cmd: String;
   n, ITmp: Integer;
+  bTmp: Boolean;
   X, Y: Integer;
   P1, P2, P3, P4, P5, P6: Integer;
   IsInverted: Boolean;
@@ -1943,11 +2029,13 @@ begin
             P3 := StrToInt(CmdParts[3]);
             P4 := StrToInt(CmdParts[4]);
             P5 := StrToInt(CmdParts[5]);
-            Animate(CmdParts[1], P2, P3, P4, P5);
-            FAnimationData.IsAnimationDisplayed := True;
           end;
+          bTmp:= True;
+          if ((CmdParts.Count >= 7) and ((CmdParts[6].ToUpper = 'FALSE') or (CmdParts[6] = '0'))) then
+            bTmp:= False;
+          Animate(CmdParts[1], P2, P3, P4, P5, bTmp);
+          FAnimationData.IsAnimationDisplayed := True;
         end;
-
       end
       else
       if ('BITMAP' = Cmd) then

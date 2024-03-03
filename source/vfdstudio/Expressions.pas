@@ -162,14 +162,16 @@ resourcestring
   RsHelpANIMATE =
     'Draws an animation from file on the display.' + LineEnding +
     'An animation image consist of several single frames of same width, horizontally aligned side by side.' + LineEnding +
+    'By default, an animpation plays continuosly, add (0 or FALSE) to the command to play only one sequence.' + LineEnding +
     'Based on the image width and the frame width, VFD-Studio calculates the number of frames.' + LineEnding +
-    'The animation image should be black&white and in Bitmap format.' + LineEnding +
+    'The animation image should be black & white and in Bitmap format.' + LineEnding +
     'Make sure to enclose the file name in quote signs and that the file actually exists.' + LineEnding + LineEnding +
     'Param1:' + LineEnding + '  filename, MUST be enclosed in ''-quote signs' + LineEnding +
     'Param2:' + LineEnding + '  refresh rate; Example: 500 = every 500ms' + LineEnding +
     'Param3:' + LineEnding + '  x coordinate' + LineEnding +
     'Param4:' + LineEnding + '  y coordinate' + LineEnding +
-    'Param5:' + LineEnding + '  frame width in pixels';
+    'Param5:' + LineEnding + '  frame width in pixels' + LineEnding +
+    'Param6 [optional]:' + LineEnding + '  play single sequence (0 or FALSE)';
 
   RsHelpORMODE =
     'OR combination of display layers.' + LineEnding +
@@ -499,7 +501,9 @@ const
     (Expr: 'ANIMATE';
       Help: RsHelpANIMATE;
       Example: ';New frame each 500ms:' + LineEnding +
-                'ANIMATE ''ani\frog.bmp'' 500 12 4 64'),
+                'ANIMATE ''ani\frog.bmp'' 500 12 4 64' + LineEnding +
+                ';Play a single sequence:' + LineEnding +
+                'ANIMATE ''ani\frog.bmp'' 500 80 4 64 FALSE'),
     (Expr: 'PIXEL';
       Help: RsHelpPIXEL;
       Example: ';Pixel @ x1, y2 on' + LineEnding +
