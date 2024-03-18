@@ -46,7 +46,7 @@ The following criteria are relevant doing this:
 
 * Reading/understanding simple schematics
 * Some soldering work (no SMD parts though)
-* Actually no programming skills. But you'll have to compile and upload a program to the Arduino board. So it would be quite beneficial if this was not your very first project with an Arduino.
+* Actually no programming skills. You'll have to change literally one line of code to adapt to your specific display and to compile and upload a program to the Arduino board. Nevertheless, it would be quite beneficial if this was not your very first project with an Arduino.
 
 > [!IMPORTANT]
 > If you don't like soldering and stability is of less importance, you can use a solderless [breadboard](https://en.wikipedia.org/wiki/Breadboard) instead.
@@ -86,11 +86,11 @@ And to make it a little more easy for me to illustrate and more easy for you to 
    
    <img src="./images/ssd1306_4.jpg" title="Placing a 3.3V voltage regulator" alt="Photo showing a 3.3V regulator placed on the breadboard." width="640">
 
-5. Connect the left pin of the LM1084 to the ground line of the breadboard. I also added a 220&mu;F electrolytic capacitor close to the voltage regulator between the ground and the 5V line and a 10&mu;F electrolytic capacitor close to the display between the *GND *and *VCC *pins. Those are to eliminate voltage fluctuations. The exact capacity doesn't matter much - you could use anything from 47&mu;F to 470&mu;F and 1&mu;F to 47&mu;F as well. What matters is that you do not confuse the poles of the capacitors; usually the negative side (ground) is marked with a thick line on the casing. 
+5. Connect the left pin of the LM1084 to the ground line of the breadboard. I also added a 220&mu;F electrolytic capacitor close to the voltage regulator between the ground and the 5V line and a 10&mu;F electrolytic capacitor close to the display between the *GND* and *VCC* pins. Those are to eliminate voltage fluctuations. The exact capacity doesn't matter much - you could use anything from 47&mu;F to 470&mu;F and 1&mu;F to 47&mu;F as well. What matters is that you do not confuse the poles of the capacitors; usually the negative side (ground) is marked with a thick line on the casing. 
    
    <img src="./images/ssd1306_5.jpg" title="Placing condensators" alt="Photo showing condensators placed on the breadboard and how to connect the voltage regulator to ground." width="640">
 
-6. Now connect the right pin of the LM1084 to the 5V line of the breadboard and the middle pin to the *VCC *pin of the display.
+6. Now connect the right pin of the LM1084 to the 5V line of the breadboard and the middle pin to the *VCC* pin of the display.
    Remember: different voltage regulators may have a different pinout.
    
    <img src="./images/ssd1306_6.jpg" title="Connect the regulator to power" alt="Photo showing the voltage regulator connected to 5V and the display connected to the regulator." width="640">
@@ -101,7 +101,7 @@ And to make it a little more easy for me to illustrate and more easy for you to 
    <img src="./images/ssd1306_7.jpg" title="Connect I2C lines" alt="Photo showing how to connect the I2C lines." width="640">
 
 8. It is a good idea to check everything now before going on. You also might want to unplug the display, connect the USB cable to the ESP8266 board and a computer and check with a voltage meter if there is 3.3V coming out from the voltage regulator. If everything is ok, unplug USB, reconnect the display to the breadboard and plug in USB again.
-   The picture below shows the display already running with VFD-Studio 2. To achieve this, the Arduino firmware must be adapted and uploaded which is described in the next sections.
+   The picture below shows the display already successfully running with VFD-Studio 2. To achieve this, the Arduino firmware must be adapted and uploaded which is described in the next sections.
    
    <img src="./images/ssd1306_8.jpg" title="Powered up" alt="Photo showing the display working with VFD-Studio 2." width="640">
 
@@ -143,7 +143,7 @@ And to make it a little more easy for me to illustrate and more easy for you to 
 7. Press Ctrl+U to upload to the ESP8266.
 
 > [!NOTE]
-> This are example instructions for an ESP8266 board and a specific SSD1306 display controller. Depending on your selected display and Arduino board other steps will be required.
+> This are example instructions for an ESP8266 board and a specific SSD1306 display controller. Depending on your selected display and Arduino board other settings will be required.
 
 #### Explanation
 
@@ -151,20 +151,23 @@ In step #3 we tell the Arduino IDE which Arduino compatible board we are using. 
 
 In step #4 we tell the Arduino IDE to which port the board is connected to. See the [troubleshooting section below](#troubleshooting), if you are unsure which port it is.
 
-In step #5 we tell what kind of display it is and how it is connected to the board. This is how I proceeded:
+In step #5 we tell what kind of display it is and how it is connected to the board. This is how to proceed:
 
 1. Know what resolution the display has (e.g. 128X64).
 
 2. Know what controller your display has. For example: on the backside of the display I used here it says *SSD1306*.
 
 3. Know what interface you are using. As mentioned above, the display I used has a I2C interface. 
+   
    Note: Sometimes, displays also might provide more than one interface.
 
 4. Search the [u8g2 constructor reference](https://github.com/olikraus/u8g2/wiki/u8g2setupcpp#constructor-reference) for a constructor that matches your display. The naming scheme is: `U8G2_<controller>_<resolution>_<manufacturer>_<variant>_<interface>`
+   
    Displays acquired via eBay or AliExpress are often cheap but also often badly documented. I my case didn't know who the manufacturer is, so I started with `U8G2_SSD1306_128x64_NONAME_1_HW_I2C` where *HW_I2C* stands for hardware I2C interface (it is also possible to emulate interfaces such as I2C or SPI with software).
 
 5. Try it. Upload the firmware to the board as described in steps #6 and #7 and observe what the display shows. If it's working correctly the display should show a random pixel pattern when you press the reset button on the board.
-   If it does not, only partly or if you experience irregularities when running the display from VFD-Studio 2, you need to go back to step #5 and try another constructor. I ended up with `U8G2_SSD1306_128X64_VCOMH0_F_HW_I2C` being the one that works best with my specific display.
+   
+   If it does not, only partly or if you experience irregularities when running the display from VFD-Studio 2, you need to go back to step #5 and try another constructor. In this example ended up with `U8G2_SSD1306_128X64_VCOMH0_F_HW_I2C` being the one that works best with my specific display.
 
 ### Launch
 
