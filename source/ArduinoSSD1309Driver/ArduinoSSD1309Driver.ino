@@ -186,6 +186,8 @@ void loop()
     }
     
     String input = Serial.readStringUntil('\n');
+    digitalWrite(LED_BUILTIN, LOW); // LED is on when the Arduino needs some time to process the serial data
+    Serial.write((byte)XOFF);
     processCommand(input);
     
     digitalWrite(LED_BUILTIN, HIGH);
