@@ -1,22 +1,18 @@
 # VFD-Studio 2
 
-Windows application to show various system information on a graphics-capable VFD or other monochrome graphics display.
-
-If you would like to keep an eye on CPU load and memory usage during gaming, if you are a fan of (retro) case modding or if you just appreciate to have a little fancy additional display for your computer, then you've come to the right place.
-
 [Download here](https://github.com/CypaxNET/VFD-Studio2/releases)
 
 [Documentation here](./docs/README.md)
 
-<mark>Examples here</mark>
-
-## What it is
+---
 
 Greetings everyone and welcome to VFD-Studio 2! This is a free and open-source project to show system information on a Vacuum Fluorescent Display ([VFD](https://en.wikipedia.org/wiki/Vacuum_fluorescent_display)) or other monochrome graphics display:
 
+If you would like to keep an eye on CPU load and memory usage during gaming, if you are a fan of (retro) case modding or if you just appreciate to have a little fancy additional display for your computer, then you've come to the right place.
+
 <img title="" src="./docs/images/vfdstudio_screenshot1.png" alt="Application screenshot" width="191">  <img title="" src=".\docs\images\screen_example_mainboard.jpg" alt="Graphics output on a VFD" width="506">  <mark>TODO: YT-Video</mark>
 
-### Features
+## Features
 
 - Displays images, animations, charts, etc.
 
@@ -26,13 +22,16 @@ Greetings everyone and welcome to VFD-Studio 2! This is a free and open-source p
 
 - Intuitive user interface, including a preview-display and useful controls
 
-### Supported displays
+## Supported displays
 
-- Noritake Itron GU-800 VFD Series (tested with a GU128x64-800B)
+- Noritake Itron GU-800 VFD Series
+  (tested with a GU128x64-800B)
 
-- Noritake Itron GU-300 VFD Series (tested with a GU256x64-372, identical to GU256X64F-9900)
+- Noritake Itron GU-300 VFD Series 
+  (tested with a GU256x64-372, identical to GU256X64F-9900)
 
-- Basically any display supported by the Arduino [U8glib](https://github.com/olikraus/u8g2/) library (tested with a DIY More 128x64 OLED, SSD1309 chip)
+- Basically any display supported by the Arduino [U8glib](https://github.com/olikraus/u8g2/) library 
+  (tested with SSD1309 and SSD1306 128x64 OLED displays)
 
 ## How it works
 
