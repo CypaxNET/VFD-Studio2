@@ -1,12 +1,12 @@
 # VFD-Studio 2
 
-[Download here](https://github.com/CypaxNET/VFD-Studio2/releases)
+[Download](https://github.com/CypaxNET/VFD-Studio2/releases)
 
-[Documentation here](./docs/README.md)
+[Documentation](./docs/README.md)
 
 ---
 
-Greetings everyone and welcome to VFD-Studio 2! This is a free and open-source project to show system information on a Vacuum Fluorescent Display ([VFD](https://en.wikipedia.org/wiki/Vacuum_fluorescent_display)) or other monochrome graphics display:
+Greetings everyone and welcome to VFD-Studio 2! This is a free and open-source project to **show system information on a VFD, LCD or OLED display**.
 
 If you would like to keep an eye on CPU load and memory usage during gaming, if you are a fan of (retro) case modding or if you just appreciate to have a little fancy additional display for your computer, then you've come to the right place.
 
