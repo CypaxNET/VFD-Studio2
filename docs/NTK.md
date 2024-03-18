@@ -221,4 +221,4 @@ If none of that helps, ask the following questions:
 
 * Did this display work before? What has changed since?
 * Did this Arduino Nano work before? Did it work while plugged into the adapter board too? What did change since?
-* Are we 100% sure the wiring and assembly is correct
+* Are we 100% sure the wiring and assembly is correct?

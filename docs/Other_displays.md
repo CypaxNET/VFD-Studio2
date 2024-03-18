@@ -228,4 +228,4 @@ If none of that helps, ask the following questions:
 
 * Did this display work before? What has changed since?
 * Did this Arduino board work before? Did it work while connected to the display too? What did change since?
-* Are we 100% sure the wiring is correct
+* Are we 100% sure the wiring is correct?
