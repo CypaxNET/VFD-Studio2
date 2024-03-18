@@ -10,9 +10,12 @@ The recommended approach is to select the controller based on the chosen display
 The following criteria are relevant doing this:
 
 * The display interface type. - Select an Arduino board that provides the display connection type (e.g. I2C or SPI) or the number of available GPIOs.
+  
   As said, displays come with a variety of connection types like I2C, SPI. Others may require eight or more input signals in addition to control signals and thus a lot of available pins. It should also be noted that not every pin on an Arduino board is equally suitable, as some of them have dual functions or need to be on a specific voltage level during the boot process.
 * The display voltage. - Select an Arduino board that matches the display voltage level (e.g. 3.3V or 5V).
+  
   Typical display voltages are 3.3V and 5V. It is possible to work with level shifters, but the less complicated way is to chose an Arduino Board which already provides the respective voltage levels.
+  
   Also consider the power consumption of the display. Many Arduino boards cannot provide much current, especially on the 3.3V line.
 
 > [!CAUTION]
