@@ -57,7 +57,7 @@ The preview display adapts in size and color to the [display settings](./Setup.m
 
 By clicking on the *View* button, VFD-Studio 2 toggles between the standard view as shown in the screenshot above and an expanded view:
 
-<img src="screenshot_expandedview.png" title="" alt="Screenshot of the main window in expanded view." width="503">
+<img src="images/screenshot_expandedview.png" title="" alt="Screenshot of the main window in expanded view." width="503">
 
 In the expanded view, you'll find on the right side the loaded List File with the currently shown Screen being highlighted.
 A double-click on a line in the List will cause VFD-Studio 2 to jump to the respective Screen.

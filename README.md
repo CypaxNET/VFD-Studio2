@@ -14,7 +14,7 @@ If you would like to keep an eye on CPU load and memory usage during gaming, if 
 
 Greetings everyone and welcome to VFD-Studio 2! This is a free and open-source project to show system information on a Vacuum Fluorescent Display ([VFD](https://en.wikipedia.org/wiki/Vacuum_fluorescent_display)) or other monochrome graphics display:
 
-<img title="" src="./docs/vfdstudio_screenshot1.png" alt="Application screenshot" width="191">  <img title="" src=".\docs\screen_example_mainboard.jpg" alt="Graphics output on a VFD" width="506">  <mark>TODO: YT-Video</mark>
+<img title="" src="./docs/images/vfdstudio_screenshot1.png" alt="Application screenshot" width="191">  <img title="" src=".\docs\images\screen_example_mainboard.jpg" alt="Graphics output on a VFD" width="506">  <mark>TODO: YT-Video</mark>
 
 ### Features
 
@@ -38,7 +38,7 @@ Greetings everyone and welcome to VFD-Studio 2! This is a free and open-source p
 
 The general concept is that the display is connected to an [Arduino](https://en.wikipedia.org/wiki/Arduino)-microcontroller (source and schematics are included in this project) which communicates via USB serial connection with a computer that runs VFD-Studio. Let me show this in a premium-quality illustration:
 
-<img title="" src="./docs/VFDStudio_concept.png" alt="" width="724" data-align="inline">
+<img title="" src="./docs/images/VFDStudio_concept.png" alt="" width="724" data-align="inline">
 
 Once all installed and wired, simply start VFD-Studio, configure the type of display, it's resolution and select the serial port.
 
