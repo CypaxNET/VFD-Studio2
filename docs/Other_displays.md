@@ -12,6 +12,7 @@ The following criteria are relevant doing this:
 * The display interface type. - Select an Arduino board that provides the display connection type (e.g. I2C or SPI) or the number of available GPIOs.
   
   As said, displays come with a variety of connection types like I2C, SPI. Others may require eight or more input signals in addition to control signals and thus a lot of available pins. It should also be noted that not every pin on an Arduino board is equally suitable, as some of them have dual functions or need to be on a specific voltage level during the boot process.
+
 * The display voltage. - Select an Arduino board that matches the display voltage level (e.g. 3.3V or 5V).
   
   Typical display voltages are 3.3V and 5V. It is possible to work with level shifters, but the less complicated way is to chose an Arduino Board which already provides the respective voltage levels.
@@ -25,10 +26,10 @@ The following criteria are relevant doing this:
 
 **Materials:**
 
-* An Arduino-compatible Arduino board, incl. USB cable.
+* An Arduino-compatible board, incl. USB cable.
 * A display which is supported by the [U8glib library](https://github.com/olikraus/u8g2/wiki/u8g2setupcpp) and depending on the chosen display:
   * a dedicated power source for the display
-  * Cables, connectors, additional electronic components
+  * cables, connectors, additional electronic components
 * A prototype PCB
 * Some wire and solder
 
@@ -47,8 +48,8 @@ The following criteria are relevant doing this:
 * Some soldering work (no SMD parts though)
 * Actually no programming skills. But you'll have to compile and upload a program to the Arduino board. So it would be quite beneficial if this was not your very first project with an Arduino.
 
-> [!NOTE]
-> If you don't like soldering and stability is of less importance, you can use a [breadboard](https://en.wikipedia.org/wiki/Breadboard) instead.
+> [!IMPORTANT]
+> If you don't like soldering and stability is of less importance, you can use a solderless [breadboard](https://en.wikipedia.org/wiki/Breadboard) instead.
 
 ## Instructions
 
@@ -56,7 +57,7 @@ The following criteria are relevant doing this:
 
 A LCD or OLED display cannot just be plugged into a computer so we need to build an adapter with an Arduino board.
 
-In this instructions I will use a 128x64 OLED display with I2C interface as it can be found often on eBay for little money this days. It is tiny, but it does the job.
+In this instructions I will use a 128x64 OLED display with I2C interface like those which can be found often on eBay for little money. It is tiny, but it does the job.
 
 > [!TIP]
 > I2C is a rather slow serial interface. When it comes to high display resolutions (128x64 counts as high in this context) and displaying animations or effects you better go with a SPI interface.
@@ -75,7 +76,7 @@ And to make it a little more easy for me to illustrate and more easy for you to 
    
    <img src="./images/ssd1306_2.jpg" title="Connecting Ground" alt="Photo showing how to route the Ground line on the breadboard." width="640">
 
-3. The Wemos D1 board can provide only very little power on the 3V3 pin, so we will need to power the display from 5V from USB. Since the display however runs at 5V we will use a dedicated voltage regulator.
+3. The Wemos D1 board can provide only very little power on the *3V3* pin, so we will need to power the display from 5V from USB. Since the display however runs at 5V we will use a dedicated voltage regulator.
    In this step we route the 5V from the _5V_ pin, which is powered by USB, to a power line of the breadboard.
    
    <img src="./images/ssd1306_3.jpg" title="Connecting 5V" alt="Photo showing how to route the 5V line on the breadboard." width="640">
@@ -85,22 +86,22 @@ And to make it a little more easy for me to illustrate and more easy for you to 
    
    <img src="./images/ssd1306_4.jpg" title="Placing a 3.3V voltage regulator" alt="Photo showing a 3.3V regulator placed on the breadboard." width="640">
 
-5. Connect the left pin of the LM1084 to the ground line of the breadboard. I also added a 220?F electrolytic capacitor close to the voltage regulator between the ground and the 5V line and a 10?F electrolytic capacitor close to the display between the GND and VCC pins. Those are to eliminate voltage fluctuations. The exact capacity doesn't matter much - you could use anything from 47?F to 470?F and 1?F to 47?F as well. What matters is that you do not confuse the poles of the capacitors; usually the negative side (ground) is marked with a thick line on the casing. 
+5. Connect the left pin of the LM1084 to the ground line of the breadboard. I also added a 220&mu;F electrolytic capacitor close to the voltage regulator between the ground and the 5V line and a 10&mu;F electrolytic capacitor close to the display between the *GND *and *VCC *pins. Those are to eliminate voltage fluctuations. The exact capacity doesn't matter much - you could use anything from 47&mu;F to 470&mu;F and 1&mu;F to 47&mu;F as well. What matters is that you do not confuse the poles of the capacitors; usually the negative side (ground) is marked with a thick line on the casing. 
    
    <img src="./images/ssd1306_5.jpg" title="Placing condensators" alt="Photo showing condensators placed on the breadboard and how to connect the voltage regulator to ground." width="640">
 
-6. Now connect the right pin of the LM1084 to the 5V line of the breadboard and the middle pin to the VCC pin of the display.
+6. Now connect the right pin of the LM1084 to the 5V line of the breadboard and the middle pin to the *VCC *pin of the display.
    Remember: different voltage regulators may have a different pinout.
    
    <img src="./images/ssd1306_6.jpg" title="Connect the regulator to power" alt="Photo showing the voltage regulator connected to 5V and the display connected to the regulator." width="640">
 
-7. Although being slow, the benefit of I2C is that you basically need just two signals: in this step we connect SCL (serial clock signal) and SDA (serial data line) from the display to the ESP8266 board.
-   I googled the [board pinout](https://edistechlab.com/esp8266-wemos-d1-mini-pin-out/) and SCL (yellow cable) goes to pin D1 and SDA (green cable) goes to D2.
+7. Although being slow, the benefit of I2C is that you basically need just two signals: in this step we connect *SCL* (serial clock signal) and *SDA* (serial data line) from the display to the ESP8266 board.
+   I googled the [board pinout](https://edistechlab.com/esp8266-wemos-d1-mini-pin-out/) and *SCL* (yellow cable) goes to pin *D1* and *SDA* (green cable) goes to *D2*.
    
    <img src="./images/ssd1306_7.jpg" title="Connect I2C lines" alt="Photo showing how to connect the I2C lines." width="640">
 
 8. It is a good idea to check everything now before going on. You also might want to unplug the display, connect the USB cable to the ESP8266 board and a computer and check with a voltage meter if there is 3.3V coming out from the voltage regulator. If everything is ok, unplug USB, reconnect the display to the breadboard and plug in USB again.
-   The picture below shows the display already running with VFD-Studio 2. To achieve this, the Arduino firmware must be adapted and uploaded which is described in the next section.
+   The picture below shows the display already running with VFD-Studio 2. To achieve this, the Arduino firmware must be adapted and uploaded which is described in the next sections.
    
    <img src="./images/ssd1306_8.jpg" title="Powered up" alt="Photo showing the display working with VFD-Studio 2." width="640">
 
