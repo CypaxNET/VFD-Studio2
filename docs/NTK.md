@@ -36,6 +36,8 @@ Most of these displays can only show certain symbols or digits. However, there a
 
 * A soldering iron with a fine tip
 
+* Small pincers
+
 * A continuity tester
 
 * The Arduino IDE
@@ -133,7 +135,7 @@ Follow the instructions in the image. **Remember: The image shows the adapter bo
 
 4. Connect the Arduino on the adapter board to a USB port of the computer.
 
-5. 🎉🎆 Congratulations - you are done with hardware! 🎆🎉
+5. :sparkles: Congratulations - you are done with hardware! :sparkles:
 
 ### Firmware installation
 

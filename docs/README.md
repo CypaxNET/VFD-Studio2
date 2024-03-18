@@ -12,7 +12,7 @@
 
 [Noritake Itron VFDs](./NTK.md)
 
-Other displays
+[Other displays](./Other_displays.md)
 
 # VFD-Studio usage
 
