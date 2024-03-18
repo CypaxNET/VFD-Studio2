@@ -25,12 +25,15 @@ If you would like to keep an eye on CPU load and memory usage during gaming, if 
 ## Supported displays
 
 - Noritake Itron GU-800 VFD Series
+
   (tested with a GU128x64-800B)
 
 - Noritake Itron GU-300 VFD Series 
+
   (tested with a GU256x64-372, identical to GU256X64F-9900)
 
 - Basically any display supported by the Arduino [U8glib](https://github.com/olikraus/u8g2/) library 
+
   (tested with SSD1309 and SSD1306 128x64 OLED displays)
 
 ## How it works
