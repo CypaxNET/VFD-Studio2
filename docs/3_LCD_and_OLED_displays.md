@@ -173,7 +173,7 @@ In step #5 we tell what kind of display it is and how it is connected to the boa
 
 1. Start VFD-Studio.
 
-2. Got to the [settings window](./Setup.md) and select:
+2. Got to the [settings window](./2_Setup.md) and select:
    
    * *u8g2_compatible*
    * The port, which you selected in the Arduino IDE

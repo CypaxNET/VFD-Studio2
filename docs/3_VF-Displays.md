@@ -3,7 +3,7 @@
 First of all, for those who wonder:
 A [*VFD*](https://en.wikipedia.org/wiki/Vacuum_fluorescent_display) is a kind of display you've probably seen before on HiFi devices or supermarket checkouts. Here's an example from a cassette player:
 
-![Closeup photo from the front of a hifi cassette deck with its glowing display.](./vfd_example2.jpg)
+![Closeup photo from the front of a hifi cassette deck with its glowing display.](./images/vfd_example2.jpg)
 
 Most of these displays can only show certain symbols or digits. However, there are also graphics-capable VFDs. Much less common and much more expensive, but they make very fascinating gadgets for your PC to show pictures, animations or various system information using VFD-Studio 2:
 
@@ -157,7 +157,7 @@ Follow the instructions in the image. **Remember: The image shows the adapter bo
 
 1. Start VFD-Studio.
 
-2. Got to the [settings window](./Setup.md) and select:
+2. Got to the [settings window](./2_Setup.md) and select:
    
    * *Noritake GU-300 Series* or *Noritake GU-800 Series* (depending on your display)
    * The port, which you selected in the Arduino IDE
@@ -208,7 +208,7 @@ Follow the instructions in the image. **Remember: The image shows the adapter bo
   3. Compile and upload the *Blink* example. If this works, the Arduino is not the problem.
   4. Upload the [ArduinoNTKDriver.ino](../source/ArduinoNTKDriver/ArduinoNTKDriver.ino) file again
 
-* Check if we can communicate with the ArduinoNTKDriver.ino firmware on the Arduino:
+* Check if we can communicate with the firmware on the Arduino:
   
   1. Close VFD-Studio 2
   2. Open the Arduino IDE

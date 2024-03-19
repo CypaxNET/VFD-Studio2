@@ -29,7 +29,7 @@ If this is not possible for you for some reason, there is an alternative option:
 
 7. Start VFD-Studio 2 via the new link.
 
-8. Open the [settings window](./Setup.md) and configure your other display.
+8. Open the [settings window](./2_Setup.md) and configure your other display.
 
 9. Close VFD-Studio 2.
 

@@ -1,28 +1,28 @@
 # Installation
 
-[Installation via installer](./Installer.md)
+[Installation via installer](./1_Installation.md)
 
-[Portable installation](./Install_portable.md)
+[Portable version](./1_Portable_version.md)
 
 # Setup
 
-[Application setup](./Setup.md)
+[Application setup](./2_Setup.md)
 
-# Display
+# Displays
 
-[Noritake Itron VFDs](./NTK.md)
+[Noritake Itron VFDs](./3_VF-Displays.md)
 
-[Other displays](./Other_displays.md)
+[Other displays](./3_LCD_and_OLED_displays.md)
 
-# VFD-Studio usage
+# Usage
 
-[Application usage](./Usage.md)
+[Application usage](./4_Application_usage.md)
 
-List Editor
+[List Editor](./4_List_Editor_usage.md)
+
+[Special: Multiple displays](./Multiple_displays.md)
 
 Troubleshooting
-
-Multiple displays
 
 # FAQ
 
@@ -36,7 +36,7 @@ A: It works with
 
 Q: Why doesn't VFD-Studio 2 support the [Noritake Itron 7000 series](https://www.noritake-elec.com/products/vfd-display-module/dot-matrix-graphic-display/gu-7000-series)? They even come with a serial interface!
 
-A: Those are nice. But I have none. Send me one and I'll make an update of VFD-Studio 2.
+A: Those are nice. But I have none. Buy me one and I'll make an update of VFD-Studio 2 :smile:
 
 Q: Why VFD-Studio **2** - where is version 1?
 
