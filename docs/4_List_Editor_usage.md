@@ -84,7 +84,7 @@ ENDSCREEN
 
 ### Displaying simple text
 
-Now let's display some text.  Insert a command `PLAINTEXT 'Hello World!' 0 0` after the `CLEARSCREEN`command: 
+Now let's display some text.  Insert a command `PLAINTEXT 'Hello World!' 0 0` after the `CLEARSCREEN` command: 
 
 ```
 NEWSCREEN
@@ -124,7 +124,7 @@ Note that the Preview Display of the List Editor will not update the preview per
 ### Text with font
 
 The clock we created is nice, but to a bit to small. Let's change the font and make it bigger.
-Change the `PLAINTEXT` commend for the `$TIME$` keyword to a `TEXTOUT`command:
+Change the `PLAINTEXT` command for the `$TIME$` keyword to a `TEXTOUT`command:
 
 ```
 NEWSCREEN
@@ -135,15 +135,15 @@ SCREENTIME 60
 ENDSCREEN
 ```
 
-You will notice, that the line in now highlighted in red, which indicates a syntax error:
+You will notice, that the line is now highlighted in red, which indicates a syntax error:
 
 <img src="./images/editor_textout_error.png" title="" alt="Screenshot of the List Editor window." width="368">
 
 If you look to the status bar, the List Editor will tell you what appears to be wrong:
 <img src="./images/editor_textout_errmsg.png" title="" alt="Screenshot of the List Editor window." width="559">   
-Move the caret to the `TEXTOUT`command and press F1 or click on the `TEXTOUT` command on the command list on the right side of the List Editor window to get its description and an example.
+Move the caret to the `TEXTOUT` command and press F1 or click on the `TEXTOUT` command on the command list on the right side of the List Editor window to get its description and an example.
 
-While `PLAINTEXT` is used to display unformatted text in a default 8x6 pixel font on a specific column and row, the `TEXTOUT`command can display text with a specific font and size.
+While `PLAINTEXT` is used to display unformatted text in a default 8x6 pixel font on a specific column and row, the `TEXTOUT` command can display text with a specific font and size.
 So let's fix that error and change the line to `TEXTOUT '$TIME$' 0 10 18 'Digit Tech 7'`
 This is how it should look now:
 
@@ -153,7 +153,7 @@ If it doesn't look like the above, then that's because you need the *Digit Tech 
 
 ### Graphics
 
-Now let's add some real graphics. Move the caret behind the `ENDSCREEN`command and press enter. You are now in the last line of the List File. Press Alt+N to insert another Screen.
+Now let's add some real graphics. Move the caret behind the `ENDSCREEN` command and press enter. You are now in the last line of the List File. Press Alt+N to insert another Screen.
 This is how it should look like:
 
 ```
@@ -171,7 +171,7 @@ SCREENTIME 60
 ENDSCREEN
 ```
 
-Move the caret to the blank line after the `CLEARSCREEN`command and press Alt+B or select Menu > Edit > Insert BITMAP.
+Move the caret to the blank line after the `CLEARSCREEN` command and press Alt+B or select Menu > Edit > Insert BITMAP.
 
 A file open dialog window will open and let you chose a graphics file from the file system.
 
