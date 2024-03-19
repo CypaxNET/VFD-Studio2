@@ -101,7 +101,7 @@ The Preview Display will let you know how it will look on the display:
 ### Keywords
 
 Since a "Hello World" is still boring, why not change it to a Hello from your computer?
-Change the `PLAINTEXT` command line to this: `PLAINTEXT 'Hello form $PCNAME$!' 0 0` 
+Change the `PLAINTEXT` command line to this: `PLAINTEXT 'Hello from $PCNAME$!' 0 0` 
 As you can see in the Preview Display, the `$PCNAME$` keyword will be replaced with the network name of your computer.
 
 VFD-Studio 2 can show static information like the computer name on the display and dynamic information. Unlike static information, dynamic information can change at any time and thus will be re-written on the display periodically.
@@ -111,7 +111,7 @@ Let's try that by displaying the time:
 ```
 NEWSCREEN
 CLEARSCREEN
-PLAINTEXT 'Hello form $PCNAME$!' 0 0
+PLAINTEXT 'Hello from $PCNAME$!' 0 0
 PLAINTEXT '$TIME$' 0 1
 SCREENTIME 60
 ENDSCREEN
