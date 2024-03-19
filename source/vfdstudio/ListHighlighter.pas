@@ -258,29 +258,33 @@ begin
     Exit
   else
 
-
-  if FLineText[FTokenEnd] = '$' then
-  begin
-    // At start of keyword? Find end of keyword
-    repeat
-      Inc(FTokenEnd);
-    until (FTokenEnd > l) or (FLineText[FTokenEnd] = '$'); //not(FLineText[FTokenEnd] in [#32..#35, #37..#255])
-    if (FLineText[FTokenEnd] = '$') then
-      Inc(FTokenEnd);
-  end
-  else
-  if FLineText[FTokenEnd] in [#9, ' '] then
-    // At Space? Find end of spaces
-    while (FTokenEnd <= l) and (FLineText[FTokenEnd] in [#0..#32]) do
+  if (FTokenEnd <= length(FLineText)) then begin
+    if FLineText[FTokenEnd] = '$' then
     begin
-      Inc(FTokenEnd);
+      // At start of keyword? Find end of keyword
+      repeat
+        if (FTokenEnd < length(FLineText)) then
+          Inc(FTokenEnd)
+         else
+           Break;
+      until (FTokenEnd > l) or (FLineText[FTokenEnd] = '$'); //not(FLineText[FTokenEnd] in [#32..#35, #37..#255])
+      if (FLineText[FTokenEnd] = '$') then
+        Inc(FTokenEnd);
     end
-  else
-    // At something else? Find end of something else
-    while (FTokenEnd <= l) and not (FLineText[FTokenEnd] in [#9, ' ', '$']) do
-    begin
-      Inc(FTokenEnd);
-    end;
+    else
+    if FLineText[FTokenEnd] in [#9, ' '] then
+      // At Space? Find end of spaces
+      while (FTokenEnd <= l) and (FLineText[FTokenEnd] in [#0..#32]) do
+      begin
+        Inc(FTokenEnd);
+      end
+    else
+      // At something else? Find end of something else
+      while (FTokenEnd <= l) and not (FLineText[FTokenEnd] in [#9, ' ', '$']) do
+      begin
+        Inc(FTokenEnd);
+      end;
+  end;
 end;
 
 function TListHighlighter.GetEol: Boolean;
