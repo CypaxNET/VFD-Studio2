@@ -89,7 +89,7 @@
 /* ******** Communication stuff ******** */
 
 const char kIdStr[] =      "Arduino driver for U8g2 compatible displays";
-const char kVersionStr[] = "v0.1.0.0";
+const char kVersionStr[] = "v1.0.0.0";
 const char kHelpStr[] =    "I = identify driver\n"\
                            "V = get software version\n"\
                            "R = (re)initialize display\n"\

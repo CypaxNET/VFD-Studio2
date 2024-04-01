@@ -79,7 +79,7 @@
 /* ******** Communication stuff ******** */
 
 const char kIdStr[] =      "Arduino driver for Noritake GU 300/800 VFD series";
-const char kVersionStr[] = "v0.3.0.1";
+const char kVersionStr[] = "v1.0.0.0";
 const char kHelpStr[] =    "I = identify driver\n"\
                            "V = get software version\n"\
                            "3 w h = initialize GU-300 series mode with w h = display resolution in hexadecimal\n"\
