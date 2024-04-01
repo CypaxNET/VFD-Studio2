@@ -4,7 +4,7 @@
 
 VFD-Studio 2 is a Windows application intended to show various text, graphics and system information on a monochrome graphics display.
 
-Since these displays usually do not have any interface suitable to be connected directly to a computer, an <mark>Arduino microcontroller</mark> will serve as the driver and connect to the computer via USB serial interface.
+Since these displays usually do not have any interface suitable to be connected directly to a computer, an Arduino microcontroller will serve as the driver and connect to the computer via USB serial interface.
 
 The VFD-Studio 2 application reads and processes text based files (*List Files*) which contain *commands* - e.g. print some text, show an image, etc.
 
@@ -41,7 +41,7 @@ The preview display adapts in size and color to the [display settings](./2_Setup
 
 * *Next screen*: Skip to the next Screen.
 
-* *Editor*: Open the <mark>List Editor</mark>, a separate application to edit Lists Files.
+* *Editor*: Open the [List Editor](./4_List_Editor_usage.md), a separate application to edit Lists Files.
 
 * *Config*: Open the [settings window](./2_Setup.md).
 
@@ -49,7 +49,7 @@ The preview display adapts in size and color to the [display settings](./2_Setup
 
 * *OK*: Minimizes the main window to an [icon in the task bar](#taskbar-icon).
 
-* *Info*: Open a window with licence and copyright information.
+* *Info*: Open a window with license and copyright information.
 
 * *Exit*: Closes the application. Note that you can configure VFD-Studio 2 to [clear the display content on exit](./2_Setup.md#clear-display-on-exit).
 
@@ -62,4 +62,4 @@ By clicking on the *View* button, VFD-Studio 2 toggles between the standard view
 In the expanded view, you'll find on the right side the loaded List File with the currently shown Screen being highlighted.
 A double-click on a line in the List will cause VFD-Studio 2 to jump to the respective Screen.
 
-On the bottom of the main window you'll find the *Log File*, a list of events which might be helpful for <mark>troubleshooting</mark>. You can save the Log File at any time with the *Save log file...* button.
+On the bottom of the main window you'll find the *Log File*, a list of events which might be helpful for [troubleshooting](./9_Troubleshooting.md). You can save the Log File at any time with the *Save log file...* button.

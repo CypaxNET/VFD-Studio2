@@ -10,7 +10,7 @@ Greetings everyone and welcome to VFD-Studio 2! This is a free and open-source p
 
 If you would like to keep an eye on CPU load and memory usage during gaming, if you are a fan of (retro) case modding or if you just appreciate to have a little fancy additional display for your computer, then you've come to the right place.
 
-<img title="" src="./docs/images/vfdstudio_screenshot1.png" alt="Application screenshot" width="191">  <img title="" src=".\docs\images\screen_example_mainboard.jpg" alt="Graphics output on a VFD" width="506">  <mark>TODO: YT-Video</mark>
+<img title="" src="./docs/images/vfdstudio_screenshot1.png" alt="Application screenshot" width="191">  <img title="" src=".\docs\images\screen_example_mainboard.jpg" alt="Graphics output on a VFD" width="506">
 
 ## Features
 

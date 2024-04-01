@@ -22,7 +22,7 @@
 
 [Special: Multiple displays](./Multiple_displays.md)
 
-Troubleshooting
+[Troubleshooting](./9_Troubleshooting.md)
 
 # FAQ
 
