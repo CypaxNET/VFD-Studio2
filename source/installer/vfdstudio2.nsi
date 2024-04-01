@@ -41,6 +41,7 @@ LicenseData "..\..\LICENSE"
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_UNPAGE_COMPONENTS
 
 ; Function to be called when the Welcome page is shown
 Function WelcomePageShow
@@ -119,6 +120,12 @@ Section "Program files (Required)"  SecPrg
   File "..\vfdstudio\VFDStudio2.exe"
   File "..\vfdstudio\ListEditor.exe"
   
+  File "..\vfdstudio\1.ico"
+  File "..\vfdstudio\2.ico"
+  File "..\vfdstudio\3.ico"
+  File "..\vfdstudio\4.ico"
+  File "..\vfdstudio\VFDStudio2.ico"
+  
   SetOverwrite off ; we don't want to overwrite user settings
     File "vfdstudio.ini"
     File "listeditor.ini"
@@ -134,6 +141,9 @@ Section "Program files (Required)"  SecPrg
   WriteRegDWORD HKCU "${REGPATH_UNINSTSUBKEY}" "NoModify" 1
   WriteRegDWORD HKCU "${REGPATH_UNINSTSUBKEY}" "NoRepair" 1  
   
+  ; remove previous installation from autostart
+  DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "VFD-Studio 2"
+  
 SectionEnd
 
 Section "Add to autostart" SecAutostart
@@ -144,12 +154,21 @@ SectionEnd
 Section ""
   SetOutPath $INSTDIR\Lists 
   File "..\vfdstudio\Lists\Default.vfdlst"
+  File "..\vfdstudio\Lists\left-eye.vfdlst"
+  File "..\vfdstudio\Lists\right-eye.vfdlst"
+  File "..\vfdstudio\Lists\Features_128x64.vfdlst"
 SectionEnd
 
 ; BITMAPS / ANIMATIONS
 Section ""
   SetOutPath $INSTDIR\Bitmaps 
   File "..\vfdstudio\Bitmaps\VFDStudio128x17.bmp"
+  SetOutPath $INSTDIR\Bitmaps\128x64
+  File "..\vfdstudio\Bitmaps\128x64\l1.bmp"
+  File "..\vfdstudio\Bitmaps\128x64\r1.bmp"
+  SetOutPath $INSTDIR\Bitmaps\animations
+  File "..\vfdstudio\Bitmaps\animations\lefteye128x64_7.bmp"
+  File "..\vfdstudio\Bitmaps\animations\righteye128x64_7.bmp"
 SectionEnd
 
 ; LANGUAGES
@@ -158,9 +177,23 @@ Section ""
   File "..\vfdstudio\languages\*.mo"
 SectionEnd
 
+; ARDUINO VFD DRIVER
+Section "Arduino VFD driver" SecVfdDriver
+  SetOutPath $INSTDIR\ArduinoNTKDriver 
+  File "..\ArduinoNTKDriver\ArduinoNTKDriver.ino"
+  File "..\ArduinoNTKDriver\ntk_commands.h"
+SectionEnd
+
+; ARDUINO LCD/OLED DRIVER
+Section "Arduino LCD/OLED driver (SSD1309 example)" SecDspDriver
+  SetOutPath $INSTDIR\ArduinoSSD1309Driver 
+  File "..\ArduinoSSD1309Driver\ArduinoSSD1309Driver.ino"
+  File "..\ArduinoSSD1309Driver\glyph.h"
+SectionEnd
+
 Section "Start Menu Shortcuts" SecStartMenu
   CreateDirectory "$SMPROGRAMS\${NAME}"
-  CreateShortCut "$SMPROGRAMS\${NAME}\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
+  CreateShortCut "$SMPROGRAMS\${NAME}\Uninstall.lnk" "$INSTDIR\Uninst.exe" "" "$INSTDIR\Uninst.exe" 0
   CreateShortCut "$SMPROGRAMS\${NAME}\VFD-Studio2.lnk" "$INSTDIR\VFDStudio2.exe" "" "$INSTDIR\VFDStudio2.exe" 0
   CreateShortCut "$SMPROGRAMS\${NAME}\ListEditor.lnk" "$INSTDIR\ListEditor.exe" "" "$INSTDIR\ListEditor.exe" 0
 SectionEnd
@@ -173,30 +206,74 @@ SectionEnd
   LangString DESC_SecPrg ${LANG_ENGLISH} "VFD-Studio2 application, Editor for list files, a set of predefined lists and bitmaps."
   LangString DESC_SecStartMenu ${LANG_ENGLISH} "Add VFD-Studio 2 to the Windows start menu."
   LangString DESC_SecAutostart ${LANG_ENGLISH} "Start VFD-Studio 2 when Windows starts."
+  LangString DESC_SecVfdDriver ${LANG_ENGLISH} "Install the Arduino driver program for VFDs (VF-Displays)."
+  LangString DESC_SecDspDriver ${LANG_ENGLISH} "Install the Arduino driver program for LCDs / OLED displays."
 
   ;Assign language strings to sections
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
     !insertmacro MUI_DESCRIPTION_TEXT ${SecPrg} $(DESC_SecPrg)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecStartMenu} $(DESC_SecStartMenu)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecAutostart} $(DESC_SecAutostart)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecVfdDriver} $(DESC_SecVfdDriver)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecDspDriver} $(DESC_SecDspDriver)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 
 
 /* UNINSTALL */
 
-Section "Uninstall"
+Section /o "un.Delete settings"
+  Delete "$INSTDIR\*.ini"
+SectionEnd
+
+Section /o "un.Delete all List Files in installation directory"
+  Delete "$INSTDIR\Lists\*.vfdlst"
+  RMDir "$INSTDIR\Lists"
+SectionEnd
+
+Section /o "un.Delete all images in installation directory"
+  Delete "$INSTDIR\Bitmaps\128x64\*"
+  Delete "$INSTDIR\Bitmaps\256x64\*"
+  Delete "$INSTDIR\Bitmaps\animations\*"
+  Delete "$INSTDIR\Bitmaps\*"
+  RMDir "$INSTDIR\Bitmaps\128x64"  
+  RMDir "$INSTDIR\Bitmaps\256x64"  
+  RMDir "$INSTDIR\Bitmaps\animations"  
+  RMDir "$INSTDIR\Bitmaps"  
+SectionEnd
+
+Section "un.Uninstall application files"
+  SectionIn Ro
+  
+  ; unistall binaries
   Delete "$InstDir\Uninst.exe"
   Delete "$INSTDIR\VFDStudio2.exe"
   Delete "$INSTDIR\ListEditor.exe"
-  Delete "$INSTDIR\vfdstudio.ini"
-  Delete "$INSTDIR\listeditor.ini"
-  Delete "Lists\Default.vfdlst"
-  Delete "Bitmaps\VFDStudio128x17.bmp"
+  ; icons
+  Delete "$INSTDIR\1.ico"  
+  Delete "$INSTDIR\2.ico"  
+  Delete "$INSTDIR\3.ico"  
+  Delete "$INSTDIR\4.ico"  
+  Delete "$INSTDIR\VFDStudio2.ico"
+  ; log files
+  Delete "$INSTDIR\*.log" 
+  ; language files
+  Delete "$INSTDIR\languages\*.mo" 
+  RMDir "$INSTDIR\languages"
+  ; Arduino stuff
+  Delete "$INSTDIR\ArduinoNTKDriver\ArduinoNTKDriver.ino"
+  Delete "$INSTDIR\ArduinoNTKDriver\ntk_commands.h"
+  RMDir "$INSTDIR\ArduinoNTKDriver"
+  Delete "$INSTDIR\\ArduinoSSD1309Driver\ArduinoSSD1309Driver.ino"
+  Delete "$INSTDIR\ArduinoSSD1309Driver\glyph.h"  
+  RMDir "$INSTDIR\ArduinoSSD1309Driver"
+  
+  ; autostart entry
   RMDir $INSTDIR
   DeleteRegKey HKCU "${REGPATH_UNINSTSUBKEY}"
   DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "VFD-Studio 2"
-
+  
+  ; program menu entry
   ${UnpinShortcut} "$SMPrograms\${NAME}.lnk"
   Delete "$SMPrograms\${NAME}.lnk"
   RMDir "$SMPROGRAMS\${NAME}" 
