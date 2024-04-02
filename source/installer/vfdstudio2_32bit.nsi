@@ -163,12 +163,19 @@ SectionEnd
 Section ""
   SetOutPath $INSTDIR\Bitmaps 
   File "..\vfdstudio\Bitmaps\VFDStudio128x17.bmp"
+  File "..\vfdstudio\Bitmaps\clockface31x31.bmp"
+  File "..\vfdstudio\Bitmaps\clockface64x64.bmp"
+  File "..\vfdstudio\Bitmaps\column8x22.bmp"
   SetOutPath $INSTDIR\Bitmaps\128x64
   File "..\vfdstudio\Bitmaps\128x64\l1.bmp"
   File "..\vfdstudio\Bitmaps\128x64\r1.bmp"
   SetOutPath $INSTDIR\Bitmaps\animations
   File "..\vfdstudio\Bitmaps\animations\lefteye128x64_7.bmp"
   File "..\vfdstudio\Bitmaps\animations\righteye128x64_7.bmp"
+  File "..\vfdstudio\Bitmaps\animations\cursor8x1_2.bmp"
+  File "..\vfdstudio\Bitmaps\animations\robot46x48_10.bmp"
+  File "..\vfdstudio\Bitmaps\animations\globe32x32_30.bmp"
+  File "..\vfdstudio\Bitmaps\animations\globe64x64_30.bmp"
 SectionEnd
 
 ; LANGUAGES
