@@ -26,6 +26,7 @@ type
     BrightSettingsRadioButton: TRadioButton;
     ClearOnCloseCheckBox: TCheckBox;
     ColorButton: TColorButton;
+    BackgroundColorButton: TColorButton;
     DspBox: TGroupBox;
     DspTypeCombo: TComboBox;
     IconGroupBox: TGroupBox;
@@ -47,6 +48,7 @@ type
     OptionsBox: TGroupBox;
     Panel1: TPanel;
     PreviewColorLabel: TLabel;
+    PreviewBackgroundColorLabel: TLabel;
     ResLabel: TLabel;
     ResXSpinEdit: TSpinEdit;
     ResYSpinEdit: TSpinEdit;

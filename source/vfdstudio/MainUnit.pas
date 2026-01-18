@@ -17,6 +17,7 @@ type
   TApplicationConfig = record
     Language: String;
     PreviewDisplayColor: TColor; // color of the pixels in the preview display
+    PreviewDisplayBackgroundColor: TColor; // background color of the preview display
     DoStartMinimized: Boolean;   // start VFD-Studio2 minimized in system tray?
     IsBrightnessControlledByList: Boolean; // display brightness is controlled by list commands (otherwise by following setting)
     DisplayBrightness: Byte; // display brightness in percent, unless brightness is controlled by list commands
@@ -418,6 +419,9 @@ begin
     ColorString := IniFile.ReadString('APPLICATION', 'DspColor', '$FFFFFF');
     ColorString := ColorString.Replace('#', '$');
     FStudioConfig.ApplicationConfig.PreviewDisplayColor := StringToColor(ColorString);
+    ColorString := IniFile.ReadString('APPLICATION', 'DspBackColor', '$000000');
+    ColorString := ColorString.Replace('#', '$');
+    FStudioConfig.ApplicationConfig.PreviewDisplayBackgroundColor := StringToColor(ColorString);
     FStudioConfig.ApplicationConfig.DoStartMinimized := IniFile.ReadBool('APPLICATION', 'StartMinimized', False);
     FStudioConfig.ApplicationConfig.IconIndex := IniFile.ReadInteger('APPLICATION', 'IconIndex', 0);
     FStudioConfig.ApplicationConfig.DontAskAgainDisplay:= IniFile.ReadBool('APPLICATION', 'DontAskForDisplay', False);
@@ -456,13 +460,15 @@ begin
 
     { application section }
     IniFile.WriteString('APPLICATION', 'Language', FStudioConfig.ApplicationConfig.Language);
-    ColorString := Format('$%.6x', [FStudioConfig.ApplicationConfig.PreviewDisplayColor]);
     IniFile.WriteBool('APPLICATION', 'StartMinimized', FStudioConfig.ApplicationConfig.DoStartMinimized);
     IniFile.WriteInteger('APPLICATION', 'IconIndex', FStudioConfig.ApplicationConfig.IconIndex);
     IniFile.WriteBool('APPLICATION', 'DontAskForDisplay', FStudioConfig.ApplicationConfig.DontAskAgainDisplay);
     IniFile.WriteInteger('APPLICATION', 'Sync', Ord(FStudioConfig.ApplicationConfig.SyncSetting));
 
+    ColorString := Format('$%.6x', [FStudioConfig.ApplicationConfig.PreviewDisplayColor]);
     IniFile.WriteString('APPLICATION', 'DspColor', ColorString);
+    ColorString := Format('$%.6x', [FStudioConfig.ApplicationConfig.PreviewDisplayBackgroundColor]);
+    IniFile.WriteString('APPLICATION', 'DspBackColor', ColorString);
     IniFile.WriteBool('APPLICATION', 'DspClearOnExit', FStudioConfig.ApplicationConfig.DoClearOnExit);
     IniFile.WriteBool('APPLICATION', 'DspBrightnessByList', FStudioConfig.ApplicationConfig.IsBrightnessControlledByList);
     IniFile.WriteInteger('APPLICATION', 'DspBrightness', FStudioConfig.ApplicationConfig.DisplayBrightness);
@@ -576,6 +582,7 @@ begin
   SetApplicationIcon;
 
   FDisplayMgr.PreviewColor := FStudioConfig.ApplicationConfig.PreviewDisplayColor;
+  FDisplayMgr.PreviewBackgroundColor := FStudioConfig.ApplicationConfig.PreviewDisplayBackgroundColor;
 
   LogEvent(lvINFO, 'Application language "'+FStudioConfig.ApplicationConfig.Language+'"', Now);
   SetDefaultLang(FStudioConfig.ApplicationConfig.Language);
@@ -1105,6 +1112,7 @@ end;
 procedure TMainForm.CfgButtonClick(Sender: TObject);
 begin
   ConfigForm.ColorButton.ButtonColor := FStudioConfig.ApplicationConfig.PreviewDisplayColor;
+  ConfigForm.BackgroundColorButton.ButtonColor := FStudioConfig.ApplicationConfig.PreviewDisplayBackgroundColor;
   ConfigForm.StartMinimizedCheckBox.Checked := FStudioConfig.ApplicationConfig.DoStartMinimized;
   ConfigForm.BrightListRadioButton.Checked := FStudioConfig.ApplicationConfig.IsBrightnessControlledByList;
   ConfigForm.BrightSettingsRadioButton.Checked := not FStudioConfig.ApplicationConfig.IsBrightnessControlledByList;
@@ -1239,6 +1247,7 @@ procedure TMainForm.LogEvent(const LogLevel: TLogLevel; const AText: String; con
 var
   Item: TListItem;
   AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond: Word;
+  LogFileName: String;
 begin
   DecodeDateTime(Timestamp, AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond);
 
@@ -1254,6 +1263,11 @@ begin
   end;
   Item.Subitems.Add(Format('%.04d-%.02d-%.02d %.02d:%.02d:%.02d.%.03d', [AYear, AMonth, ADay, AHour, AMinute, ASecond, AMilliSecond]));
   Item.MakeVisible(False);  // scroll to new entry
+
+  LogFileName := ExtractFileName(FIniFileName);
+  LogFileName:= LogFileName.Replace('.ini', '.log');
+  LogFileName:= ExtractFilePath(Application.ExeName) + LogFileName;
+  SaveLogFile(LogFileName);
 end;
 
 // Starting at StartIndex this function seeks forward/backward to the next line in ListBox which starts with the questioned string.
@@ -1621,7 +1635,7 @@ begin
   SetLength(FMatrix.Drops, 0);
   for I := 1 to (FStudioConfig.DisplayConfig.ResX div (GLYPH_W + GLYPH_GAP)) do
   begin
-    MaxTextLen := Random(4) + 4;
+    MaxTextLen := Random(3) + 2;
     SlownessFactor := Random(3) + 1;
     AText := ' ';
     Row := (Random(10) + 1) * -1;
@@ -2165,7 +2179,9 @@ begin
   PreviousDisplayConfig := FStudioConfig.DisplayConfig;
 
   FStudioConfig.ApplicationConfig.PreviewDisplayColor := ConfigForm.ColorButton.ButtonColor;
+  FStudioConfig.ApplicationConfig.PreviewDisplayBackgroundColor := ConfigForm.BackgroundColorButton.ButtonColor;
   FDisplayMgr.PreviewColor := FStudioConfig.ApplicationConfig.PreviewDisplayColor;
+  FDisplayMgr.PreviewBackgroundColor := FStudioConfig.ApplicationConfig.PreviewDisplayBackgroundColor;
   FStudioConfig.ApplicationConfig.DoStartMinimized := ConfigForm.StartMinimizedCheckBox.Checked;
   FStudioConfig.ApplicationConfig.IsBrightnessControlledByList := ConfigForm.BrightListRadioButton.Checked;
   FStudioConfig.ApplicationConfig.DisplayBrightness := ConfigForm.BrightnessTrackBar.Position;
@@ -2223,6 +2239,7 @@ begin
   // restore settings which might have been changed in ConfigForm
   SetDefaultLang(FStudioConfig.ApplicationConfig.Language);
   FDisplayMgr.PreviewColor := FStudioConfig.ApplicationConfig.PreviewDisplayColor;
+  FDisplayMgr.PreviewBackgroundColor := FStudioConfig.ApplicationConfig.PreviewDisplayBackgroundColor;
 end;
 
 procedure TMainForm.SettingsColorChange(AColor: TColor);

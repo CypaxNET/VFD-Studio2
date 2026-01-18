@@ -99,6 +99,9 @@ type
     procedure SaveAsMenuItemClick(Sender: TObject);
     procedure SaveButtonClick(Sender: TObject);
     procedure SaveMenuItemClick(Sender: TObject);
+    procedure SynCompletion1BeforeExecute(ASender: TSynBaseCompletion;
+      var ACurrentString: String; var APosition: Integer; var AnX,
+      AnY: Integer; var AnResult: TOnBeforeExeucteFlags);
     procedure SynCompletion1Execute(Sender: TObject);
     procedure SynCompletion1SearchPosition(var APosition: Integer);
     procedure LoadConfig(const AFilePath: String);
@@ -255,7 +258,10 @@ begin
   PreviewImage.Picture.Bitmap.Height := FStudioConfig.DisplayConfig.ResY;
 
   FDisplayMgr.PreviewColor:= FStudioConfig.ApplicationConfig.PreviewDisplayColor;
+  FDisplayMgr.PreviewBackgroundColor:= FStudioConfig.ApplicationConfig.PreviewDisplayBackgroundColor;
+
   FDisplayMgr.AddDisplay('PREVIEW', FStudioConfig.DisplayConfig.ResX, FStudioConfig.DisplayConfig.ResY, '', 0);
+  FDisplayMgr.ForcePreviewUpdate; // this instruction is needed to show the correct preview display background color on startup
 
 
   AFileName := FStudioConfig.ListConfig.ListName;
@@ -910,6 +916,13 @@ begin
   SaveButtonClick(Sender);
 end;
 
+procedure TMainForm.SynCompletion1BeforeExecute(ASender: TSynBaseCompletion;
+  var ACurrentString: String; var APosition: Integer; var AnX, AnY: Integer;
+  var AnResult: TOnBeforeExeucteFlags);
+begin
+
+end;
+
 procedure TMainForm.SynCompletion1Execute(Sender: TObject);
 begin
   SynCompletion1.ItemList.Clear;
@@ -997,6 +1010,9 @@ begin
     ColorString := IniFile.ReadString('APPLICATION', 'DspColor', '$FFFFFF');
     ColorString := ColorString.Replace('#', '$');
     FStudioConfig.ApplicationConfig.PreviewDisplayColor := StringToColor(ColorString);
+    ColorString := IniFile.ReadString('APPLICATION', 'DspBackColor', '$000000');
+    ColorString := ColorString.Replace('#', '$');
+    FStudioConfig.ApplicationConfig.PreviewDisplayBackgroundColor := StringToColor(ColorString);
     FStudioConfig.ApplicationConfig.DoStartMinimized := IniFile.ReadBool('APPLICATION', 'StartMinimized', False);
 
     { display section }

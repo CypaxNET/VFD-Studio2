@@ -31,6 +31,7 @@ type
     FTxtHeight: Word; // number of text rows the display can show with the selected glyph table
 
     FPreviewColor: TColor;
+    FPreviewBackgroundColor: TColor;
 
     FDisplays: array of TVFDisplay;
 
@@ -55,7 +56,9 @@ type
     property OnDbgMessage: TLoggingProcedure read FLoggingCallback write FLoggingCallback;
     property OnPreviewChanged: TPreviewChangedEvent read FOnPreviewChangedEvent write FOnPreviewChangedEvent;
     procedure SetPreviewColor(const AColor: TColor);
+    procedure SetPreviewBackgroundColor(const AColor: TColor);
     property PreviewColor: TColor read FPreviewColor write SetPreviewColor;
+    property PreviewBackgroundColor: TColor read FPreviewBackgroundColor write SetPreviewBackgroundColor;
 
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -145,6 +148,18 @@ begin
   begin
     if (FDisplays[DspIdx].DisplayType = 'PREVIEW') then
       TPreviewDisplay(FDisplays[DspIdx]).DisplayColor := FPreviewColor;
+  end;
+end;
+
+procedure TDisplayManager.SetPreviewBackgroundColor(const AColor: TColor);
+var
+  DspIdx: Integer;
+begin
+  FPreviewBackgroundColor := AColor;
+  for DspIdx := Low(FDisplays) to High(FDisplays) do
+  begin
+    if (FDisplays[DspIdx].DisplayType = 'PREVIEW') then
+      TPreviewDisplay(FDisplays[DspIdx]).DisplayBackgroundColor := FPreviewBackgroundColor;
   end;
 end;
 
@@ -258,6 +273,7 @@ begin
     FDisplays[High(FDisplays)].OnDbgMessage := FLoggingCallback;
     FDisplays[High(FDisplays)].DspInit(DisplayConfig.ResX, DisplayConfig.ResY);
     TPreviewDisplay(FDisplays[High(FDisplays)]).DisplayColor := FPreviewColor;
+    TPreviewDisplay(FDisplays[High(FDisplays)]).DisplayBackgroundColor := FPreviewBackgroundColor;
   end
   else
   if (DisplayConfig.DisplayType = 'NTK300') then
@@ -588,6 +604,7 @@ var
   I: Integer;
   IsAdded: Boolean;
 begin
+  IsAdded := False;
 
   // is there a free slot?
   for I := 0 to (MAX_VARIABLE_INFO - 1) do
@@ -622,7 +639,7 @@ begin
 end;
 
 
-//Infos, die sich nicht ständig ändern
+// Process information which does NOT change continuously
 procedure TDisplayManager.HandleTextOutput(AText: String; X, Y: Byte; FontName: String; FontSize: Integer);
 var
   S: String;
@@ -672,7 +689,7 @@ begin
 
 end;
 
-//Infos, die sich ständig ändern
+// Process information which DOES change continuously
 procedure TDisplayManager.RefreshTextOutputs;
 var
   I: Integer;
@@ -1093,12 +1110,31 @@ var
   Hour, Minute, Second, MilliSecond: Word;
   RegEx: TRegExpr;
   Match: String;
+  OhmComp, OhmType, OhmName, OhmValue: String;
 begin
 
   RegEx := TRegExpr.Create;
   S := AText;
   CurrentDateTime := Now;
   DecodeDateTime(CurrentDateTime, Year, Month, Day, Hour, Minute, Second, MilliSecond);
+
+
+  if (Pos('$OHM', S) <> 0) then
+  begin
+    // OHM = Open Hardware Monitor; read sensor values from WMI
+
+    // OHM cmds are structured like $OHM|component|sensortype|sensorname$
+    RegEx.Expression := '\$OHM\|(.+)\|(.+)\|(.+)\$';
+    if (RegEx.Exec(S)) then
+    begin
+      OhmComp := RegEx.Match[1];
+      OhmType := RegEx.Match[2];
+      OhmName := RegEx.Match[3];
+      OhmValue := FSysInfo.GetOhmValue(OhmComp, OhmType, OhmName);
+      S := RegEx.Replace(S, OhmValue, False);
+    end;
+  end;
+
 
   if (Pos('$TOTALDRIVE', S) <> 0) then
   begin

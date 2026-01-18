@@ -20,6 +20,7 @@ type
   TApplicationConfig = record
     Language: String;
     PreviewDisplayColor: TColor; // color of the pixels in the preview display
+    PreviewDisplayBackgroundColor: TColor; // background color of the pixels in the preview display
     DoStartMinimized: Boolean;   // start VFD-Studio2 minimized in system tray?
   end;
 

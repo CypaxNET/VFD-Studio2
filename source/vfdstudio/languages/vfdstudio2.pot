@@ -147,6 +147,10 @@ msgstr ""
 msgid "Options"
 msgstr ""
 
+#: tconfigform.previewbackgroundcolorlabel.caption
+msgid "Background color of preview display"
+msgstr ""
+
 #: tconfigform.previewcolorlabel.caption
 msgid "Color of preview display"
 msgstr ""

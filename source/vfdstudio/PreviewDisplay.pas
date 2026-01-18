@@ -5,7 +5,7 @@ unit PreviewDisplay;
 interface
 
 uses
-  Classes, SysUtils, ExtCtrls, Graphics, StudioCommon, VFDisplay, Glyphs;
+  Classes, SysUtils, ExtCtrls, Graphics, GraphType, StudioCommon, VFDisplay, Glyphs;
 
 
   { PreviewDisplay }
@@ -14,6 +14,8 @@ type
   private
   protected
     FDisplayColor: TColor;
+    FDisplayBackgroundColor: TColor;
+
     FLayerMode: TLayerMode;   // OR, AND or XOR combination of the layers
 
     FGraphicsLayer: TBitmap; // graphics layer of preview display
@@ -25,6 +27,7 @@ type
   public
 
     property DisplayColor: TColor read FDisplayColor write FDisplayColor;
+    property DisplayBackgroundColor: TColor read FDisplayBackgroundColor write FDisplayBackgroundColor;
     property LayerMode: TLayermode read FLayerMode write SetLayerMode;
 
     property GraphicsLayer: TBitmap read FGraphicsLayer write FGraphicsLayer;
@@ -215,39 +218,62 @@ end;
 
 procedure TPreviewDisplay.CombineVirtualLayers;
 var
-  TmpBitmap: TBitmap;
+  TmpBitmap, CombBitmap: TBitmap;
 begin
   TmpBitmap := TBitmap.Create;
   TmpBitmap.Width := FCombinedBitmap.Width;
   TmpBitmap.Height := FCombinedBitmap.Height;
 
-  FCombinedBitmap.Canvas.CopyMode := cmNotSrcCopy;
-  FCombinedBitmap.Canvas.Draw(0, 0, FGraphicsLayer);
+  CombBitmap := TBitmap.Create;
+  CombBitmap.Width := FCombinedBitmap.Width;
+  CombBitmap.Height := FCombinedBitmap.Height;
+
+
+  FCombinedBitmap.Canvas.Clear;
+
+  CombBitmap.Canvas.CopyMode := cmNotSrcCopy;
+  CombBitmap.Canvas.Draw(0, 0, FGraphicsLayer);
 
   TmpBitmap.Canvas.CopyMode := cmNotSrcCopy;
   TmpBitmap.Canvas.Draw(0, 0, FTextLayer);
 
   if (lmOR = FLayerMode) then
-    FCombinedBitmap.Canvas.CopyMode := cmSrcPaint
+    CombBitmap.Canvas.CopyMode := cmSrcPaint
   else
   if (lmXOR = FLayerMode) then
-    FCombinedBitmap.Canvas.CopyMode := cmSrcInvert
+    CombBitmap.Canvas.CopyMode := cmSrcInvert
   else
-    FCombinedBitmap.Canvas.CopyMode := cmSrcAnd;
+    CombBitmap.Canvas.CopyMode := cmSrcAnd;
+  // CombBitmap now contains the display content in white on black surface
 
-  FCombinedBitmap.Canvas.Draw(0, 0, TmpBitmap);
+  CombBitmap.Canvas.Draw(0, 0, TmpBitmap);
 
-  // ink the combined black&white image
-  TmpBitmap.Canvas.CopyMode := cmSrcCopy;
+  // prepare a tint bitmap in the content color
   TmpBitmap.Width := FCombinedBitmap.Width;
   TmpBitmap.Height := FCombinedBitmap.Height;
   TmpBitmap.Canvas.Brush.Color := FDisplayColor;
   TmpBitmap.Canvas.FillRect(0, 0, TmpBitmap.Width, TmpBitmap.Height);
+
+  // make a copy of CombBitmap and tint all content pixels
+  FCombinedBitmap.Canvas.CopyMode := cmSrcCopy;
+  FCombinedBitmap.Canvas.Draw(0, 0, CombBitmap);
   FCombinedBitmap.Canvas.CopyMode := cmSrcAnd;
-  //TmpBitmap.Canvas.Pixels[0,0]:= clYellow;
   FCombinedBitmap.Canvas.Draw(0, 0, TmpBitmap);
 
+  // prepare a tint bitmap in the background color
+  TmpBitmap.Canvas.Brush.Color := FDisplayBackgroundColor;
+  TmpBitmap.Canvas.FillRect(0, 0, TmpBitmap.Width, TmpBitmap.Height);
+
+  // tint all background pixels
+  CombBitmap.Canvas.CopyMode := cmSrcErase;
+  CombBitmap.Canvas.Draw(0, 0, TmpBitmap);
+
+  // combine the tinted content with the tinted background
+  FCombinedBitmap.Canvas.CopyMode := cmSrcPaint;
+  FCombinedBitmap.Canvas.Draw(0, 0, CombBitmap);
+
   TmpBitmap.Free;
+  CombBitmap.Free;
 end;
 
 end.

@@ -1,20 +1,20 @@
 object ConfigForm: TConfigForm
-  Left = 1625
-  Height = 300
-  Top = 1009
+  Left = 952
+  Height = 320
+  Top = 518
   Width = 600
   AutoSize = True
   BorderIcons = [biSystemMenu]
   Caption = 'Settings'
   ChildSizing.ControlsPerLine = 1
-  ClientHeight = 300
+  ClientHeight = 320
   ClientWidth = 600
   Constraints.MinHeight = 300
   Constraints.MinWidth = 590
   OnShow = FormShow
   Position = poMainFormCenter
   ShowInTaskBar = stAlways
-  LCLVersion = '3.0.0.3'
+  LCLVersion = '3.2.0.0'
   object Panel1: TPanel
     AnchorSideLeft.Control = Owner
     AnchorSideRight.Control = Owner
@@ -23,7 +23,7 @@ object ConfigForm: TConfigForm
     AnchorSideBottom.Side = asrBottom
     Left = 4
     Height = 44
-    Top = 252
+    Top = 272
     Width = 592
     Anchors = [akLeft, akRight, akBottom]
     AutoSize = True
@@ -84,7 +84,7 @@ object ConfigForm: TConfigForm
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Panel1
     Left = 4
-    Height = 244
+    Height = 264
     Top = 4
     Width = 135
     Anchors = [akTop, akLeft, akBottom]
@@ -95,7 +95,7 @@ object ConfigForm: TConfigForm
     BorderSpacing.Bottom = 4
     BorderSpacing.InnerBorder = 4
     Caption = 'Application'
-    ClientHeight = 224
+    ClientHeight = 244
     ClientWidth = 131
     Constraints.MaxWidth = 240
     ParentBackground = False
@@ -109,7 +109,7 @@ object ConfigForm: TConfigForm
       AnchorSideBottom.Control = ApplicationGroupBox
       AnchorSideBottom.Side = asrBottom
       Left = 4
-      Height = 133
+      Height = 153
       Top = 83
       Width = 123
       Anchors = [akTop, akLeft, akRight, akBottom]
@@ -125,7 +125,7 @@ object ConfigForm: TConfigForm
       ChildSizing.VerticalSpacing = 4
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 1
-      ClientHeight = 113
+      ClientHeight = 133
       ClientWidth = 119
       ParentBackground = False
       TabOrder = 0
@@ -501,17 +501,17 @@ object ConfigForm: TConfigForm
     AnchorSideRight.Control = OptionsBox
     AnchorSideBottom.Control = Panel1
     Left = 143
-    Height = 244
+    Height = 264
     Top = 4
-    Width = 210
+    Width = 202
     Anchors = [akTop, akLeft, akRight, akBottom]
     AutoSize = True
     BorderSpacing.Left = 4
     BorderSpacing.Top = 4
     BorderSpacing.Bottom = 4
     Caption = 'Display (requires restart)'
-    ClientHeight = 224
-    ClientWidth = 206
+    ClientHeight = 244
+    ClientWidth = 198
     Constraints.MinWidth = 171
     TabOrder = 2
     object DspTypeCombo: TComboBox
@@ -523,7 +523,7 @@ object ConfigForm: TConfigForm
       Left = 32
       Height = 23
       Top = 23
-      Width = 166
+      Width = 158
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 32
       BorderSpacing.Right = 8
@@ -572,7 +572,7 @@ object ConfigForm: TConfigForm
       Left = 32
       Height = 23
       Top = 73
-      Width = 166
+      Width = 158
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 32
       BorderSpacing.Right = 8
@@ -605,7 +605,7 @@ object ConfigForm: TConfigForm
       Left = 32
       Height = 23
       Top = 123
-      Width = 166
+      Width = 158
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 32
       BorderSpacing.Right = 8
@@ -681,10 +681,10 @@ object ConfigForm: TConfigForm
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Panel1
-    Left = 357
-    Height = 244
+    Left = 349
+    Height = 264
     Top = 4
-    Width = 239
+    Width = 247
     Anchors = [akTop, akRight, akBottom]
     AutoSize = True
     BorderSpacing.Left = 4
@@ -693,8 +693,8 @@ object ConfigForm: TConfigForm
     BorderSpacing.Bottom = 4
     BorderSpacing.InnerBorder = 4
     Caption = 'Options'
-    ClientHeight = 224
-    ClientWidth = 235
+    ClientHeight = 244
+    ClientWidth = 243
     ParentBackground = False
     TabOrder = 3
     object ColorButton: TColorButton
@@ -730,7 +730,7 @@ object ConfigForm: TConfigForm
       AnchorSideTop.Control = BrightSettingsRadioButton
       AnchorSideRight.Control = OptionsBox
       AnchorSideRight.Side = asrBottom
-      Left = 195
+      Left = 203
       Height = 15
       Top = 58
       Width = 40
@@ -746,7 +746,7 @@ object ConfigForm: TConfigForm
       Left = 75
       Height = 25
       Top = 58
-      Width = 116
+      Width = 124
       Frequency = 10
       Max = 100
       Min = 1
@@ -812,9 +812,9 @@ object ConfigForm: TConfigForm
     object IdlePercentageLabel: TLabel
       AnchorSideTop.Control = IdleLevelLabel
       AnchorSideRight.Side = asrBottom
-      Left = 195
+      Left = 203
       Height = 15
-      Top = 178
+      Top = 211
       Width = 40
       Anchors = [akTop, akRight]
       BorderSpacing.Right = 8
@@ -829,8 +829,8 @@ object ConfigForm: TConfigForm
       AnchorSideBottom.Side = asrBottom
       Left = 69
       Height = 25
-      Top = 178
-      Width = 122
+      Top = 211
+      Width = 130
       Frequency = 10
       Max = 100
       Min = 1
@@ -846,7 +846,7 @@ object ConfigForm: TConfigForm
       AnchorSideTop.Side = asrBottom
       Left = 16
       Height = 15
-      Top = 178
+      Top = 211
       Width = 49
       BorderSpacing.Left = 16
       BorderSpacing.Top = 8
@@ -854,17 +854,46 @@ object ConfigForm: TConfigForm
     end
     object OnlyOnIdleBox: TCheckBox
       AnchorSideLeft.Control = OptionsBox
-      AnchorSideTop.Control = ColorButton
+      AnchorSideTop.Control = BackgroundColorButton
       AnchorSideTop.Side = asrBottom
       AnchorSideBottom.Side = asrBottom
       Left = 8
       Height = 19
-      Top = 151
+      Top = 184
       Width = 219
       BorderSpacing.Left = 8
       BorderSpacing.Top = 8
       Caption = 'Play animations only when CPU is idle'
       TabOrder = 5
+    end
+    object BackgroundColorButton: TColorButton
+      AnchorSideLeft.Control = OptionsBox
+      AnchorSideTop.Control = ColorButton
+      AnchorSideTop.Side = asrBottom
+      Left = 8
+      Height = 25
+      Top = 151
+      Width = 27
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 8
+      BorderWidth = 2
+      ButtonColorSize = 16
+      ButtonColor = clBlack
+      OnColorChanged = ColorButtonColorChanged
+    end
+    object PreviewBackgroundColorLabel: TLabel
+      AnchorSideLeft.Control = BackgroundColorButton
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideBottom.Control = BackgroundColorButton
+      AnchorSideBottom.Side = asrBottom
+      Left = 43
+      Height = 15
+      Top = 157
+      Width = 192
+      Anchors = [akLeft, akBottom]
+      BorderSpacing.Left = 8
+      BorderSpacing.Bottom = 4
+      Caption = 'Background color of preview display'
     end
   end
   object ImageList1: TImageList
