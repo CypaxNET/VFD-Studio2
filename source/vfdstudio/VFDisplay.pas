@@ -19,7 +19,7 @@ type
 
 type
   TLoggingProcedure = procedure(const LogLevel: TLogLevel; const Text: String; const Timestamp: TDateTime) of object;
-
+  TConnectionFailueProcedure = procedure(const Text: String; const Timestamp: TDateTime) of object;
 
   { VFDisplay }
   TVFDisplay = class(TComponent)
@@ -41,6 +41,7 @@ type
     FIsLineBreak: Boolean;          // do a line break when printing text outside visible area?
 
     FLoggingCallback: TLoggingProcedure;        // callback procedure to report error strings
+    FConnectionFailureCallback: TConnectionFailueProcedure;        // callback procedure to report connection errors
 
     FInterfaceConfig: TInterfaceConfig; // interface configuration
 
@@ -48,6 +49,7 @@ type
     function ReverseBits(Bits: Byte): Byte;
     procedure MsDelay(const Milliseconds: QWord); public
     property OnDbgMessage: TLoggingProcedure read FLoggingCallback write FLoggingCallback;
+    property OnConnectionFailure: TConnectionFailueProcedure read FConnectionFailureCallback write FConnectionFailureCallback;
 
     property DisplayType: String read FDisplayType;
 

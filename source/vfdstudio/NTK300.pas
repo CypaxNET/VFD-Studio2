@@ -721,6 +721,10 @@ begin
       begin
         FLoggingCallback(lvERROR, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Write timeout on ' + FInterfaceConfig.IfaceName, Now);
       end;
+      if Assigned(FConnectionFailureCallback) then
+      begin
+        FConnectionFailureCallback('WriteTimeout', Now);
+      end;
     end;
   except
     on E: Exception do
@@ -729,6 +733,10 @@ begin
       if Assigned(FLoggingCallback) then
       begin
         FLoggingCallback(lvCRITICAL, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Interface exception: ' + E.Message, Now);
+      end;
+      if Assigned(FConnectionFailureCallback) then
+      begin
+        FConnectionFailureCallback('InterfaceException', Now);
       end;
     end;
   end;
