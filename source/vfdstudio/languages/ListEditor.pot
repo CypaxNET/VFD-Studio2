@@ -437,6 +437,18 @@ msgid ""
 "  pixels shall be off/black (1 or TRUE)"
 msgstr ""
 
+#: listeditorunit.rshelpohm
+msgid ""
+"Sensor value from Open Hardware Monitor (OHM).\n"
+"OHM must be running to obtain updated values.\n"
+"Param1:\n"
+"  Component - must be the exact name as shown in OHM or the correct identifier such as \"/intelcpu/0\"\n"
+"Param2:\n"
+"  Sensor type (e.g. \"Temperature\", \"Clock\", ...)\n"
+"Param3:\n"
+"  Sensor name - must be the exact name as shown in OHM (e.g. \"CPU Core #2)"
+msgstr ""
+
 #: listeditorunit.rshelpormode
 msgid ""
 "OR combination of display layers.\n"

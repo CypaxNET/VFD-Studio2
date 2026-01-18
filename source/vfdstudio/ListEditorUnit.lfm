@@ -1316,6 +1316,7 @@ object MainForm: TMainForm
     Top = 56
   end
   object SynCompletion1: TSynCompletion
+    OnBeforeExecute = SynCompletion1BeforeExecute
     OnExecute = SynCompletion1Execute
     Position = -1
     LinesInWindow = 6

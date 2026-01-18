@@ -414,6 +414,12 @@ resourcestring
     'Current year.' + LineEnding +
     'Example: "2024"';
 
+  RsHelpOHM =
+    'Sensor value from Open Hardware Monitor (OHM).' + LineEnding +
+    'OHM must be running to obtain updated values.' + LineEnding +
+    'Param1:' + LineEnding + '  Component - must be the exact name as shown in OHM or the correct identifier such as "/intelcpu/0"' + LineEnding +
+    'Param2:' + LineEnding + '  Sensor type (e.g. "Temperature", "Clock", ...)' + LineEnding +
+    'Param3:' + LineEnding + '  Sensor name - must be the exact name as shown in OHM (e.g. "CPU Core #2)';
 
 const
 
@@ -759,6 +765,9 @@ const
                'PLAINTEXT ''Pos $WAPOS$ / $WALENGTH$'' 1 2'),
     (Expr: 'YEAR';
       Help: RsHelpYEAR;
-      Example: 'PLAINTEXT ''It''''s the year $YEAR$!'' 1 1')
+      Example: 'PLAINTEXT ''It''''s the year $YEAR$!'' 1 1'),
+    (Expr: 'OHM';
+      Help: RsHelpOHM;
+      Example: 'PLAINTEXT ''CPU Temp: $OHM|/intelcpu/0|Temperature|CPU Package$'' 1 1')
     );
 

@@ -1,7 +1,7 @@
 object MainForm: TMainForm
-  Left = 1212
+  Left = 848
   Height = 598
-  Top = 401
+  Top = 240
   Width = 743
   AutoSize = True
   BorderIcons = [biSystemMenu, biMinimize]
@@ -14,7 +14,7 @@ object MainForm: TMainForm
   OnDestroy = FormDestroy
   OnWindowStateChange = FormWindowStateChange
   Position = poScreenCenter
-  LCLVersion = '3.0.0.3'
+  LCLVersion = '3.2.0.0'
   object ScreenTimeLabel: TLabel
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = PreviewImage
