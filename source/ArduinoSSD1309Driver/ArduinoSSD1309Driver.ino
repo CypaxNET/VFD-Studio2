@@ -83,7 +83,7 @@
 // Number of serial bytes receivable in the buffer before XOFF is sent. 
 // Actually the buffer size is 64 bytes by default in Arduino, but it's not 
 // wrong to raise the flag a little bit earlier:
-#define XOFF_THRESHOLD 48  
+#define XOFF_THRESHOLD 48
 
 
 /* ******** Communication stuff ******** */
@@ -98,7 +98,7 @@ const char kHelpStr[] =    "I = identify driver\n"\
                            "T v = set contrast / brightness\n"\
                            "B p x y = draw vertical block of pixels\n"\
                            "L l x y = draw letter\n"\
-                           "SP x y = draw pixel\n"\
+                                      "SP x y = draw pixel\n"\
                            "CP x y = clear pixel\n"\
                            "SL x0 y0 x0 y0 = draw line\n"\
                            "CL x0 y0 x0 y0 = clear line\n"\
@@ -116,9 +116,9 @@ const char kErrorStr[] =   "ERR";
 /******************************************************************************/
 
 // A display constructor using software SPI:
-//U8G2_SSD1309_128X64_NONAME0_F_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/ 14, /* data=*/ 13, /* cs=*/ 15, /* dc=*/ 4, /* reset=*/ 5);  
+//U8G2_SSD1309_128X64_NONAME0_F_4W_SW_SPI u8g2(U8G2_R0, /* clock=*/ 14, /* data=*/ 13, /* cs=*/ 15, /* dc=*/ 4, /* reset=*/ 5);
 // A display constructor using hardware SPI:
-U8G2_SSD1309_128X64_NONAME0_F_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 15, /* dc=*/ 4, /* reset=*/ 5);  
+U8G2_SSD1309_128X64_NONAME0_F_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 15, /* dc=*/ 4, /* reset=*/ 5);
 
 /******************************************************************************/
 /* Declaration of own functions                                               */
@@ -165,7 +165,7 @@ void setup()
   initializeDisplay();
   
   // initialize the randomizer using a floating (unconnected) analog input
-  randomSeed(analogRead(0));	
+  randomSeed(analogRead(0));
 }
 
 /*
