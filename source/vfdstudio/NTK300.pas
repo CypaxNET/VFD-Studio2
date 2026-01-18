@@ -5,7 +5,7 @@ unit NTK300;
 interface
 
 uses
-  Classes, SysUtils, Forms, VFDisplay, Graphics, Math, synaser, GraphUtil,
+  Classes, SysUtils, Forms, VFDisplay, Graphics, Math, noresetsynaser, GraphUtil,
   StudioCommon, Glyphs;
 type
   { NTK300 }
@@ -18,7 +18,7 @@ type
     FShadowLayer0: Array of Array of Byte;
     FShadowLayer1: Array of Array of Byte;
 
-    FSerialInterface: TBlockSerial;
+    FSerialInterface: TBlockSerialNoReset;
 
     FPosX, FPosY: Word;
 
@@ -632,7 +632,7 @@ begin
   begin
     FInterfaceConfig.IfaceType := itCOM;
     try
-      FSerialInterface := TBlockSerial.Create;
+      FSerialInterface := TBlockSerialNoReset.Create;
       FSerialInterface.ConvertLineEnd := True;
       FSerialInterface.DeadlockTimeout := 100; // Wartezeit für den seriellen Port
       FSerialInterface.Connect(AInterface); // Setzen Sie den gewünschten COM - Port

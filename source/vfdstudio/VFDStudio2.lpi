@@ -40,6 +40,7 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <MajorVersionNr Value="2"/>
+      <RevisionNr Value="1"/>
       <StringTable CompanyName="cypax.net" FileDescription="VFD-Studio2" LegalCopyright="cypax.net" ProductName="VFD-Studio" ProductVersion="2"/>
     </VersionInfo>
     <BuildModes>
@@ -235,6 +236,10 @@
       </Unit>
       <Unit>
         <Filename Value="U8G2.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="noresetsynaser.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
     </Units>

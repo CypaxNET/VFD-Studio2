@@ -5,7 +5,7 @@ unit U8G2;
 interface
 
 uses
-  Classes, SysUtils, Forms, VFDisplay, Graphics, Math, synaser, Glyphs,
+  Classes, SysUtils, Forms, VFDisplay, Graphics, Math, noresetsynaser, Glyphs,
   GraphUtil, StudioCommon;
 type
   TGlyphConfig = record
@@ -24,7 +24,7 @@ type
 
   protected
 
-    FSerialInterface: TBlockSerial;
+    FSerialInterface: TBlockSerialNoReset;
 
     FPosX, FPosY: Word;
 
@@ -314,7 +314,8 @@ begin
   begin
     FInterfaceConfig.IfaceType := itCOM;
     try
-      FSerialInterface := TBlockSerial.Create;
+      FSerialInterface := TBlockSerialNoReset.Create;
+      FSerialInterface.EnableRTSToggle(False);
       FSerialInterface.ConvertLineEnd := True;
       FSerialInterface.DeadlockTimeout := 100; // Wartezeit für den seriellen Port
       FSerialInterface.Connect(AInterface); // Setzen Sie den gewünschten COM - Port
