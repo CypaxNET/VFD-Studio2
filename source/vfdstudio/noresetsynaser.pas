@@ -1,6 +1,9 @@
 {==============================================================================|
 | TBlockSerialNoReset - a TBlockSerial variant without DTR/RTS so ESP8266 MCUs |
 | are not set into programming mode when opening a serial port                 |
+|                                                                              |
+| See https://forum.lazarus.freepascal.org/index.php?topic=63101.0             |
+|                                                                              |
 |==============================================================================|
 | Content: Serial port support                                                 |
 |==============================================================================}
