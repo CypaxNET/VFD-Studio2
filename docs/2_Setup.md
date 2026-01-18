@@ -60,12 +60,12 @@ Lists may include special commands to adjust the display brightness. In the opti
 
 You can decide whether to clear the display content when VFD-Studio 2 closes or leave it as it is.
 
-### Color of preview display
+### Color of preview display / Background color of preview display
 
-The main window of VFD-Studio features a preview display. In the settings you can adjust the color of the preview display to match the color of the physical display.
+The main window of VFD-Studio features a preview display. In the settings you can adjust the content and background colors of the preview display to match the colors of the physical display.
 
 > [!NOTE]
-> This settings takes effect as soon as something is updated on the preview display. If you slide the settings window away from the main window, you might see the effect immediately.
+> These settings takes effect as soon as something is updated on the preview display. If you slide the settings window away from the main window, you might see the effect immediately.
 
 ### Play animations only when the CPU is idle
 
