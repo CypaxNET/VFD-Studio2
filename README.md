@@ -28,7 +28,7 @@ If you would like to keep an eye on CPU load and memory usage during gaming, if 
 
 - Noritake Itron GU-300 VFD Series<br>(tested with a GU256x64-372, identical to GU256X64F-9900)
 
-- Basically any display supported by the Arduino [U8glib](https://github.com/olikraus/u8g2/) library<br>(tested with SSD1309 and SSD1306 128x64 OLED displays)
+- Basically any display supported by the Arduino [U8glib](https://github.com/olikraus/u8g2/) library<br>(tested with SSD1309 and SSD1306 128x64 OLED displays)<br><br>Here another example with a GP1287 VFD:<br><img title="" src="./docs/images/VFD-GP1287.jpg" alt=" GP1287 VFD (EVG256x48/50 200AP-c)" width="800"> 
 
 ## How it works
 
@@ -38,7 +38,7 @@ The general concept is that the display is connected to an [Arduino](https://en.
 
 Once all installed and wired, simply start VFD-Studio, configure the type of display, it's resolution and select the serial port.
 
-VFD-Studio processes so-called *Lists* - text files which contain instructions for the display - e.g. draw an image or print some text.
+VFD-Studio processes *Lists* - basically just plain text files which contain instructions for the display - e.g. draw an image or print some text.
 
 A set of instructions belongs to a *Screen* which is displayed for a certain duration before the next Screen is displayed.
 

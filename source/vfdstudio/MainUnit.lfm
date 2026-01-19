@@ -375,7 +375,7 @@ object MainForm: TMainForm
     Anchors = [akTop, akRight]
     BorderSpacing.Top = 4
     BorderSpacing.Right = 4
-    Caption = ', 2004-2024'
+    Caption = ', 2004-2026'
   end
   object ListGroupBox: TGroupBox
     AnchorSideLeft.Control = PreviewImage

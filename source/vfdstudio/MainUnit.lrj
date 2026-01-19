@@ -14,7 +14,7 @@
 {"hash":178749038,"name":"tmainform.versionlabel.caption","sourcebytes":[86,69,82,83,73,79,78],"value":"VERSION"},
 {"hash":109789124,"name":"tmainform.hyperlinklabel.caption","sourcebytes":[99,121,112,97,120,46,110,101,116],"value":"cypax.net"},
 {"hash":27056,"name":"tmainform.bylabel.caption","sourcebytes":[98,121,32],"value":"by "},
-{"hash":56518244,"name":"tmainform.developmentyearslabel.caption","sourcebytes":[44,32,50,48,48,52,45,50,48,50,52],"value":", 2004-2024"},
+{"hash":56518246,"name":"tmainform.developmentyearslabel.caption","sourcebytes":[44,32,50,48,48,52,45,50,48,50,54],"value":", 2004-2026"},
 {"hash":168200906,"name":"tmainform.listgroupbox.caption","sourcebytes":[67,117,114,114,101,110,116,108,121,32,100,105,115,112,108,97,121,101,100,58],"value":"Currently displayed:"},
 {"hash":158118362,"name":"tmainform.logfilegroupbox.caption","sourcebytes":[76,111,103,32,102,105,108,101,58],"value":"Log file:"},
 {"hash":35,"name":"tmainform.loglistview.columns[0].caption","sourcebytes":[35],"value":"#"},

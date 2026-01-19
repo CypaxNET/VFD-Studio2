@@ -21,6 +21,7 @@ type
     procedure Image1Click(Sender: TObject);
     procedure InfoOkButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure Memo1Change(Sender: TObject);
   private
 
   public
@@ -54,6 +55,11 @@ end;
 procedure TInfoForm.FormCreate(Sender: TObject);
 begin
   HtmlViewer1.LoadFromString(Memo1.Text);
+end;
+
+procedure TInfoForm.Memo1Change(Sender: TObject);
+begin
+
 end;
 
 end.
