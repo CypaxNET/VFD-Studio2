@@ -5,7 +5,8 @@ interface
 uses
   Windows, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Registry, winsock, ExtCtrls, JwaWinBase, Win32Proc, resource,
-  versiontypes, versionresource, ComObj, Variants, Process, ActiveX;
+  versiontypes, versionresource, ComObj, Variants, Process, ActiveX,
+  fphttpclient, fpjson, jsonparser;
 
 type
   TSysInfo = class(TComponent)
@@ -20,6 +21,7 @@ type
     { Public-Deklarationen }
 
     function GetOhmValue(OhmComp, OhmType, OhmName: string): string;
+    function GetLhmValue(LhmURL, LhmComp, LhmType, LhmName: string): string;
 
     function ResourceVersionInfo: string;
 
@@ -136,66 +138,216 @@ begin
   end;
 end;
 
-(*
-OBSOLETE
-function TSysInfo.GetOhmValue(OhmComp, OhmType, OhmName: String): String;
+function TSysInfo.GetLhmValue(LhmURL, LhmComp, LhmType, LhmName: string): string;
 var
-  Cmd: String;
-  SensorType, SensorName, SensorParent: String;
-  SensorValue: Double;
-  I: Integer;
-  ResStr: String;
-  AProcess: TProcess;
-  OutputStream: TMemoryStream;
-  Buffer: array[1..2048] of Byte;
-  BytesRead: LongInt;
-  OutputString: TStringList;
-begin
-  ResStr := '?';
-  AProcess := TProcess.Create(nil);
-  try
-    AProcess.Options := [poUsePipes, poWaitOnExit, poNoConsole];
-    AProcess.Executable := 'wmic.exe';
-    // OhmComponent should be something like "/intelcpu/0". If it's not, we need to search for it based on the given name:
-    if (not OhmComp.StartsWith('/')) then begin
-      Cmd:= '/namespace:\\ROOT\OpenHardwareMonitor path Hardware where "name=''' + OhmComp + '''" get name, identifier';
-      AProcess.Parameters.Add(Cmd);
-      AProcess.Execute;
+  Http: TFPHTTPClient;
+  JsonText: string;
+  Root: TJSONData;
 
-      OutputStream := TMemoryStream.Create;
-      try
-        repeat
-          BytesRead := AProcess.Output.Read(Buffer, SizeOf(Buffer));
-          if BytesRead > 0 then
-            OutputStream.Write(Buffer, BytesRead);
-        until BytesRead = 0;
 
-        OutputStream.Position := 0;
-        OutputString := TStringList.Create;
-        Application.Title:= Inttostr(OutputString.Count) + ' lines';
-        try
-          OutputString.LoadFromStream(OutputStream);
-          //AOutput.Assign(OutputString);
-        finally
-          OutputString.Free;
+  function ExtractRoundedNumber(const S: string): string;
+  var
+    FS: TFormatSettings;
+    NumStr: string;
+    i: Integer;
+    Ch: Char;
+    V: Double;
+  begin
+    Result := '';
+
+    // Extract number from string (e.g. "36,6 °C" -> "36,6")
+    NumStr := '';
+    for i := 1 to Length(S) do
+    begin
+      Ch := S[i];
+      if (Ch in ['0'..'9', ',', '.', '-', '+']) then
+        NumStr := NumStr + Ch
+      else if NumStr <> '' then
+        Break;
+    end;
+
+    if NumStr = '' then
+      Exit('');
+
+    // us , as decimal separator
+    FS := DefaultFormatSettings;
+    FS.DecimalSeparator := ',';
+    FS.ThousandSeparator := #0;
+
+    NumStr := StringReplace(NumStr, '.', ',', [rfReplaceAll]);
+
+    // parse and round to integer
+    if TryStrToFloat(NumStr, V, FS) then
+      Result := IntToStr(Round(V));
+  end;
+
+  function FindSensorRecursive(Node: TJSONData; const InHardware: Boolean): string;
+  var
+    Obj: TJSONObject;
+    Arr: TJSONArray;
+    i: Integer;
+
+    HardwareId, SensorType, SensorText, SensorValue: string;
+    NowInHardware: Boolean;
+    ChildResult: string;
+  begin
+    Result := '';
+
+    if Node = nil then
+      Exit;
+
+    // only objects can have "Children", "HardwareId", "Type", "Text", "Value"
+    if Node.JSONType = jtObject then
+    begin
+      Obj := TJSONObject(Node);
+
+      HardwareId := Obj.Get('HardwareId', '');
+      SensorType := Obj.Get('Type', '');
+      SensorText := Obj.Get('Text', '');
+      SensorValue := Obj.Get('Value', '');
+
+      NowInHardware := InHardware or ((HardwareId <> '') and SameText(HardwareId, LhmComp));
+
+      // Sensor found?
+      if NowInHardware then
+      begin
+        if (SensorType <> '') and SameText(SensorType, LhmType) and SameText(SensorText, LhmName) then
+        begin
+          Result := SensorValue;
+          Exit;
         end;
-      finally
-        OutputStream.Free;
       end;
 
+      // recursively search in Children
+      if Obj.Find('Children') <> nil then
+      begin
+        if Obj.Arrays['Children'] <> nil then
+        begin
+          Arr := Obj.Arrays['Children'];
+          for i := 0 to Arr.Count - 1 do
+          begin
+            ChildResult := FindSensorRecursive(Arr.Items[i], NowInHardware);
+            if ChildResult <> '' then
+            begin
+              Result := ChildResult;
+              Exit;
+            end;
+          end;
+        end;
+      end;
+    end
+    else if Node.JSONType = jtArray then
+    begin
+      Arr := TJSONArray(Node);
+      for i := 0 to Arr.Count - 1 do
+      begin
+        ChildResult := FindSensorRecursive(Arr.Items[i], InHardware);
+        if ChildResult <> '' then
+        begin
+          Result := ChildResult;
+          Exit;
+        end;
+      end;
     end;
-
-    if (OhmComp <> '') then begin
-    end;
-
-  finally
-    AProcess.Free;
   end;
-  Result:= Trim(ResStr);
+
+begin
+  Result := '';
+
+  // parameter check
+  if (Trim(LhmComp) = '') or (Trim(LhmType) = '') or (Trim(LhmName) = '') then
+    Exit;
+
+  Http := TFPHTTPClient.Create(nil);
+  try
+    Http.AddHeader('User-Agent', 'Lazarus/TSysInfo');
+    Http.AddHeader('Accept', 'application/json');
+
+    // load JSON
+    JsonText := Http.Get(LhmURL);
+
+    // parse JSON
+    Root := GetJSON(JsonText);
+    try
+      Result := FindSensorRecursive(Root, False);
+      Result := ExtractRoundedNumber(Result);
+    finally
+      Root.Free;
+    end;
+
+  except
+    // return ? when nothing is found
+    Result := '?';
+  end;
+
+  Http.Free;
+end;
+
+
+(*
+function TSysInfo.GetLhmValue(LhmComp, LhmType, LhmName: string): string;
+var
+  Locator: olevariant;
+  WMIService: olevariant;
+  WbemObjectSet: olevariant;
+  WbemObject: olevariant;
+  Enum: IEnumVariant;
+  SensorType, SensorName, SensorParent: string;
+  SensorValue: double;
+  I: integer;
+  ResStr: string;
+  Value: cardinal;
+begin
+  ResStr := '?';
+  try
+    Locator := CreateOleObject('WbemScripting.SWbemLocator');
+    WMIService := Locator.ConnectServer(WideString('.'), 'root\LibreHardwareMonitor');
+
+    // LhmComponent should be something like "/intelcpu/0". If it's not, we need to search for it based on the given name:
+    if (not LhmComp.StartsWith('/')) then
+    begin
+      WbemObjectSet := WMIService.ExecQuery(
+        'SELECT * FROM Sensor WHERE Name="' + LhmComp + '"');
+      Enum := WbemObjectSet._NewEnum;
+      if (WbemObjectSet.Count > 0) then
+      begin
+        while (Enum.Next(1, WbemObject, Value) = S_OK) do
+        begin
+          LhmComp := WbemObject.Properties_.Item('Identifier').Value;
+        end;
+
+      end
+      else
+      begin
+        LhmComp := '';
+      end;
+    end;
+
+    if (LhmComp <> '') then
+    begin
+
+      WbemObjectSet := WMIService.ExecQuery('SELECT * FROM Sensor WHERE SensorType="' +
+        LhmType + '" AND Parent="' + LhmComp + '"');
+      Enum := WbemObjectSet._NewEnum;
+      while (Enum.Next(1, WbemObject, Value) = S_OK) do
+      begin
+        SensorType := WbemObject.Properties_.Item('SensorType').Value;
+        SensorName := WbemObject.Properties_.Item('Name').Value;
+        SensorValue := WbemObject.Properties_.Item('Value').Value;
+        SensorParent := WbemObject.Properties_.Item('Parent').Value;
+        if (SensorName = LhmName) then
+        begin
+          //ResStr := Format('%.1f', [SensorValue]);
+          ResStr := IntToStr(Round(SensorValue));
+          Break;
+        end;
+      end;
+    end;
+  finally
+    Result := Trim(ResStr);
+  end;
 end;
 *)
-
-
 
 
 function TSysInfo.ResourceVersionInfo: string;

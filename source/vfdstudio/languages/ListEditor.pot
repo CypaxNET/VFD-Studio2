@@ -273,6 +273,12 @@ msgid ""
 "  chart length in characters"
 msgstr ""
 
+#: listeditorunit.rshelpdriveuse
+msgid ""
+"Used disk space in poercent.\n"
+"Must include a drive letter (see code example)."
+msgstr ""
+
 #: listeditorunit.rshelpendscreen
 msgid ""
 "End mark of a screen.\n"
@@ -340,6 +346,20 @@ msgctxt "listeditorunit.rshelpip"
 msgid ""
 "Assigned IP address of the first network interface.\n"
 "Example: \"192.168.10.63\""
+msgstr ""
+
+#: listeditorunit.rshelplhm
+msgid ""
+"Sensor value from Libre Hardware Monitor (LHM).\n"
+"LHM web server must be running to obtain updated values.\n"
+"Param1:\n"
+"  Server URL and port\n"
+"Param2:\n"
+"  Component - must be the exact name as shown in LHM or the correct identifier such as \"/gpu-nvidia/0\"\n"
+"Param3:\n"
+"  Sensor type (e.g. \"Temperature\", \"Clock\", ...)\n"
+"Param4:\n"
+"  Sensor name - must be the exact name as shown in LHM (e.g. \"GPU Core\")"
 msgstr ""
 
 #: listeditorunit.rshelplight
@@ -446,7 +466,7 @@ msgid ""
 "Param2:\n"
 "  Sensor type (e.g. \"Temperature\", \"Clock\", ...)\n"
 "Param3:\n"
-"  Sensor name - must be the exact name as shown in OHM (e.g. \"CPU Core #2)"
+"  Sensor name - must be the exact name as shown in OHM (e.g. \"CPU Core\")"
 msgstr ""
 
 #: listeditorunit.rshelpormode

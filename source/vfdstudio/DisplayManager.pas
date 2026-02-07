@@ -1108,9 +1108,11 @@ var
   DoW: Word;
   Year, Month, Day: Word;
   Hour, Minute, Second, MilliSecond: Word;
+  d: Double;
   RegEx: TRegExpr;
   Match: String;
   OhmComp, OhmType, OhmName, OhmValue: String;
+  LhmServer: String;
 begin
 
   RegEx := TRegExpr.Create;
@@ -1135,6 +1137,22 @@ begin
     end;
   end;
 
+  if (Pos('$LHM', S) <> 0) then
+  begin
+    // LHM = Open Hardware Monitor; read sensor values from server URL
+
+    // LHM cmds are structured like $LHM|serverURL|component|sensortype|sensorname$
+    RegEx.Expression := '\$LHM\|(.+)\|(.+)\|(.+)\|(.+)\$';
+    if (RegEx.Exec(S)) then
+    begin
+      LhmServer := RegEx.Match[1];
+      OhmComp := RegEx.Match[2];
+      OhmType := RegEx.Match[3];
+      OhmName := RegEx.Match[4];
+      OhmValue := FSysInfo.GetLhmValue(LhmServer, OhmComp, OhmType, OhmName);
+      S := RegEx.Replace(S, OhmValue, False);
+    end;
+  end;
 
   if (Pos('$TOTALDRIVE', S) <> 0) then
   begin
@@ -1153,6 +1171,17 @@ begin
     begin
       Match := RegEx.Match[1];
       S := RegEx.Replace(S, IntToStr(Round(FSysInfo.GetFreeDiskSpace(Match[1]) / 1073741824)), False);
+    end;
+  end;
+
+  if (Pos('$DRIVEUSE', S) <> 0) then
+  begin
+    RegEx.Expression := '\$DRIVEUSE(\w)\$';
+    if (RegEx.Exec(S)) then
+    begin
+      Match := RegEx.Match[1];
+      d:= 100.0 - (FSysInfo.GetFreeDiskSpace(Match[1]) / FSysInfo.GetDiskSpace(Match[1]) * 100.0);
+      S := RegEx.Replace(S, Format('%.1f', [d]), False);
     end;
   end;
 

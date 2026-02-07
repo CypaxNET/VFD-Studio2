@@ -285,6 +285,10 @@ resourcestring
     'Free disk space in GB.' + LineEnding +
     'Must include a drive letter (see code example).';
 
+  RsHelpDRIVEUSE =
+    'Used disk space in poercent.' + LineEnding +
+    'Must include a drive letter (see code example).';
+
   RsHelpFREEMEM =
     'Free physical memory in MB.' + LineEnding +
     'Example: "7564"';
@@ -419,7 +423,16 @@ resourcestring
     'OHM must be running to obtain updated values.' + LineEnding +
     'Param1:' + LineEnding + '  Component - must be the exact name as shown in OHM or the correct identifier such as "/intelcpu/0"' + LineEnding +
     'Param2:' + LineEnding + '  Sensor type (e.g. "Temperature", "Clock", ...)' + LineEnding +
-    'Param3:' + LineEnding + '  Sensor name - must be the exact name as shown in OHM (e.g. "CPU Core #2)';
+    'Param3:' + LineEnding + '  Sensor name - must be the exact name as shown in OHM (e.g. "CPU Core")';
+
+  RsHelpLHM =
+    'Sensor value from Libre Hardware Monitor (LHM).' + LineEnding +
+    'LHM web server must be running to obtain updated values.' + LineEnding +
+    'Param1:' + LineEnding + '  Server URL and port' + LineEnding +
+    'Param2:' + LineEnding + '  Component - must be the exact name as shown in LHM or the correct identifier such as "/gpu-nvidia/0"' + LineEnding +
+    'Param3:' + LineEnding + '  Sensor type (e.g. "Temperature", "Clock", ...)' + LineEnding +
+    'Param4:' + LineEnding + '  Sensor name - must be the exact name as shown in LHM (e.g. "GPU Core")';
+
 
 const
 
@@ -732,6 +745,10 @@ const
       Help: RsHelpTOTALDRIVE;
       Example: ';Drive C:\ total space' + LineEnding +
                'PLAINTEXT ''$TOTALDRIVEC$ GB'' 1 1'),
+    (Expr: 'DRIVEUSE';
+      Help: RsHelpDRIVEUSE;
+      Example: ';Drive C:\ usage' + LineEnding +
+               'PLAINTEXT ''$DRIVEUSEC$ %'' 1 1'),
     (Expr: 'UPTIME';
       Help: RsHelpUPTIME;
       Example: 'PLAINTEXT ''Uptime:'' 0 0' + LineEnding +
@@ -768,6 +785,9 @@ const
       Example: 'PLAINTEXT ''It''''s the year $YEAR$!'' 1 1'),
     (Expr: 'OHM';
       Help: RsHelpOHM;
-      Example: 'PLAINTEXT ''CPU Temp: $OHM|/intelcpu/0|Temperature|CPU Package$'' 1 1')
+      Example: 'PLAINTEXT ''CPU Temp: $OHM|/intelcpu/0|Temperature|CPU Package$'' 1 1'),
+    (Expr: 'LHM';
+      Help: RsHelpLHM;
+      Example: 'PLAINTEXT ''CPU Temp: $LHM|http://localhost:8085/data.json|/gpu-nvidia/0|Temperature|GPU Core$'' 1 1')
     );
 
