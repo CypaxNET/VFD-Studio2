@@ -110,14 +110,14 @@ var
   CValue: Byte;         // Ord(C)
   NumberOfRows: Integer; // number of visible text rows in the display
 begin
-  NumberOfRows := FGraphicsLayer.Height div GLYPH_H;
+  NumberOfRows := FHeight div GLYPH_H;
 
   Text := TGlyphs.Adapt2Charmap(Text);
 
   CurrentCol := X;
   for C in Text do
   begin
-    if (CurrentCol >= (FGraphicsLayer.Width div (GLYPH_W + GLYPH_GAP))) then
+    if (CurrentCol >= (FWidth div (GLYPH_W + GLYPH_GAP))) then
       Break;
 
     CValue := Ord(C);
@@ -125,7 +125,7 @@ begin
     begin
       Pixels := charMap8x6[CValue, Gx];
       DX := CurrentCol * (GLYPH_W + GLYPH_GAP) + Gx;
-      for Gy := 0 to (NumberOfRows - 1) do
+      for Gy := 0 to (GLYPH_H - 1) do
       begin
         DY := Y * GLYPH_H + Gy;
         if ((Pixels and (1 shl Gy)) <> 0) then
