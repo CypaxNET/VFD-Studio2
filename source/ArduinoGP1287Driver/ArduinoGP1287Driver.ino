@@ -24,10 +24,6 @@
  *    3. Then compile (Ctrl + R)
  *    4. Then upload (Ctrl + U)
  *
- *    ALSO IMORTANT!
- *    1. This sketch uses a custom u8g2 derivate based on u8g2 2.27.5
- *       Extract the enclosed U8g2 zip file  to your arduino\libraries\ directory.
- *
  *    Sketch function:
  *    Receives command strings in ASCII format via serial interface and forwards them 
  *    accordingly to a GP1287 display.
@@ -114,7 +110,7 @@ const char kErrorStr[] =   "ERR";
 /******************************************************************************/
 
 // A display constructor using hardware SPI:
-U8G2_GP1294AI_256X48_F_3W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 15, /* reset=*/ 5);
+U8G2_GP1294AI_256X48_F_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 15, /* dc=*/U8X8_PIN_NONE, /* reset=*/ 5);
 
 /******************************************************************************/
 /* Declaration of own functions                                               */
@@ -193,9 +189,10 @@ void loop()
     
     //digitalWrite(LED_BUILTIN, HIGH);
     Serial.write((byte)XON); // ready to receive more serial data
+    
+    digitalWrite(LED_BUILTIN, HIGH); // LED off
   }
 
-  digitalWrite(LED_BUILTIN, HIGH); // LED off
 }
 
 
