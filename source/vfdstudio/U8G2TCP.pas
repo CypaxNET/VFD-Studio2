@@ -1,12 +1,12 @@
-unit U8G2;
+unit U8G2TCP;
 
 {$mode ObjFPC}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, Forms, VFDisplay, Graphics, Math, noresetsynaser, Glyphs,
-  GraphUtil, StudioCommon;
+  Classes, SysUtils, Forms, VFDisplay, Graphics, Math, Glyphs,
+  GraphUtil, StudioCommon, blcksock, synsock;
 
 type
   TGlyphConfig = record
@@ -18,18 +18,20 @@ type
     CurrentCol: Byte;
   end;
 
-  { TSerialSenderThread - Asynchroner Sender-Thread }
-  TSerialSenderThread = class(TThread)
+  { TTCPAsyncSenderThread - Asynchroner Sender-Thread }
+  TTCPAsyncSenderThread = class(TThread)
   private
-    FSerialInterface: TBlockSerialNoReset;
+    FTCP: TTCPBlockSocket;
     FCommandQueue: TThreadList;
     FActive: Boolean;
     FOnError: TNotifyEvent;
-    procedure CallErrorHandler;  // <-- Diese Zeile hinzufügen
+    FHost: String;
+    FPort: String;
+    procedure CallErrorHandler;
   protected
     procedure Execute; override;
   public
-    constructor Create(ASerialInterface: TBlockSerialNoReset);
+    constructor Create(AHost, APort: String);
     destructor Destroy; override;
     procedure EnqueueCommand(const ACommand: String);
     procedure FlushCommands;
@@ -37,17 +39,19 @@ type
     property OnError: TNotifyEvent read FOnError write FOnError;
   end;
 
-  { U8G2 }
-  TU8G2 = class(TVFDisplay)
+  { U8G2UDP }
+  TU8G2TCP = class(TVFDisplay)
   private
-    FSenderThread: TSerialSenderThread;
+    FSenderThread: TTCPAsyncSenderThread;
     procedure HandleThreadError(Sender: TObject);
   protected
-    FSerialInterface: TBlockSerialNoReset;
+    FTCP: TTCPBlockSocket;
     FPosX, FPosY: Word;
     FNumBytesSent: Cardinal;
     FDbgLastSent: String;
     FGlyphConfig: TGlyphConfig;         // all data related to glyphs
+    FHost: String;
+    FPort: String;
   public
     { Constructor / Destructor }
     constructor Create(AOwner: TComponent); override;
@@ -73,7 +77,7 @@ type
     { Other / helper methods }
     function removeLeadingZeros(Text: String): String;
     procedure SelectScreen(ALayer: Word);
-    procedure SerialOut(Text: String);
+    procedure TcpOut(Text: String);
   end;
 
 const
@@ -83,18 +87,24 @@ const
 
 implementation
 
-{ TSerialSenderThread }
+{ TTCPAsyncSenderThread }
 
-constructor TSerialSenderThread.Create(ASerialInterface: TBlockSerialNoReset);
+constructor TTCPAsyncSenderThread.Create(AHost, APort: String);
 begin
-  inherited Create(True); // Create suspended
-  FSerialInterface := ASerialInterface;
+  inherited Create(True);
+  FHost := AHost;
+  FPort := APort;
   FCommandQueue := TThreadList.Create;
   FActive := True;
   FreeOnTerminate := False;
+
+  // TCP Socket erstellen
+  FTCP := TTCPBlockSocket.Create;
+  FTCP.Family := SF_IP4;
+  FTCP.Connect(FHost, FPort);
 end;
 
-destructor TSerialSenderThread.Destroy;
+destructor TTCPAsyncSenderThread.Destroy;
 var
   List: TList;
   I: Integer;
@@ -112,10 +122,14 @@ begin
   end;
 
   FCommandQueue.Free;
+
+  if Assigned(FTCP) then
+    FTCP.Free;
+
   inherited;
 end;
 
-procedure TSerialSenderThread.EnqueueCommand(const ACommand: String);
+procedure TTCPAsyncSenderThread.EnqueueCommand(const ACommand: String);
 var
   Cmd: PString;
   List: TList;
@@ -131,13 +145,13 @@ begin
   end;
 end;
 
-procedure TSerialSenderThread.CallErrorHandler;
+procedure TTCPAsyncSenderThread.CallErrorHandler;
 begin
   if Assigned(FOnError) then
     FOnError(Self);
 end;
 
-procedure TSerialSenderThread.Execute;
+procedure TTCPAsyncSenderThread.Execute;
 var
   List: TList;
   Cmd: PString;
@@ -147,7 +161,6 @@ begin
   begin
     Cmd := nil;
 
-    // Hole nächsten Befehl aus Queue
     List := FCommandQueue.LockList;
     try
       if List.Count > 0 then
@@ -159,12 +172,14 @@ begin
       FCommandQueue.UnlockList;
     end;
 
-    // Sende Befehl
     if Assigned(Cmd) then
     begin
       try
         CmdText := Cmd^ + #10;
-        FSerialInterface.SendString(CmdText);
+        FTCP.SendString(CmdText);
+
+        if FTCP.LastError <> 0 then
+          Synchronize(@CallErrorHandler);
       except
         on E: Exception do
           Synchronize(@CallErrorHandler);
@@ -173,14 +188,13 @@ begin
       Dispose(Cmd);
     end
     else
-    begin
-      // Nur CPU-Zeit freigeben, kein aktives Warten
-      Sleep(0); // Gibt CPU frei, blockiert aber nicht
-    end;
+      Sleep(0);
+
+    Sleep(0);
   end;
 end;
 
-procedure TSerialSenderThread.FlushCommands;
+procedure TTCPAsyncSenderThread.FlushCommands;
 var
   List: TList;
 begin
@@ -192,19 +206,19 @@ begin
   end;
 end;
 
-procedure TSerialSenderThread.Stop;
+procedure TTCPAsyncSenderThread.Stop;
 begin
   FActive := False;
   Terminate;
 end;
 
-{ TU8G2 }
+{ TU8G2TCP }
 
-constructor TU8G2.Create(AOwner: TComponent);
+constructor TU8G2TCP.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  FDisplayType := 'U8G2';
+  FDisplayType := 'U8G2TCP';
   FNumBytesSent := 0;
   FDbgLastSent := '';
   FInterfaceConfig.IfaceType := itNONE;
@@ -216,11 +230,11 @@ begin
 
   FSelectedLayer := 0;
   FSenderThread := nil;
+  FTCP := nil;
 end;
 
-destructor TU8G2.Destroy;
+destructor TU8G2TCP.Destroy;
 begin
-  // Thread stoppen und aufräumen
   if Assigned(FSenderThread) then
   begin
     FSenderThread.Stop;
@@ -228,61 +242,55 @@ begin
     FSenderThread.Free;
   end;
 
-  if Assigned(FSerialInterface) then
-  begin
-    FSerialInterface.CloseSocket;
-    FSerialInterface.Free;
-  end;
+  if Assigned(FTCP) then
+    FTCP.Free;
 
   inherited;
 end;
 
-procedure TU8G2.HandleThreadError(Sender: TObject);
+procedure TU8G2TCP.HandleThreadError(Sender: TObject);
 begin
   FInterfaceConfig.IfaceType := itNONE;
 
   if Assigned(FLoggingCallback) then
-    FLoggingCallback(lvERROR, Self.ClassName + ': Serial communication error in async thread', Now);
+    FLoggingCallback(lvERROR, Self.ClassName + ': TCP communication error in async thread', Now);
 
   if Assigned(FConnectionFailureCallback) then
     FConnectionFailureCallback('AsyncCommError', Now);
 end;
 
-procedure TU8G2.Connect(AInterface: String);
+procedure TU8G2TCP.Connect(AInterface: String);
 var
-  RecvText: String;
+  Delimiter: Integer;
 begin
-  if AInterface.StartsWith('COM') then
+  // Format erwartet: "192.168.0.114:8888"
+  Delimiter := Pos(':', AInterface);
+
+  if Delimiter > 0 then
   begin
-    FInterfaceConfig.IfaceType := itCOM;
+    FHost := Copy(AInterface, 1, Delimiter - 1);
+    FPort := Copy(AInterface, Delimiter + 1, Length(AInterface));
+
+    FInterfaceConfig.IfaceType := itTCP;
     try
-      FSerialInterface := TBlockSerialNoReset.Create;
-      FSerialInterface.EnableRTSToggle(False);
-      FSerialInterface.ConvertLineEnd := True;
-      FSerialInterface.DeadlockTimeout := 100;
-      FSerialInterface.Connect(AInterface);
-      FSerialInterface.Config(115200, 8, 'N', SB1, True, False);
-      Sleep(500);
+      FTCP := TTCPBlockSocket.Create;
+      FTCP.Family := SF_IP4;
+      FTCP.Connect(FHost, FPort);
 
-      FInterfaceConfig.IsConnected := True;
-      FInterfaceConfig.IfaceName := AInterface;
-
-      // Starte asynchronen Sender-Thread
-      FSenderThread := TSerialSenderThread.Create(FSerialInterface);
-      FSenderThread.OnError := @HandleThreadError;
-      FSenderThread.Start;
-
-      if Assigned(FLoggingCallback) then
+      if FTCP.LastError = 0 then
       begin
-        if FSerialInterface.CanRead(1000) then
-        begin
-          RecvText := FSerialInterface.RecvPacket(1);
-          if RecvText.StartsWith('Err') then
-            FLoggingCallback(lvWARNING, Self.ClassName + '.Connect: Received error: ' + Trim(RecvText), Now)
-          else if Length(RecvText) > 0 then
-            FLoggingCallback(lvINFO, Self.ClassName + '.Connect: Received: ' + Trim(RecvText), Now);
-        end;
-      end;
+        FInterfaceConfig.IsConnected := True;
+        FInterfaceConfig.IfaceName := AInterface;
+
+        FSenderThread := TTCPAsyncSenderThread.Create(FHost, FPort);
+        FSenderThread.OnError := @HandleThreadError;
+        FSenderThread.Start;
+
+        if Assigned(FLoggingCallback) then
+          FLoggingCallback(lvINFO, Self.ClassName + '.Connect: TCP connected to ' + AInterface, Now);
+      end
+      else
+        raise Exception.Create('TCP Socket Error: ' + IntToStr(FTCP.LastError));
 
     except
       on E: Exception do
@@ -293,10 +301,15 @@ begin
           FLoggingCallback(lvCRITICAL, Self.ClassName + '.Connect: Exception: ' + E.Message, Now);
       end;
     end;
+  end
+  else
+  begin
+    if Assigned(FLoggingCallback) then
+      FLoggingCallback(lvERROR, Self.ClassName + '.Connect: Invalid format. Expected "IP:Port"', Now);
   end;
 end;
 
-procedure TU8G2.SerialOut(Text: String);
+procedure TU8G2TCP.TcpOut(Text: String);
 begin
   if not Assigned(FSenderThread) then
     Exit;
@@ -312,28 +325,28 @@ begin
 end;
 
 
-procedure TU8G2.Dbg(Value: Byte);
+procedure TU8G2TCP.Dbg(Value: Byte);
 begin
   // DBG here
 end;
 
-procedure TU8G2.ClearScreen;
+procedure TU8G2TCP.ClearScreen;
 var
   Cmd: String;
 begin
   if (False = FInterfaceConfig.isConnected) then Exit;
 
-  if (itCOM = FInterfaceConfig.IfaceType) then
+  if (itTCP = FInterfaceConfig.IfaceType) then
   begin
     if Assigned(FSenderThread) then
       FSenderThread.FlushCommands; // discard all queued commands in the list
 
     Cmd := 'X';
-    SerialOut(Cmd);
+    TcpOut(Cmd);
   end;
 end;
 
-procedure TU8G2.SelectScreen(ALayer: Word);
+procedure TU8G2TCP.SelectScreen(ALayer: Word);
 begin
   if (ALayer < FNumLayers) then
   begin
@@ -342,13 +355,13 @@ begin
 end;
 
 
-procedure TU8G2.ShowScreen(ALayer: Word);
+procedure TU8G2TCP.ShowScreen(ALayer: Word);
 begin
   // nothing to do, this display has only one layer
 end;
 
 
-procedure TU8G2.PaintString(Text: String; X, Y: Integer);
+procedure TU8G2TCP.PaintString(Text: String; X, Y: Integer);
 var
   I: Integer;
   C: Char;
@@ -356,7 +369,7 @@ var
 begin
   if (False = FInterfaceConfig.isConnected) then Exit;
 
-  if (itCOM = FInterfaceConfig.IfaceType) then
+  if (itTCP = FInterfaceConfig.IfaceType) then
   begin
     Text := TGlyphs.Adapt2Charmap(Text);
     for I := 1 to Length(Text) do begin
@@ -365,7 +378,7 @@ begin
         removeLeadingZeros(IntToHex(Ord(C))) + ' ' +
         removeLeadingZeros(IntToHex(X + I-1)) + ' ' +
         removeLeadingZeros(IntToHex(Y));
-      SerialOut(Cmd);
+      TcpOut(Cmd);
     end;
     UpdateDisplayFromBuffer;
   end;
@@ -375,7 +388,7 @@ end;
 {
   Draws a bitmap on the display
 }
-procedure TU8G2.PaintBitmap(ABitmap: TBitmap; XPos, YPos: Word);
+procedure TU8G2TCP.PaintBitmap(ABitmap: TBitmap; XPos, YPos: Word);
 var
   X, Y: Integer;
   PixelColor: TColor;
@@ -385,7 +398,7 @@ var
 begin
   if (False = FInterfaceConfig.isConnected) then Exit;
 
-  if (itCOM = FInterfaceConfig.IfaceType) then
+  if (itTCP = FInterfaceConfig.IfaceType) then
   begin
     aBitmap.Canvas.Pixels[0, 0] := aBitmap.Canvas.Pixels[0, 0];  // this seems nonsense, but one way to actually assign memory to the bitmap canvas is by acessing its pixels
 
@@ -413,13 +426,13 @@ begin
         end;
 
         // send the pixel block to the Arduino
-        if (itCOM = FInterfaceConfig.IfaceType) then
+        if (itTCP = FInterfaceConfig.IfaceType) then
         begin
           Cmd := 'B' + ' ' +
             removeLeadingZeros(IntToHex(Pixels)) + ' ' +
             removeLeadingZeros(IntToHex(XPos + X)) + ' ' +
             removeLeadingZeros(IntToHex(YPos + Y*8));
-          SerialOut(Cmd);
+          TcpOut(Cmd);
         end;
 
       end;
@@ -428,13 +441,13 @@ begin
   end;
 end;
 
-procedure TU8G2.PaintPixel(X, Y: Word; IsInverted: Boolean);
+procedure TU8G2TCP.PaintPixel(X, Y: Word; IsInverted: Boolean);
 var
   Cmd: String;
 begin
   if (False = FInterfaceConfig.isConnected) then Exit;
 
-  if (itCOM = FInterfaceConfig.IfaceType) then
+  if (itTCP = FInterfaceConfig.IfaceType) then
   begin
     if (IsInverted) then
       Cmd := 'CP'
@@ -443,18 +456,18 @@ begin
     Cmd := Cmd + ' ' +
       removeLeadingZeros(IntToHex(X)) + ' ' +
       removeLeadingZeros(IntToHex(Y));
-    SerialOut(Cmd);
+    TcpOut(Cmd);
     UpdateDisplayFromBuffer;
   end;
 end;
 
-procedure TU8G2.PaintLine(X0, Y0, X1, Y1: Word; IsInverted: Boolean);
+procedure TU8G2TCP.PaintLine(X0, Y0, X1, Y1: Word; IsInverted: Boolean);
 var
   Cmd: String;
 begin
   if (False = FInterfaceConfig.isConnected) then Exit;
 
-  if (itCOM = FInterfaceConfig.IfaceType) then
+  if (itTCP = FInterfaceConfig.IfaceType) then
   begin
     if (IsInverted) then
       Cmd := 'CL'
@@ -465,19 +478,19 @@ begin
       removeLeadingZeros(IntToHex(Y0)) + ' ' +
       removeLeadingZeros(IntToHex(X1)) + ' ' +
       removeLeadingZeros(IntToHex(Y1));
-    SerialOut(Cmd);
+    TcpOut(Cmd);
     UpdateDisplayFromBuffer;
   end;
 end;
 
 
-procedure TU8G2.PaintFrame(X0, Y0, X1, Y1: Word; IsInverted: Boolean);
+procedure TU8G2TCP.PaintFrame(X0, Y0, X1, Y1: Word; IsInverted: Boolean);
 var
   Cmd: String;
 begin
   if (False = FInterfaceConfig.isConnected) then Exit;
 
-  if (itCOM = FInterfaceConfig.IfaceType) then
+  if (itTCP = FInterfaceConfig.IfaceType) then
   begin
     if (IsInverted) then
       Cmd := 'CF'
@@ -488,27 +501,27 @@ begin
       removeLeadingZeros(IntToHex(Y0)) + ' ' +
       removeLeadingZeros(IntToHex(X1+1)) + ' ' +  // +1 because u8g2 lib wants the width as 3. param
       removeLeadingZeros(IntToHex(Y1+1));         // +1 because u8g2 lib wants the height as 4. param
-    SerialOut(Cmd);
+    TcpOut(Cmd);
     UpdateDisplayFromBuffer;
   end;
 
 end;
 
-procedure TU8G2.SetBrightness(Percent: Byte);
+procedure TU8G2TCP.SetBrightness(Percent: Byte);
 var
   Cmd: String;
 begin
   if (False = FInterfaceConfig.isConnected) then Exit;
 
-  if (itCOM = FInterfaceConfig.IfaceType) then
+  if (itTCP = FInterfaceConfig.IfaceType) then
   begin
     Cmd := 'T' + ' ' + removeLeadingZeros(IntToHex(Percent));
-    SerialOut(Cmd);
+    TcpOut(Cmd);
     UpdateDisplayFromBuffer;
   end;
 end;
 
-procedure TU8G2.SetLayerMode(LayerMode: TLayerMode);
+procedure TU8G2TCP.SetLayerMode(LayerMode: TLayerMode);
 begin
   // nothing to do here; display supports only one layer
 end;
@@ -517,7 +530,7 @@ end;
  Initializes class variables and starts the VFD.
 }
 
-procedure TU8G2.DspInit(XRes, YRes: Word);
+procedure TU8G2TCP.DspInit(XRes, YRes: Word);
 begin
   FGfxWidth := XRes;
   FGfxHeight := YRes;
@@ -529,7 +542,7 @@ begin
 end;
 
 
-function TU8G2.removeLeadingZeros(Text: String): String;
+function TU8G2TCP.removeLeadingZeros(Text: String): String;
 begin
   Result := Text;
   while Result.StartsWith('0') do
@@ -541,12 +554,12 @@ end;
 {
   Request the Arduino to update the display
 }
-procedure TU8G2.UpdateDisplayFromBuffer;
+procedure TU8G2TCP.UpdateDisplayFromBuffer;
 var
   Cmd: String;
 begin
   Cmd := 'U';
-  SerialOut(Cmd);
+  TcpOut(Cmd);
 end;
 
 end.

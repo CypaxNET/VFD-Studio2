@@ -83,6 +83,23 @@ msgstr ""
 msgid "Yes"
 msgstr ""
 
+#: settingsform.rsbaud
+msgid "Baudrate:"
+msgstr ""
+
+#: settingsform.rsif
+msgctxt "settingsform.rsif"
+msgid "Interface:"
+msgstr ""
+
+#: settingsform.rsip
+msgid "IP address:"
+msgstr ""
+
+#: settingsform.rsport
+msgid "TCP port:"
+msgstr ""
+
 #: tconfigform.abortbutton.caption
 msgid "Abort"
 msgstr ""
@@ -128,11 +145,20 @@ msgid "Baud rate:"
 msgstr ""
 
 #: tconfigform.iflabel.caption
+msgctxt "tconfigform.iflabel.caption"
 msgid "Interface:"
 msgstr ""
 
 #: tconfigform.languagegroupbox.caption
 msgid "Language"
+msgstr ""
+
+#: tconfigform.lazintegereditport.text
+msgid "8080"
+msgstr ""
+
+#: tconfigform.maskeditip.text
+msgid "   .   .   .   "
 msgstr ""
 
 #: tconfigform.okbutton.caption

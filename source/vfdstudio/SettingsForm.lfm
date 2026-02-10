@@ -1,7 +1,7 @@
 object ConfigForm: TConfigForm
-  Left = 952
+  Left = -720
   Height = 320
-  Top = 518
+  Top = 323
   Width = 600
   AutoSize = True
   BorderIcons = [biSystemMenu]
@@ -11,10 +11,10 @@ object ConfigForm: TConfigForm
   ClientWidth = 600
   Constraints.MinHeight = 300
   Constraints.MinWidth = 590
-  OnShow = FormShow
   Position = poMainFormCenter
   ShowInTaskBar = stAlways
-  LCLVersion = '3.2.0.0'
+  LCLVersion = '4.4.0.0'
+  OnShow = FormShow
   object Panel1: TPanel
     AnchorSideLeft.Control = Owner
     AnchorSideRight.Control = Owner
@@ -52,8 +52,8 @@ object ConfigForm: TConfigForm
       ModalResult = 1
       Images = ImageList1
       ImageIndex = 0
-      OnClick = OkButtonClick
       TabOrder = 0
+      OnClick = OkButtonClick
     end
     object AbortButton: TBitBtn
       AnchorSideLeft.Control = OkButton
@@ -74,8 +74,8 @@ object ConfigForm: TConfigForm
       ModalResult = 2
       Images = ImageList1
       ImageIndex = 1
-      OnClick = AbortButtonClick
       TabOrder = 1
+      OnClick = AbortButtonClick
     end
   end
   object ApplicationGroupBox: TGroupBox
@@ -86,7 +86,7 @@ object ConfigForm: TConfigForm
     Left = 4
     Height = 264
     Top = 4
-    Width = 135
+    Width = 154
     Anchors = [akTop, akLeft, akBottom]
     AutoSize = True
     BorderSpacing.Left = 4
@@ -96,7 +96,7 @@ object ConfigForm: TConfigForm
     BorderSpacing.InnerBorder = 4
     Caption = 'Application'
     ClientHeight = 244
-    ClientWidth = 131
+    ClientWidth = 150
     Constraints.MaxWidth = 240
     ParentBackground = False
     TabOrder = 1
@@ -109,9 +109,9 @@ object ConfigForm: TConfigForm
       AnchorSideBottom.Control = ApplicationGroupBox
       AnchorSideBottom.Side = asrBottom
       Left = 4
-      Height = 153
-      Top = 83
-      Width = 123
+      Height = 147
+      Top = 89
+      Width = 142
       Anchors = [akTop, akLeft, akRight, akBottom]
       AutoSize = True
       BorderSpacing.Left = 4
@@ -125,8 +125,8 @@ object ConfigForm: TConfigForm
       ChildSizing.VerticalSpacing = 4
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 1
-      ClientHeight = 133
-      ClientWidth = 119
+      ClientHeight = 127
+      ClientWidth = 138
       ParentBackground = False
       TabOrder = 0
       OnResize = LanguageGroupBoxResize
@@ -220,8 +220,8 @@ object ConfigForm: TConfigForm
           0000000000000000000000000000000000000000000000000000000000000000
           000000000000000000000000000000000000
         }
-        OnClick = LangEnButtonClick
         TabOrder = 0
+        OnClick = LangEnButtonClick
       end
       object LangDeButton: TBitBtn
         Left = 4
@@ -313,8 +313,8 @@ object ConfigForm: TConfigForm
           0000000000000000000000000000000000000000000000000000000000000000
           000000000000000000000000000000000000
         }
-        OnClick = LangDeButtonClick
         TabOrder = 1
+        OnClick = LangDeButtonClick
       end
       object LangItButton: TBitBtn
         Left = 4
@@ -406,8 +406,8 @@ object ConfigForm: TConfigForm
           0000000000000000000000000000000000000000000000000000000000000000
           000000000000000000000000000000000000
         }
-        OnClick = LangItButtonClick
         TabOrder = 2
+        OnClick = LangItButtonClick
       end
     end
     object StartMinimizedCheckBox: TCheckBox
@@ -429,9 +429,9 @@ object ConfigForm: TConfigForm
       AnchorSideRight.Control = ApplicationGroupBox
       AnchorSideRight.Side = asrBottom
       Left = 4
-      Height = 40
+      Height = 46
       Top = 35
-      Width = 123
+      Width = 142
       Anchors = [akTop, akLeft, akRight]
       AutoSize = True
       BorderSpacing.Left = 4
@@ -444,50 +444,50 @@ object ConfigForm: TConfigForm
       ChildSizing.ShrinkVertical = crsScaleChilds
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 5
-      ClientHeight = 20
-      ClientWidth = 119
+      ClientHeight = 26
+      ClientWidth = 138
       TabOrder = 2
       object SpeedButton1: TSpeedButton
         Left = 0
-        Height = 20
+        Height = 26
         Top = 0
-        Width = 24
+        Width = 28
         Images = ImageList2
         ImageIndex = 0
         OnClick = SpeedButton1Click
       end
       object SpeedButton2: TSpeedButton
-        Left = 24
-        Height = 20
+        Left = 28
+        Height = 26
         Top = 0
-        Width = 24
+        Width = 27
         Images = ImageList2
         ImageIndex = 1
         OnClick = SpeedButton2Click
       end
       object SpeedButton3: TSpeedButton
-        Left = 48
-        Height = 20
+        Left = 55
+        Height = 26
         Top = 0
-        Width = 24
+        Width = 28
         Images = ImageList2
         ImageIndex = 2
         OnClick = SpeedButton3Click
       end
       object SpeedButton4: TSpeedButton
-        Left = 72
-        Height = 20
+        Left = 83
+        Height = 26
         Top = 0
-        Width = 24
+        Width = 27
         Images = ImageList2
         ImageIndex = 3
         OnClick = SpeedButton4Click
       end
       object SpeedButton5: TSpeedButton
-        Left = 96
-        Height = 20
+        Left = 110
+        Height = 26
         Top = 0
-        Width = 23
+        Width = 28
         Images = ImageList2
         ImageIndex = 4
         OnClick = SpeedButton5Click
@@ -500,10 +500,10 @@ object ConfigForm: TConfigForm
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = OptionsBox
     AnchorSideBottom.Control = Panel1
-    Left = 143
+    Left = 162
     Height = 264
     Top = 4
-    Width = 202
+    Width = 183
     Anchors = [akTop, akLeft, akRight, akBottom]
     AutoSize = True
     BorderSpacing.Left = 4
@@ -511,7 +511,7 @@ object ConfigForm: TConfigForm
     BorderSpacing.Bottom = 4
     Caption = 'Display (requires restart)'
     ClientHeight = 244
-    ClientWidth = 198
+    ClientWidth = 179
     Constraints.MinWidth = 171
     TabOrder = 2
     object DspTypeCombo: TComboBox
@@ -523,7 +523,7 @@ object ConfigForm: TConfigForm
       Left = 32
       Height = 23
       Top = 23
-      Width = 158
+      Width = 139
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 32
       BorderSpacing.Right = 8
@@ -533,7 +533,8 @@ object ConfigForm: TConfigForm
         'NONE'
         'Noritake GU-800 Series'
         'Noritake GU-300 Series'
-        'u8g2 compatible'
+        'u8g2 serial interface'
+        'u8g2 TCP interface'
       )
       ReadOnly = True
       TabOrder = 0
@@ -572,7 +573,7 @@ object ConfigForm: TConfigForm
       Left = 32
       Height = 23
       Top = 73
-      Width = 158
+      Width = 139
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 32
       BorderSpacing.Right = 8
@@ -586,14 +587,14 @@ object ConfigForm: TConfigForm
     end
     object IfCfgLabel: TLabel
       AnchorSideLeft.Control = DspBox
-      AnchorSideTop.Control = InterfaceCombo
+      AnchorSideTop.Control = IfLabel
       AnchorSideTop.Side = asrBottom
       Left = 8
       Height = 15
-      Top = 108
+      Top = 105
       Width = 53
       BorderSpacing.Left = 8
-      BorderSpacing.Top = 12
+      BorderSpacing.Top = 32
       Caption = 'Baud rate:'
     end
     object IfCfgCombo: TComboBox
@@ -604,8 +605,8 @@ object ConfigForm: TConfigForm
       AnchorSideRight.Side = asrBottom
       Left = 32
       Height = 23
-      Top = 123
-      Width = 158
+      Top = 120
+      Width = 139
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 32
       BorderSpacing.Right = 8
@@ -623,14 +624,14 @@ object ConfigForm: TConfigForm
     end
     object ResLabel: TLabel
       AnchorSideLeft.Control = DspBox
-      AnchorSideTop.Control = IfCfgCombo
+      AnchorSideTop.Control = IfCfgLabel
       AnchorSideTop.Side = asrBottom
       Left = 8
       Height = 15
-      Top = 158
+      Top = 152
       Width = 59
       BorderSpacing.Left = 8
-      BorderSpacing.Top = 12
+      BorderSpacing.Top = 32
       Caption = 'Resolution:'
     end
     object XLabel: TLabel
@@ -640,7 +641,7 @@ object ConfigForm: TConfigForm
       AnchorSideTop.Side = asrCenter
       Left = 94
       Height = 15
-      Top = 177
+      Top = 171
       Width = 7
       BorderSpacing.Left = 4
       Caption = 'X'
@@ -651,7 +652,7 @@ object ConfigForm: TConfigForm
       AnchorSideTop.Side = asrBottom
       Left = 32
       Height = 23
-      Top = 173
+      Top = 167
       Width = 58
       BorderSpacing.Left = 32
       MaxValue = 256
@@ -665,13 +666,56 @@ object ConfigForm: TConfigForm
       AnchorSideTop.Control = ResXSpinEdit
       Left = 105
       Height = 23
-      Top = 173
+      Top = 167
       Width = 50
       BorderSpacing.Left = 4
       MaxValue = 256
       MinValue = 1
       TabOrder = 4
       Value = 64
+    end
+    object LazIntegerEditPort: TLazIntegerEdit
+      AnchorSideLeft.Control = DspBox
+      AnchorSideTop.Control = IfCfgLabel
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = DspBox
+      AnchorSideRight.Side = asrBottom
+      Left = 32
+      Height = 23
+      Top = 120
+      Width = 139
+      Value = 8080
+      MinValue = -9223372036854775808
+      MaxValue = 9223372036854775807
+      SetDecimalKeys = '#'
+      HexIndicator = '$'
+      ToggleHexKeys = '$x'
+      OctIndicator = '&'
+      ToggleOctKeys = '&'
+      BinIndicator = '%'
+      ToggleBinKeys = '%'
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 32
+      BorderSpacing.Right = 8
+      TabOrder = 5
+      Text = '8080'
+    end
+    object MaskEditIP: TEdit
+      AnchorSideLeft.Control = DspBox
+      AnchorSideTop.Control = IfLabel
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = DspBox
+      AnchorSideRight.Side = asrBottom
+      Left = 32
+      Height = 23
+      Top = 73
+      Width = 139
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 32
+      BorderSpacing.Right = 8
+      MaxLength = 15
+      TabOrder = 6
+      Text = '   .   .   .   '
     end
   end
   object OptionsBox: TGroupBox
@@ -750,8 +794,8 @@ object ConfigForm: TConfigForm
       Frequency = 10
       Max = 100
       Min = 1
-      OnChange = BrightnessTrackBarChange
       Position = 1
+      OnChange = BrightnessTrackBarChange
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Right = 4
@@ -834,8 +878,8 @@ object ConfigForm: TConfigForm
       Frequency = 10
       Max = 100
       Min = 1
-      OnChange = IdleTrackBarChange
       Position = 1
+      OnChange = IdleTrackBarChange
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Right = 4

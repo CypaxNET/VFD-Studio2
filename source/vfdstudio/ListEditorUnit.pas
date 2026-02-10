@@ -1400,7 +1400,7 @@ begin
       if ('TEXTOUT' = CMD) then
       begin
         // should have a text parameter followed by three number parameters and another text parameter for the font name
-        RegEx.Expression := '^TEXTOUT\s+\''(\''{2}|[^\''])+?\''(\s+\d+){3}\s+\''(.*)\''$';
+        RegEx.Expression := '^TEXTOUT\s+\''(\''{2}|[^\''])+?\''(\s+-?\d+){3}\s+\''(.*)\''$';
         if (RegEx.Exec(S)) then
         begin
           Res := 'ok';

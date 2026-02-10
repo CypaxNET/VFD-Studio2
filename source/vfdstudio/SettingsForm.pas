@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Buttons, ComCtrls, LCLTranslator, Spin, Registry;
+  Buttons, ComCtrls, LCLTranslator, Spin, MaskEdit, LazNumEdit, Registry;
 type
   TOkEvent = procedure of object;
   TAbortEvent = procedure of object;
@@ -43,6 +43,8 @@ type
     LangEnButton: TBitBtn;
     LangItButton: TBitBtn;
     LanguageGroupBox: TGroupBox;
+    LazIntegerEditPort: TLazIntegerEdit;
+    MaskEditIP: TEdit;
     OkButton: TBitBtn;
     OnlyOnIdleBox: TCheckBox;
     OptionsBox: TGroupBox;
@@ -98,6 +100,14 @@ var
   ConfigForm: TConfigForm;
 
 implementation
+
+
+resourcestring
+  RsIf = 'Interface:';
+  RsBaud = 'Baudrate:';
+  RsIp = 'IP address:';
+  RsPort = 'TCP port:';
+
 
 {$R *.lfm}
 
@@ -164,13 +174,34 @@ begin
   if (0 = DspTypeCombo.ItemIndex) then
   begin
     // NONE display has been selected
-    InterfaceCombo.Enabled := False;
-    IfCfgCombo.Enabled := False;
+    IfLabel.Visible:= False;
+    IfCfgLabel.Visible := False;
+    InterfaceCombo.Visible:= False;
+    IfCfgCombo.Visible:= False;
+    LazIntegerEditPort.Visible := False;
+    MaskEditIP.Visible := False;
+  end
+  else if (4 = DspTypeCombo.ItemIndex) then
+  begin
+    IfLabel.Caption:= RsIp;
+    IfCfgLabel.Caption:= RsPort;
+    IfLabel.Visible:= True;
+    IfCfgLabel.Visible := True;
+    InterfaceCombo.Visible:= False;
+    IfCfgCombo.Visible:= False;
+    LazIntegerEditPort.Visible := True;
+    MaskEditIP.Visible := True;
   end
   else
   begin
-    InterfaceCombo.Enabled := True;
-    IfCfgCombo.Enabled := True;
+    IfLabel.Caption:= RsIf;
+    IfCfgLabel.Caption:= RsBaud;
+    IfLabel.Visible:= True;
+    IfCfgLabel.Visible := True;
+    InterfaceCombo.Visible:= True;
+    IfCfgCombo.Visible:= True;
+    LazIntegerEditPort.Visible := False;
+    MaskEditIP.Visible := False;
   end;
 
 end;

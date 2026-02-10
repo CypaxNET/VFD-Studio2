@@ -431,7 +431,8 @@ resourcestring
     'Param1:' + LineEnding + '  Server URL and port' + LineEnding +
     'Param2:' + LineEnding + '  Component - must be the exact name as shown in LHM or the correct identifier such as "/gpu-nvidia/0"' + LineEnding +
     'Param3:' + LineEnding + '  Sensor type (e.g. "Temperature", "Clock", ...)' + LineEnding +
-    'Param4:' + LineEnding + '  Sensor name - must be the exact name as shown in LHM (e.g. "GPU Core")';
+    'Param4:' + LineEnding + '  Sensor name - must be the exact name as shown in LHM (e.g. "GPU Core")'+
+    'Param5 [optional]:' + LineEnding + '  Number of decimal places (default: 0)';
 
 
 const
@@ -788,6 +789,6 @@ const
       Example: 'PLAINTEXT ''CPU Temp: $OHM|/intelcpu/0|Temperature|CPU Package$'' 1 1'),
     (Expr: 'LHM';
       Help: RsHelpLHM;
-      Example: 'PLAINTEXT ''CPU Temp: $LHM|http://localhost:8085/data.json|/gpu-nvidia/0|Temperature|GPU Core$'' 1 1')
+      Example: 'PLAINTEXT ''CPU Temp: $LHM|http://localhost:8085/data.json|/gpu-nvidia/0|Temperature|GPU Core|1$'' 1 1')
     );
 

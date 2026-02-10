@@ -11,7 +11,7 @@
       <UseXPManifest Value="True"/>
       <XPManifest>
         <TextName Value="VFD-Studio 2"/>
-        <TextDesc Value="Shows system information on a monochrome graphics display."/>
+        <TextDesc Value="Shows system information on monochrome graphics displays."/>
       </XPManifest>
       <Icon Value="0"/>
     </General>
@@ -40,7 +40,7 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <MajorVersionNr Value="2"/>
-      <RevisionNr Value="1"/>
+      <MinorVersionNr Value="1"/>
       <StringTable CompanyName="cypax.net" FileDescription="VFD-Studio2" LegalCopyright="cypax.net" ProductName="VFD-Studio" ProductVersion="2"/>
     </VersionInfo>
     <BuildModes>
@@ -129,6 +129,7 @@
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="i386"/>
             <Optimizations>
               <OptimizationLevel Value="3"/>
             </Optimizations>
@@ -156,6 +157,12 @@
       <FormatVersion Value="2"/>
     </RunParams>
     <RequiredPackages>
+      <Item>
+        <PackageName Value="LazControls"/>
+      </Item>
+      <Item>
+        <PackageName Value="LazControlDsgn"/>
+      </Item>
       <Item>
         <PackageName Value="FCL"/>
       </Item>
@@ -242,6 +249,10 @@
         <Filename Value="noresetsynaser.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
+      <Unit>
+        <Filename Value="U8G2UDP.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -281,6 +292,15 @@
       </Item>
       <Item>
         <Name Value="ERangeError"/>
+      </Item>
+      <Item>
+        <Name Value="EJSONParser"/>
+      </Item>
+      <Item>
+        <Name Value="ESocketError"/>
+      </Item>
+      <Item>
+        <Name Value="EHTTPClient"/>
       </Item>
     </Exceptions>
   </Debugging>

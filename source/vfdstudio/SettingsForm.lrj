@@ -18,6 +18,8 @@
 {"hash":54822192,"name":"tconfigform.ifcfgcombo.text","sourcebytes":[49,49,53,50,48,48],"value":"115200"},
 {"hash":59920506,"name":"tconfigform.reslabel.caption","sourcebytes":[82,101,115,111,108,117,116,105,111,110,58],"value":"Resolution:"},
 {"hash":88,"name":"tconfigform.xlabel.caption","sourcebytes":[88],"value":"X"},
+{"hash":242608,"name":"tconfigform.lazintegereditport.text","sourcebytes":[56,48,56,48],"value":"8080"},
+{"hash":18940672,"name":"tconfigform.maskeditip.text","sourcebytes":[32,32,32,46,32,32,32,46,32,32,32,46,32,32,32],"value":"   .   .   .   "},
 {"hash":108725763,"name":"tconfigform.optionsbox.caption","sourcebytes":[79,112,116,105,111,110,115],"value":"Options"},
 {"hash":104593961,"name":"tconfigform.previewcolorlabel.caption","sourcebytes":[67,111,108,111,114,32,111,102,32,112,114,101,118,105,101,119,32,100,105,115,112,108,97,121],"value":"Color of preview display"},
 {"hash":37,"name":"tconfigform.brightnesspercentlabel.caption","sourcebytes":[37],"value":"%"},

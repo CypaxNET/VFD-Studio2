@@ -145,7 +145,7 @@ var
   Root: TJSONData;
 
 
-  function ExtractRoundedNumber(const S: string): string;
+  function ExtractNumber(const S: string): string;
   var
     FS: TFormatSettings;
     NumStr: string;
@@ -176,9 +176,13 @@ var
 
     NumStr := StringReplace(NumStr, '.', ',', [rfReplaceAll]);
 
+    Result := NumStr;
+
+    (*
     // parse and round to integer
     if TryStrToFloat(NumStr, V, FS) then
       Result := IntToStr(Round(V));
+    *)
   end;
 
   function FindSensorRecursive(Node: TJSONData; const InHardware: Boolean): string;
@@ -263,14 +267,22 @@ begin
     Http.AddHeader('User-Agent', 'Lazarus/TSysInfo');
     Http.AddHeader('Accept', 'application/json');
 
-    // load JSON
-    JsonText := Http.Get(LhmURL);
+    // Timeouts
+    Http.ConnectTimeout := 3000;
+    Http.IOTimeout:= 3000;
 
+    // load JSON
+    try
+      JsonText := Http.Get(LhmURL);
+    except
+      JSonText := '';
+    end;
     // parse JSON
     Root := GetJSON(JsonText);
+
     try
       Result := FindSensorRecursive(Root, False);
-      Result := ExtractRoundedNumber(Result);
+      Result := ExtractNumber(Result);
     finally
       Root.Free;
     end;

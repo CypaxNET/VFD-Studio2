@@ -15,7 +15,7 @@ type
 
   TSearchDirection = (sdForward, sdBackward);
 
-  TIntferfaceType = (itNONE, itCOM);
+  TIntferfaceType = (itNONE, itCOM, itTCP);
 
   TApplicationConfig = record
     Language: String;
@@ -30,6 +30,8 @@ type
     ResY: Word;          // display resolution in y direction
     IntName: String;     // interface name (e.g. 'COM5')
     Baudrate: Cardinal;  // baudrate for serial display connection
+    IpAddr: String;      // IP address for TCP connection
+    TcpPort: Cardinal;   // TCP port for TCP connection
     IsBrightnessControlledByList: Boolean; // display brightness is controlled by list commands (otherwise by following setting)
     DisplayBrightness: Byte; // display brightness in percent, unless brightness is controlled by list commands
     DoClearOnExit: Boolean; // clear the display when closing the application (otherwise it is left as it is)
@@ -54,7 +56,7 @@ type
   TVariableInfo = record
     Text: String;
     SubsText: String;    // substituted content of the string; used to determine if it needs to be re-drawn
-    X, Y: Byte;
+    X, Y: Integer;
     FontName: String;
     FontSize: Integer;
     PrevWidth: Integer;  // width of the string before we updated it

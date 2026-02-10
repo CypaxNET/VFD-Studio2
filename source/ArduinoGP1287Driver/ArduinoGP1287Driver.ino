@@ -16,16 +16,23 @@
  *                Visit https://github.com/CypaxNET/VFD-Studio2/ to 
  *                learn how to adapt this sketch to another display
  *                or Arduino board.
- * 
+ *                
+ *                ENHANCED WITH TCP SUPPORT:
+ *                - Commands can be sent via Serial OR UDP
+ *                - UDP Port: 8888 (configurable)
+ *                - Multiple commands per TCP packet supported (separated by \n)
+ *                - WiFi credentials configurable below
+ *
  *    IMPORTANT!
  *    1. First select the correct board in the Arduino IDE:
  *       Menu > Tools > Board > ESP8266 Boards (2.7.4) > LOLIN(WEMOS) D1 mini Pro
  *    2. Then select the port
  *    3. Then compile (Ctrl + R)
  *    4. Then upload (Ctrl + U)
+ *    5. For WLAN, configure WiFi credentials in the "WiFi Configuration" section below
  *
  *    Sketch function:
- *    Receives command strings in ASCII format via serial interface and forwards them 
+ *    Receives command strings in ASCII format via serial interface OR UDP and forwards them 
  *    accordingly to a GP1287 display.
  *    Uses software-controlled flow control on the serial interface. Baud rate 115200.
  *
@@ -46,12 +53,13 @@
  * @copyright     Created January 2026 by Cypax, https://cypax.net
 */
 
-
 /******************************************************************************/
 /* Library includes                                                           */
 /******************************************************************************/
 #include <Arduino.h>
 #include <U8g2lib.h>
+#include <ESP8266WiFi.h>
+
 #ifdef U8X8_HAVE_HW_SPI
 #include <SPI.h>
 #endif
@@ -63,6 +71,13 @@
 /* Own includes                                                               */
 /******************************************************************************/
 #include "glyph.h"  // character set
+
+/******************************************************************************/
+/* WiFi Configuration - CHANGE THESE VALUES                                  */
+/******************************************************************************/
+const char* WIFI_SSID = "NEXUS";      // Change to your WiFi SSID
+const char* WIFI_PASSWORD = "chawngoqchawngoq"; // Change to your WiFi password
+const unsigned int TCP_PORT = 8888;             // UDP port to listen on
 
 /******************************************************************************/
 /* Constants and #defines                                                     */
@@ -82,8 +97,8 @@
 
 /* ******** Communication stuff ******** */
 
-const char kIdStr[] =      "Arduino driver for U8g2 compatible displays";
-const char kVersionStr[] = "v1.0.0.0";
+const char kIdStr[] =      "Arduino driver for U8g2 compatible displays (with TCP)";
+const char kVersionStr[] = "v1.1.0.0";
 const char kHelpStr[] =    "I = identify driver\n"\
                            "V = get software version\n"\
                            "R = (re)initialize display\n"\
@@ -100,17 +115,24 @@ const char kHelpStr[] =    "I = identify driver\n"\
                            "CF x0 y0 x0 y0 = clear frame\n"\
                            "SB x0 y0 x0 y0 = draw filled box\n"\
                            "CB x0 y0 x0 y0 = clear box\n"\
+                           "W = get WiFi status\n"\
                            "? = this help text\n"\
                            "!!All parameters must be in hex!!";
 const char kErrorStr[] =   "ERR";
-
 
 /******************************************************************************/
 /* Global variables                                                           */
 /******************************************************************************/
 
-// A display constructor using hardware SPI:
+// Display constructor using hardware SPI:
 U8G2_GP1294AI_256X48_F_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 15, /* dc=*/U8X8_PIN_NONE, /* reset=*/ 5);
+
+// TCP server
+WiFiServer tcpServer(TCP_PORT);
+WiFiClient tcpClient;
+
+// Buffer for incoming data
+String tcpBuffer = "";
 
 /******************************************************************************/
 /* Declaration of own functions                                               */
@@ -118,7 +140,11 @@ U8G2_GP1294AI_256X48_F_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 15, /* dc=*/U8X8_PIN_NON
 
 /* primary functionality */
 void processCommand(String command);
+void processTcpData();
 
+/* WiFi stuff */
+void setupWiFi();
+void printWiFiStatus();
 
 /* display stuff */
 void initializeDisplay();
@@ -129,7 +155,6 @@ void drawCharacter(unsigned char c, int col, int row);
 void splitString(String input, char separator, String* parts, int maxParts);
 void sendInvalidInputResponse(String command);
 
-
 /******************************************************************************/
 /* Arduino sketch functions                                                   */
 /******************************************************************************/
@@ -137,13 +162,12 @@ void sendInvalidInputResponse(String command);
 /*
  * @brief        Setup code to be run once on power-on or after reset.
  * 
- * @description  Initializes the serial interface and the u8g2 display.
+ * @description  Initializes the serial interface, WiFi, UDP, and the u8g2 display.
  */
 void setup()
 {
   Serial.begin(115200);
-
-  //Serial.setTimeout(20); 
+  delay(10);
 
   Serial.println(" ");
   // identify self
@@ -156,24 +180,31 @@ void setup()
   u8g2.clearBuffer(); // clear the internal memory
   initializeDisplay();
 
+  // initialize WiFi and TCP
+  setupWiFi();
   
   // initialize the randomizer using a floating (unconnected) analog input
   randomSeed(analogRead(0));
 
   // initialize digital pin LED_BUILTIN as an output.
-  pinMode(LED_BUILTIN, OUTPUT);  
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH); // LED off initially
 }
 
 /*
  * @brief        Code to be run repeatedly.
- * @description  Reads lines of incomming serial data and passes them to processCommand().
- *               Manages software flow control.
+ * @description  Reads lines of incoming serial data and UDP packets, 
+ *               passes them to processCommand().
+ *               Manages software flow control for serial.
  */
 void loop()
 {
   yield(); // tell the watchdog we are still alive
 
+  // Handle TCP connections and data
+  processTcpData();
 
+  // Handle serial data
   if(Serial.available() > 0)
   {
     if(Serial.available() > XOFF_THRESHOLD)
@@ -187,21 +218,117 @@ void loop()
     Serial.write((byte)XOFF);
     processCommand(input);
     
-    //digitalWrite(LED_BUILTIN, HIGH);
     Serial.write((byte)XON); // ready to receive more serial data
     
     digitalWrite(LED_BUILTIN, HIGH); // LED off
   }
-
 }
-
 
 /******************************************************************************/
 /* Own functions                                                              */
 /******************************************************************************/
 
 /*
- * @brief        Processes a command received via serial interface and initiates 
+ * @brief        Sets up WiFi connection and starts TCP server.
+ * @description  Connects to WiFi network and begins listening on UDP port.
+ */
+void setupWiFi()
+{
+  Serial.println();
+  Serial.print("Connecting to WiFi: ");
+  Serial.println(WIFI_SSID);
+  
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  
+  // Wait for connection (with timeout)
+  int timeout = 0;
+  while (WiFi.status() != WL_CONNECTED && timeout < 30) {
+    delay(500);
+    Serial.print(".");
+    timeout++;
+  }
+  
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println();
+    Serial.println("WiFi connected!");
+    printWiFiStatus();
+    
+    // Start TCP server
+    tcpServer.begin();
+    tcpServer.setNoDelay(true); // Disable Nagle's algorithm for lower latency
+    Serial.print("TCP server started on port ");
+    Serial.println(TCP_PORT);
+  } else {
+    Serial.println();
+    Serial.println("WiFi connection failed!");
+    Serial.println("Device will continue to work via Serial interface only.");
+  }
+}
+
+/*
+ * @brief        Prints current WiFi status information.
+ */
+void printWiFiStatus()
+{
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+  Serial.print("Signal strength (RSSI): ");
+  Serial.print(WiFi.RSSI());
+  Serial.println(" dBm");
+}
+
+/*
+ * @brief        Checks for and processes incoming TCP packets.
+ * @description  Reads TCP packets and processes each command line within them.
+ *               Multiple commands can be sent in one packet, separated by newlines.
+ */
+void processTcpData()
+{
+  // Check for new clients
+  if (tcpServer.hasClient()) {
+    // If we already have a client, disconnect it first
+    if (tcpClient && tcpClient.connected()) {
+      Serial.println("TCP: Replacing existing client with new connection");
+      tcpClient.stop();
+    }
+    
+    tcpClient = tcpServer.available();
+    if (tcpClient) {
+      Serial.print("TCP: New client connected from ");
+      Serial.println(tcpClient.remoteIP());
+      tcpBuffer = ""; // Clear buffer for new client
+    }
+  }
+  
+  // Process data from connected client
+  if (tcpClient && tcpClient.connected()) {
+    while (tcpClient.available()) {
+      char c = tcpClient.read();
+      
+      if (c == '\n') {
+        // Process complete command
+        if (tcpBuffer.length() > 0) {
+          digitalWrite(LED_BUILTIN, LOW);
+          processCommand(tcpBuffer);
+          digitalWrite(LED_BUILTIN, HIGH);
+          tcpBuffer = "";
+        }
+      } else if (c != '\r') {
+        // Add to buffer (ignore carriage return)
+        tcpBuffer += c;
+      }
+      
+      yield(); // Keep watchdog happy
+    }
+  } else if (tcpClient) {
+    // Client disconnected
+    tcpClient.stop();
+  }
+}
+
+/*
+ * @brief        Processes a command received via serial interface or TCP and initiates 
  *               appropriate actions.
  * @description  Communication via serial interface is ASCII-based. Although 
  *               this makes the data load longer, it makes debugging much
@@ -245,6 +372,15 @@ void processCommand(String command)
       case 'V':
         // return version
         Serial.println(kVersionStr);
+        break;
+      
+      case 'W':
+        // WiFi status
+        if (WiFi.status() == WL_CONNECTED) {
+          printWiFiStatus();
+        } else {
+          Serial.println("WiFi not connected");
+        }
         break;
       
       case 'T':

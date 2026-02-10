@@ -7,15 +7,7 @@ interface
 uses
   Classes, SysUtils, Forms, Graphics, Controls, ExtCtrls, RegExpr, DateUtils,
   Math, StudioCommon, uSMBIOS, SysInfo, WinampControl,
-  Glyphs, VFDisplay, PreviewDisplay, NTK800, NTK300, U8G2;
-type
-  TDisplayConfig = record
-    DisplayType: String; // e.g. 'NTK800'
-    ResX: Word;          // display resolution in x direction
-    ResY: Word;          // display resolution in y direction
-    IntName: String;     // interface name (e.g. 'COM5')
-    Baudrate: Cardinal;  // baudrate for serial display connection
-  end;
+  Glyphs, VFDisplay, PreviewDisplay, NTK800, NTK300, U8G2, U8G2TCP;
 
 type
   TPreviewChangedEvent = procedure(NewPreview: TBitmap) of object;
@@ -79,18 +71,18 @@ type
     procedure SetBrightness(Percent: Byte);
     procedure SetLayerMode(LayerMode: TLayerMode);
     procedure PaintString(AText: String; Col, Row: Integer);
-    procedure PaintBitmap(ABitmap: TBitmap; X, Y: Word);
-    procedure PaintBitmapFromFile(FileName: String; X, Y: Word);
+    procedure PaintBitmap(ABitmap: TBitmap; X, Y: Integer);
+    procedure PaintBitmapFromFile(FileName: String; X, Y: Integer);
     procedure PaintLine(X0, Y0, X1, Y1: Word; IsInverted: Boolean);
     procedure PaintPixel(X, Y: Word; IsInverted: Boolean);
     procedure PaintFrame(X0, Y0, X1, Y1: Word; IsInverted: Boolean);
 
     // methods related to text output
     procedure ClearInfoStrings;
-    function GetFontedTextDimensions(AText: String; X, Y: Byte; FontName: String; FontSize: Integer): TPoint;
-    function DrawFontedText(AText: String; X, Y: Byte; FontName: String; FontSize: Integer; MinWidth, MinHeight: Integer): TPoint;
-    function AddVariableInfo(AText: String; X, Y: Byte; FontName: String; FontSize: Integer): Boolean;
-    procedure HandleTextOutput(AText: String; X, Y: Byte; FontName: String; FontSize: Integer);
+    function GetFontedTextDimensions(AText: String; X, Y: Integer; FontName: String; FontSize: Integer): TPoint;
+    function DrawFontedText(AText: String; X, Y: Integer; FontName: String; FontSize: Integer; MinWidth, MinHeight: Integer): TPoint;
+    function AddVariableInfo(AText: String; X, Y: Integer; FontName: String; FontSize: Integer): Boolean;
+    procedure HandleTextOutput(AText: String; X, Y: Integer; FontName: String; FontSize: Integer);
     procedure RefreshTextOutputs;
     function SubstituteStaticInfo(AText: String): String;
     function SubstituteVariableInfo(AText: String): String;
@@ -248,6 +240,8 @@ end;
 
 
 procedure TDisplayManager.AddDisplay(DisplayConfig: TDisplayConfig);
+var
+  dspConnection: String;
 begin
 
   if ((FGfxWidth > 0) and (DisplayConfig.ResX <> FGfxWidth)) or ((FGfxHeight > 0) and (DisplayConfig.ResY <> FGfxHeight)) then
@@ -259,12 +253,17 @@ begin
   FTxtWidth := FGfxWidth div (GLYPH_W + GLYPH_GAP);
   FTxtHeight := FGfxHeight div GLYPH_H;
 
+  if (DisplayConfig.DisplayType = 'U8G2TCP') then
+    dspConnection := DisplayConfig.IpAddr+':'+IntToStr(DisplayConfig.TcpPort)
+  else
+    dspConnection:= DisplayConfig.IntName;
+
   // log the display type
   if (Assigned(FLoggingCallback)) then
     FLoggingCallback(lvINFO, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} +
     ': Display type: "' + DisplayConfig.DisplayType + '"' +
     ', ' + IntToStr(DisplayConfig.ResX) + 'x' + IntToStr(DisplayConfig.ResY) +
-    ', if: "' + DisplayConfig.IntName + '"',  Now);
+    ', if: "' + dspConnection + '"',  Now);
 
   if (DisplayConfig.DisplayType = 'PREVIEW') then
   begin
@@ -303,6 +302,15 @@ begin
     FDisplays[High(FDisplays)].DspInit(DisplayConfig.ResX, DisplayConfig.ResY);
   end
   else
+  if (DisplayConfig.DisplayType = 'U8G2TCP') then
+  begin
+    SetLength(FDisplays, Length(FDisplays) + 1);
+    FDisplays[High(FDisplays)] := TU8G2TCP.Create(Self);
+    FDisplays[High(FDisplays)].OnDbgMessage := FLoggingCallback;
+    FDisplays[High(FDisplays)].Connect(DisplayConfig.IpAddr+':'+IntToStr(DisplayConfig.TcpPort));
+    FDisplays[High(FDisplays)].DspInit(DisplayConfig.ResX, DisplayConfig.ResY);
+  end
+  else
   begin
     if (Assigned(FLoggingCallback)) then
       FLoggingCallback(lvERROR, Self.ClassName + '.' + {$INCLUDE %CURRENTROUTINE%} + ': Unsupported display type: ' + DisplayConfig.DisplayType, Now);
@@ -319,6 +327,8 @@ begin
   DisplayConfig.ResY := ResY;
   DisplayConfig.IntName := IntName;
   DisplayConfig.Baudrate := Baudrate;
+  DisplayConfig.IpAddr:= '';
+  DisplayConfig.TcpPort:=0;
   AddDisplay(DisplayConfig);
 end;
 
@@ -428,7 +438,7 @@ begin
   end;
 end;
 
-procedure TDisplayManager.PaintBitmap(ABitmap: TBitmap; X, Y: Word);
+procedure TDisplayManager.PaintBitmap(ABitmap: TBitmap; X, Y: Integer);
 var
   DspIdx: Integer;
 begin
@@ -441,31 +451,64 @@ begin
   end;
 end;
 
-procedure TDisplayManager.PaintBitmapFromFile(FileName: String; X, Y: Word);
+procedure TDisplayManager.PaintBitmapFromFile(FileName: String; X, Y: Integer);
 var
-  TmpBitmap: TBitmap;
+  TmpBitmap, VisibleBitmap: TBitmap;
   DspIdx: Integer;
+  ClipLeft, ClipTop: Integer;
 begin
   TmpBitmap := TBitmap.Create;
-  TmpBitmap.LoadFromFile(FileName);
-  //LogEvent(lvINFO, 'Loading bitmap. Size ' + IntToStr(TmpBitmap.Width) + 'x' + IntToStr(TmpBitmap.Height), Now);
+  VisibleBitmap := TBitmap.Create;
+  try
+    TmpBitmap.LoadFromFile(FileName);
+    //LogEvent(lvINFO, 'Loading bitmap. Size ' + IntToStr(TmpBitmap.Width) + 'x' + IntToStr(TmpBitmap.Height), Now);
 
-  // clip bitmap to display if needed
-  if (TmpBitmap.Width + X >= FGfxWidth) then
-    TmpBitmap.Width := TmpBitmap.Width - (TmpBitmap.Width + X - FGfxWidth);
-  if (TmpBitmap.Height + Y >= FGfxHeight) then
-    TmpBitmap.Height := TmpBitmap.Height - (TmpBitmap.Height + Y - FGfxHeight);
+    // --- Negatives Clipping vorbereiten ---
+    ClipLeft := 0;
+    ClipTop := 0;
 
-  for DspIdx := Low(FDisplays) to High(FDisplays) do
-  begin
-    if (Assigned(FDisplays[DspIdx])) then
-      FDisplays[DspIdx].PaintBitmap(TmpBitmap, X, Y);
-    if (FDisplays[DspIdx].DisplayType = 'PREVIEW') and (Assigned(FOnPreviewChangedEvent)) then
-      FOnPreviewChangedEvent(TPreviewDisplay(FDisplays[DspIdx]).CombinedBitmap);
+    if X < 0 then
+    begin
+      ClipLeft := -X;
+      X := 0;
+    end;
+
+    if Y < 0 then
+    begin
+      ClipTop := -Y;
+      Y := 0;
+    end;
+
+    // --- Rechte und untere Kante clippen ---
+    if TmpBitmap.Width - ClipLeft + X > FGfxWidth then
+      TmpBitmap.Width := FGfxWidth - X + ClipLeft;
+    if TmpBitmap.Height - ClipTop + Y > FGfxHeight then
+      TmpBitmap.Height := FGfxHeight - Y + ClipTop;
+
+    // --- Sichtbaren Bereich vorbereiten ---
+    VisibleBitmap.SetSize(TmpBitmap.Width - ClipLeft, TmpBitmap.Height - ClipTop);
+    VisibleBitmap.Canvas.CopyRect(
+      Rect(0, 0, VisibleBitmap.Width, VisibleBitmap.Height),
+      TmpBitmap.Canvas,
+      Rect(ClipLeft, ClipTop, ClipLeft + VisibleBitmap.Width, ClipTop + VisibleBitmap.Height)
+    );
+
+    // --- Auf Displays malen ---
+    for DspIdx := Low(FDisplays) to High(FDisplays) do
+    begin
+      if Assigned(FDisplays[DspIdx]) then
+        FDisplays[DspIdx].PaintBitmap(VisibleBitmap, X, Y);
+
+      if (FDisplays[DspIdx].DisplayType = 'PREVIEW') and Assigned(FOnPreviewChangedEvent) then
+        FOnPreviewChangedEvent(TPreviewDisplay(FDisplays[DspIdx]).CombinedBitmap);
+    end;
+
+  finally
+    TmpBitmap.Free;
+    VisibleBitmap.Free;
   end;
-
-  TmpBitmap.Free;
 end;
+
 
 
 procedure TDisplayManager.ForcePreviewUpdate;
@@ -504,7 +547,7 @@ begin
   end;
 end;
 
-function TDisplayManager.GetFontedTextDimensions(AText: String; X, Y: Byte; FontName: String; FontSize: Integer): TPoint;
+function TDisplayManager.GetFontedTextDimensions(AText: String; X, Y: Integer; FontName: String; FontSize: Integer): TPoint;
 var
   TmpBitmap: TBitmap;
   ResultPoint: TPoint;
@@ -541,65 +584,106 @@ begin
 end;
 
 
-function TDisplayManager.DrawFontedText(AText: String; X, Y: Byte; FontName: String; FontSize: Integer; MinWidth, MinHeight: Integer): TPoint;
+function TDisplayManager.DrawFontedText(AText: String; X, Y: Integer; FontName: String; FontSize: Integer; MinWidth, MinHeight: Integer): TPoint;
 var
   DspIdx: Integer;
-  TmpBitmap: TBitmap;
+  TmpBitmap, VisibleBitmap: TBitmap;
   ResultPoint: TPoint;
   ARect: TRect;
+  ClipLeft, ClipTop: Integer;
 begin
   ResultPoint := Point(0, 0);
 
   TmpBitmap := TBitmap.Create;
+  VisibleBitmap := TBitmap.Create;
   try
+    // --- Bitmap vorbereiten ---
     TmpBitmap.Monochrome := True;
-    TmpBitmap.Canvas.Font.Color := clblack;
+    TmpBitmap.Canvas.Font.Color := clBlack;
     TmpBitmap.Canvas.Font.Name := FontName;
     TmpBitmap.Canvas.Font.Size := FontSize;
     TmpBitmap.Canvas.Font.Bold := False;
     TmpBitmap.Canvas.Font.Italic := False;
+
     TmpBitmap.SetSize(TmpBitmap.Canvas.TextWidth(AText), TmpBitmap.Canvas.TextHeight(AText));
     TmpBitmap.Canvas.AntialiasingMode := amOff;
     TmpBitmap.Canvas.TextOut(0, 0, AText);
 
-    // always trim the bitmap but make sure the minimum dimensions are met
+    // --- Bitmap trimmen und Mindestgröße sicherstellen ---
     TrimBitmap(TmpBitmap, True, True);
-    if (TmpBitmap.Width < MinWidth) then begin
-      ARect:= Rect(TmpBitmap.Width, 0, MinWidth, TmpBitmap.Height);
+
+    if TmpBitmap.Width < MinWidth then
+    begin
+      ARect := Rect(TmpBitmap.Width, 0, MinWidth, TmpBitmap.Height);
       TmpBitmap.Width := MinWidth;
-      TmpBitmap.Canvas.Brush.Color:= clWhite;
+      TmpBitmap.Canvas.Brush.Color := clWhite;
       TmpBitmap.Canvas.FillRect(ARect);
     end;
-    if (TmpBitmap.Height < MinHeight) then begin
-      ARect:= Rect(0, TmpBitmap.Height, TmpBitmap.Width, MinHeight);
+
+    if TmpBitmap.Height < MinHeight then
+    begin
+      ARect := Rect(0, TmpBitmap.Height, TmpBitmap.Width, MinHeight);
       TmpBitmap.Height := MinHeight;
-      TmpBitmap.Canvas.Brush.Color:= clWhite;
+      TmpBitmap.Canvas.Brush.Color := clWhite;
       TmpBitmap.Canvas.FillRect(ARect);
     end;
 
-    // clip bitmap to display if needed
-    if (TmpBitmap.Width + X >= FGfxWidth) then
-      TmpBitmap.Width := TmpBitmap.Width - (TmpBitmap.Width + X - FGfxWidth);
-    if (TmpBitmap.Height + Y >= FGfxHeight) then
-      TmpBitmap.Height := TmpBitmap.Height - (TmpBitmap.Height + Y - FGfxHeight);
+    // --- Negatives Clipping vorbereiten ---
+    ClipLeft := 0;
+    ClipTop := 0;
 
+    if X < 0 then
+    begin
+      ClipLeft := -X;
+      X := 0;
+    end;
+
+    if Y < 0 then
+    begin
+      ClipTop := -Y;
+      Y := 0;
+    end;
+
+    // --- Rechte und untere Kante clippen ---
+    if TmpBitmap.Width - ClipLeft + X > FGfxWidth then
+      TmpBitmap.Width := FGfxWidth - X + ClipLeft;
+    if TmpBitmap.Height - ClipTop + Y > FGfxHeight then
+      TmpBitmap.Height := FGfxHeight - Y + ClipTop;
+
+    // --- Sichtbaren Bereich vorbereiten ---
+    VisibleBitmap.SetSize(TmpBitmap.Width - ClipLeft, TmpBitmap.Height - ClipTop);
+    VisibleBitmap.Canvas.CopyRect(
+      Rect(0, 0, VisibleBitmap.Width, VisibleBitmap.Height),
+      TmpBitmap.Canvas,
+      Rect(ClipLeft, ClipTop, ClipLeft + VisibleBitmap.Width, ClipTop + VisibleBitmap.Height)
+    );
+
+    // --- Auf Displays malen ---
     for DspIdx := Low(FDisplays) to High(FDisplays) do
     begin
-      if (Assigned(FDisplays[DspIdx])) then
-        FDisplays[DspIdx].PaintBitmap(TmpBitmap, X, Y);
-      if (FDisplays[DspIdx].DisplayType = 'PREVIEW') and (Assigned(FOnPreviewChangedEvent)) then
+      if Assigned(FDisplays[DspIdx]) then
+        FDisplays[DspIdx].PaintBitmap(VisibleBitmap, X, Y);
+
+      if (FDisplays[DspIdx].DisplayType = 'PREVIEW') and Assigned(FOnPreviewChangedEvent) then
         FOnPreviewChangedEvent(TPreviewDisplay(FDisplays[DspIdx]).CombinedBitmap);
     end;
-    TmpBitmap.Canvas.Pixels[0, 0] := TmpBitmap.Canvas.Pixels[0, 0]; // this seems like nonsense but is required to actually load the bitmap in memory
-    ResultPoint.X := TmpBitmap.Width;
-    ResultPoint.Y := TmpBitmap.Height;
+
+    // Hack: Bitmap im Speicher „laden“
+    VisibleBitmap.Canvas.Pixels[0, 0] := VisibleBitmap.Canvas.Pixels[0, 0];
+
+    // Ergebnisgröße zurückgeben
+    ResultPoint.X := VisibleBitmap.Width;
+    ResultPoint.Y := VisibleBitmap.Height;
+
   finally
     TmpBitmap.Free;
+    VisibleBitmap.Free;
   end;
+
   Result := ResultPoint;
 end;
 
-function TDisplayManager.AddVariableInfo(AText: String; X, Y: Byte; FontName: String; FontSize: Integer): Boolean;
+function TDisplayManager.AddVariableInfo(AText: String; X, Y: Integer; FontName: String; FontSize: Integer): Boolean;
 var
   I: Integer;
   IsAdded: Boolean;
@@ -640,7 +724,7 @@ end;
 
 
 // Process information which does NOT change continuously
-procedure TDisplayManager.HandleTextOutput(AText: String; X, Y: Byte; FontName: String; FontSize: Integer);
+procedure TDisplayManager.HandleTextOutput(AText: String; X, Y: Integer; FontName: String; FontSize: Integer);
 var
   S: String;
   IsFreeSlotFound: Boolean;
@@ -1113,8 +1197,10 @@ var
   Match: String;
   OhmComp, OhmType, OhmName, OhmValue: String;
   LhmServer: String;
+  FS: TFormatSettings;
+  Decimals: Integer;
 begin
-
+  Decimals:= 0; // default
   RegEx := TRegExpr.Create;
   S := AText;
   CurrentDateTime := Now;
@@ -1142,14 +1228,31 @@ begin
     // LHM = Open Hardware Monitor; read sensor values from server URL
 
     // LHM cmds are structured like $LHM|serverURL|component|sensortype|sensorname$
-    RegEx.Expression := '\$LHM\|(.+)\|(.+)\|(.+)\|(.+)\$';
+    //RegEx.Expression := '\$LHM\|(.+)\|(.+)\|(.+)\|(.+?)(?:\|\d+)?\$';
+    RegEx.Expression := '\$LHM\|([^|]+)\|([^|]+)\|([^|]+)\|([^|]+)(?:\|(\d+))?\$';
     if (RegEx.Exec(S)) then
     begin
       LhmServer := RegEx.Match[1];
       OhmComp := RegEx.Match[2];
       OhmType := RegEx.Match[3];
       OhmName := RegEx.Match[4];
+      Match := RegEx.Match[5];
+      if (Match <> '') then
+        Decimals := StrToIntDef(RegEx.Match[5], 0);  // default: 0
+
       OhmValue := FSysInfo.GetLhmValue(LhmServer, OhmComp, OhmType, OhmName);
+      FS := DefaultFormatSettings;
+      FS.DecimalSeparator := ',';
+      FS.ThousandSeparator := #0;
+      if TryStrToFloat(OhmValue, d, FS) then
+      begin
+        if Decimals = 0 then
+          OhmValue := Format('%.0f', [d], FS)
+        else
+          OhmValue := Format('%.' + IntToStr(Decimals) + 'f', [d], FS);
+      end
+      else
+        OhmValue:= '?';
       S := RegEx.Replace(S, OhmValue, False);
     end;
   end;

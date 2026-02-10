@@ -1,7 +1,7 @@
 object MainForm: TMainForm
-  Left = 848
+  Left = -1066
   Height = 598
-  Top = 240
+  Top = 310
   Width = 743
   AutoSize = True
   BorderIcons = [biSystemMenu, biMinimize]
@@ -9,12 +9,12 @@ object MainForm: TMainForm
   Caption = 'VFD-Studio  2'
   ClientHeight = 598
   ClientWidth = 743
+  Position = poScreenCenter
+  LCLVersion = '4.4.0.0'
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnWindowStateChange = FormWindowStateChange
-  Position = poScreenCenter
-  LCLVersion = '3.2.0.0'
   object ScreenTimeLabel: TLabel
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = PreviewImage
@@ -49,7 +49,7 @@ object MainForm: TMainForm
     AnchorSideRight.Control = PreviewImage
     AnchorSideRight.Side = asrBottom
     Left = 4
-    Height = 65
+    Height = 66
     Top = 201
     Width = 248
     Anchors = [akTop, akLeft, akRight]
@@ -65,28 +65,28 @@ object MainForm: TMainForm
     ChildSizing.ShrinkVertical = crsHomogenousChildResize
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 2
-    ClientHeight = 65
+    ClientHeight = 66
     ClientWidth = 248
     TabOrder = 1
     object ListTestButton: TBitBtn
-      Left = 4
-      Height = 27
-      Top = 4
-      Width = 114
+      Left = 5
+      Height = 26
+      Top = 5
+      Width = 112
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
       BorderSpacing.Right = 4
       Caption = 'Load list...'
       Images = ImageList1
       ImageIndex = 5
-      OnClick = OpenListButtonClick
       TabOrder = 1
+      OnClick = OpenListButtonClick
     end
     object ReloadButton: TBitBtn
       AnchorSideRight.Control = LoadListPanel
-      Left = 122
-      Height = 27
-      Top = 4
+      Left = 121
+      Height = 26
+      Top = 5
       Width = 122
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -94,14 +94,14 @@ object MainForm: TMainForm
       Caption = 'Reload'
       Images = ImageList1
       ImageIndex = 4
-      OnClick = ReloadButtonClick
       TabOrder = 0
+      OnClick = ReloadButtonClick
     end
     object StopButton: TBitBtn
-      Left = 4
+      Left = 5
       Height = 26
       Top = 35
-      Width = 114
+      Width = 112
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
       BorderSpacing.Right = 4
@@ -109,12 +109,12 @@ object MainForm: TMainForm
       NumGlyphs = 2
       Images = ImageList1
       ImageIndex = 0
-      OnClick = StopButtonClick
       TabOrder = 2
+      OnClick = StopButtonClick
     end
     object NextButton: TBitBtn
       AnchorSideRight.Control = LoadListPanel
-      Left = 122
+      Left = 121
       Height = 26
       Top = 35
       Width = 122
@@ -124,8 +124,8 @@ object MainForm: TMainForm
       Caption = 'Next screen'
       Images = ImageList1
       ImageIndex = 6
-      OnClick = NextButtonClick
       TabOrder = 3
+      OnClick = NextButtonClick
     end
   end
   object OkButtonPanel: TPanel
@@ -135,8 +135,8 @@ object MainForm: TMainForm
     AnchorSideRight.Control = PreviewImage
     AnchorSideRight.Side = asrBottom
     Left = 4
-    Height = 36
-    Top = 317
+    Height = 38
+    Top = 319
     Width = 248
     Anchors = [akTop, akLeft, akRight]
     AutoSize = True
@@ -152,16 +152,16 @@ object MainForm: TMainForm
     ChildSizing.ShrinkVertical = crsHomogenousChildResize
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 3
-    ClientHeight = 36
+    ClientHeight = 38
     ClientWidth = 248
     TabOrder = 0
     object OKButton: TBitBtn
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Side = asrBottom
-      Left = 4
-      Height = 28
-      Top = 4
-      Width = 75
+      Left = 6
+      Height = 26
+      Top = 6
+      Width = 73
       AutoSize = True
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -170,16 +170,16 @@ object MainForm: TMainForm
       Caption = 'OK'
       Images = ImageList1
       ImageIndex = 9
-      OnClick = OKButtonClick
       TabOrder = 0
+      OnClick = OKButtonClick
     end
     object InfoButton: TBitBtn
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Side = asrBottom
       Left = 83
-      Height = 28
-      Top = 4
-      Width = 80
+      Height = 26
+      Top = 6
+      Width = 79
       AutoSize = True
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -188,16 +188,16 @@ object MainForm: TMainForm
       Caption = 'Info'
       Images = ImageList1
       ImageIndex = 7
-      OnClick = InfoButtonClick
       TabOrder = 1
+      OnClick = InfoButtonClick
     end
     object ExitButton: TBitBtn
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Side = asrBottom
-      Left = 167
-      Height = 28
-      Top = 4
-      Width = 77
+      Left = 166
+      Height = 26
+      Top = 6
+      Width = 76
       AutoSize = True
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -206,8 +206,8 @@ object MainForm: TMainForm
       Caption = 'Exit'
       Images = ImageList1
       ImageIndex = 8
-      OnClick = ExitButtonClick
       TabOrder = 2
+      OnClick = ExitButtonClick
     end
   end
   object BottomButtonsPanel: TPanel
@@ -217,8 +217,8 @@ object MainForm: TMainForm
     AnchorSideRight.Control = PreviewImage
     AnchorSideRight.Side = asrBottom
     Left = 4
-    Height = 35
-    Top = 274
+    Height = 36
+    Top = 275
     Width = 248
     Anchors = [akTop, akLeft, akRight]
     AutoSize = True
@@ -233,16 +233,16 @@ object MainForm: TMainForm
     ChildSizing.ShrinkVertical = crsHomogenousChildResize
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 3
-    ClientHeight = 35
+    ClientHeight = 36
     ClientWidth = 248
     TabOrder = 2
     object ListEditorButton: TBitBtn
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Side = asrBottom
-      Left = 4
-      Height = 27
-      Top = 4
-      Width = 78
+      Left = 5
+      Height = 26
+      Top = 5
+      Width = 77
       AutoSize = True
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -251,16 +251,16 @@ object MainForm: TMainForm
       Caption = 'Editor'
       Images = ImageList1
       ImageIndex = 11
-      OnClick = ListEditorButtonClick
       TabOrder = 0
+      OnClick = ListEditorButtonClick
     end
     object CfgButton: TBitBtn
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Side = asrBottom
       Left = 86
-      Height = 27
-      Top = 4
-      Width = 83
+      Height = 26
+      Top = 5
+      Width = 82
       AutoSize = True
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -269,15 +269,15 @@ object MainForm: TMainForm
       Caption = 'Config'
       Images = ImageList1
       ImageIndex = 3
-      OnClick = CfgButtonClick
       TabOrder = 1
+      OnClick = CfgButtonClick
     end
     object ExpertViewButton: TBitBtn
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Side = asrBottom
-      Left = 173
-      Height = 27
-      Top = 4
+      Left = 172
+      Height = 26
+      Top = 5
       Width = 71
       AutoSize = True
       BorderSpacing.Left = 4
@@ -323,8 +323,8 @@ object MainForm: TMainForm
       }
       Images = ImageList1
       ImageIndex = 12
-      OnClick = ExpertViewButtonClick
       TabOrder = 2
+      OnClick = ExpertViewButtonClick
     end
   end
   object VersionLabel: TLabel
@@ -386,7 +386,7 @@ object MainForm: TMainForm
     AnchorSideBottom.Control = OkButtonPanel
     AnchorSideBottom.Side = asrBottom
     Left = 264
-    Height = 349
+    Height = 353
     Top = 4
     Width = 320
     Anchors = [akTop, akLeft, akBottom]
@@ -394,7 +394,7 @@ object MainForm: TMainForm
     BorderSpacing.Top = 4
     BorderSpacing.Right = 8
     Caption = 'Currently displayed:'
-    ClientHeight = 329
+    ClientHeight = 333
     ClientWidth = 316
     Constraints.MinWidth = 320
     TabOrder = 3
@@ -420,7 +420,7 @@ object MainForm: TMainForm
       AnchorSideBottom.Control = ListGroupBox
       AnchorSideBottom.Side = asrBottom
       Left = 8
-      Height = 313
+      Height = 317
       Top = 8
       Width = 300
       Anchors = [akTop, akLeft, akRight, akBottom]
@@ -443,7 +443,7 @@ object MainForm: TMainForm
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 235
-    Top = 353
+    Top = 357
     Width = 576
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
@@ -541,8 +541,8 @@ object MainForm: TMainForm
         00FFD4AA00FFD4AA00FFD4AA00FFD4AA00FFD4AA00FFD4AA00FFD4AA00FFD4AA
         00FFD4AA00FFD4AA00FFD4AA00FFD4AA00ADD5AA0006FFFFFF00
       }
-      OnClick = SaveLogButtonClick
       TabOrder = 1
+      OnClick = SaveLogButtonClick
     end
     object ClearLogButton: TBitBtn
       AnchorSideRight.Control = LogfileGroupBox
@@ -594,8 +594,8 @@ object MainForm: TMainForm
         FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00D1A2000BD5AA0042D4AB0058D5AA
         0042D1A2000BFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
       }
-      OnClick = ClearLogButtonClick
       TabOrder = 2
+      OnClick = ClearLogButtonClick
     end
   end
   object SpacerPanel: TPanel
@@ -606,7 +606,7 @@ object MainForm: TMainForm
     AnchorSideRight.Side = asrBottom
     Left = 264
     Height = 8
-    Top = 588
+    Top = 592
     Width = 320
     Anchors = [akTop, akLeft, akRight]
     BevelOuter = bvNone

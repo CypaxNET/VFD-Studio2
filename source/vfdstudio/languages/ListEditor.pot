@@ -359,7 +359,8 @@ msgid ""
 "Param3:\n"
 "  Sensor type (e.g. \"Temperature\", \"Clock\", ...)\n"
 "Param4:\n"
-"  Sensor name - must be the exact name as shown in LHM (e.g. \"GPU Core\")"
+"  Sensor name - must be the exact name as shown in LHM (e.g. \"GPU Core\")Param5 [optional]:\n"
+"  Number of decimal places (default: 0)"
 msgstr ""
 
 #: listeditorunit.rshelplight

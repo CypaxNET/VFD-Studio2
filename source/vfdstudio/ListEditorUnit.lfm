@@ -1,7 +1,7 @@
 object MainForm: TMainForm
-  Left = 947
+  Left = 833
   Height = 843
-  Top = 389
+  Top = 366
   Width = 1163
   Caption = 'List Editor 2'
   ClientHeight = 843
@@ -9,11 +9,11 @@ object MainForm: TMainForm
   Constraints.MinHeight = 550
   Constraints.MinWidth = 750
   Menu = MainMenu1
+  LCLVersion = '4.4.0.0'
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
-  LCLVersion = '3.0.0.3'
   inline Editor: TSynEdit
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = PreviewGroupBox
@@ -496,6 +496,10 @@ object MainForm: TMainForm
       object SynGutterMarks1: TSynGutterMarks
         Width = 24
         MouseActions = <>
+        MaxExtraMarksColums = 0
+        Options = [sgmoDeDuplicateMarksOnOverflow]
+        MarkupInfo.Background = clBtnFace
+        MarkupInfo.Foreground = clNone
       end
       object SynGutterLineNumber1: TSynGutterLineNumber
         Width = 19
@@ -512,6 +516,9 @@ object MainForm: TMainForm
         MouseActions = <>
         ModifiedColor = 59900
         SavedColor = clGreen
+        MarkupInfo.Background = clNone
+        MarkupInfo.Foreground = clGreen
+        MarkupInfo.FrameColor = 59900
       end
       object SynGutterSeparator1: TSynGutterSeparator
         Width = 2

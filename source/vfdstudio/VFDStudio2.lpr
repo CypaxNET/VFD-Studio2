@@ -10,9 +10,9 @@ uses
   athreads,
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, FrameViewer09, MainUnit, SysInfo, uSMBIOS, WinampControl, SettingsForm,
-  InfoUnit, StudioCommon, DisplayManager, Glyphs, NTK300, NTK800, VFDisplay,
-  PreviewDisplay, U8G2, noresetsynaser;
+  Forms, lazcontrols, FrameViewer09, MainUnit, SysInfo, uSMBIOS, WinampControl,
+  SettingsForm, InfoUnit, StudioCommon, DisplayManager, Glyphs, NTK300, NTK800,
+  VFDisplay, PreviewDisplay, U8G2, noresetsynaser, U8G2TCP;
 
   {$R *.res}
 

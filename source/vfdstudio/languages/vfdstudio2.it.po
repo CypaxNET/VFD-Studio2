@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.4.4\n"
+"X-Generator: Poedit 3.8\n"
 
 #: displaymanager.rsdowfriday
 msgid "Friday"
@@ -93,6 +93,23 @@ msgstr "Selezionare un display adesso?"
 msgid "Yes"
 msgstr "Sì"
 
+#: settingsform.rsbaud
+msgid "Baudrate:"
+msgstr "Baud rate:"
+
+#: settingsform.rsif
+msgctxt "settingsform.rsif"
+msgid "Interface:"
+msgstr "Interfaccia:"
+
+#: settingsform.rsip
+msgid "IP address:"
+msgstr "Indirizzo IP:"
+
+#: settingsform.rsport
+msgid "TCP port:"
+msgstr "Porta TCP:"
+
 #: tconfigform.abortbutton.caption
 msgid "Abort"
 msgstr "Esci"
@@ -138,12 +155,21 @@ msgid "Baud rate:"
 msgstr "Baud rate:"
 
 #: tconfigform.iflabel.caption
+msgctxt "tconfigform.iflabel.caption"
 msgid "Interface:"
 msgstr "Interfaccia:"
 
 #: tconfigform.languagegroupbox.caption
 msgid "Language"
 msgstr "Lingua"
+
+#: tconfigform.lazintegereditport.text
+msgid "8080"
+msgstr "8080"
+
+#: tconfigform.maskeditip.text
+msgid "   .   .   .   "
+msgstr "   .   .   .   "
 
 #: tconfigform.okbutton.caption
 msgid "Ok"

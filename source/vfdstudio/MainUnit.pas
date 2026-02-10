@@ -437,6 +437,8 @@ begin
     FStudioConfig.DisplayConfig.ResY := IniFile.ReadInteger('DISPLAY', 'ResY', 64);
     FStudioConfig.DisplayConfig.IntName := IniFile.ReadString('DISPLAY', 'Interface', 'COM1');
     FStudioConfig.DisplayConfig.Baudrate := IniFile.ReadInteger('DISPLAY', 'Baud', 115200);
+    FStudioConfig.DisplayConfig.IpAddr := IniFile.ReadString('DISPLAY', 'IPaddr', '127.0.0.1');
+    FStudioConfig.DisplayConfig.TcpPort := IniFile.ReadInteger('DISPLAY', 'TcpPort', 8080);
 
     { list section }
     FStudioConfig.ListConfig.ListName := IniFile.ReadString('LIST', 'Listname', 'Default.vfdlst');
@@ -479,6 +481,8 @@ begin
     IniFile.WriteInteger('DISPLAY', 'ResY', FStudioConfig.DisplayConfig.ResY);
     IniFile.WriteString('DISPLAY', 'Interface', FStudioConfig.DisplayConfig.IntName);
     IniFile.WriteInteger('DISPLAY', 'Baud', FStudioConfig.DisplayConfig.Baudrate);
+    IniFile.WriteString('DISPLAY', 'IPaddr', FStudioConfig.DisplayConfig.IpAddr);
+    IniFile.WriteInteger('DISPLAY', 'TcpPort', FStudioConfig.DisplayConfig.TcpPort);
 
     { list section }
     IniFile.WriteString('LIST', 'Listname', FStudioConfig.ListConfig.ListName);
@@ -498,6 +502,7 @@ var
   ListName: String; // List file to load
   LogFileName: String;
   I: Integer;
+  dspConnection: String;
 begin
 
 // --- Set defaults ---
@@ -596,12 +601,17 @@ begin
   PreviewImage.Picture.Bitmap.Width := FStudioConfig.DisplayConfig.ResX;
   PreviewImage.Picture.Bitmap.Height := FStudioConfig.DisplayConfig.ResY;
 
-  TrayIcon1.Hint := FStudioConfig.DisplayConfig.DisplayType + '@' + FStudioConfig.DisplayConfig.IntName;
+  if (FStudioConfig.DisplayConfig.DisplayType = 'U8G2TCP') then
+    dspConnection := FStudioConfig.DisplayConfig.IpAddr+':'+IntToStr(FStudioConfig.DisplayConfig.TcpPort)
+  else
+    dspConnection:= FStudioConfig.DisplayConfig.IntName;
+
+  TrayIcon1.Hint := FStudioConfig.DisplayConfig.DisplayType + '@' + dspConnection;
 
   if (('NONE' = FStudioConfig.DisplayConfig.DisplayType.ToUpper) or ('' = FStudioConfig.DisplayConfig.DisplayType)) then
     DisplayTypeLabel.Caption:= RsDspType + 'NONE'
   else
-    DisplayTypeLabel.Caption:= RsDspType + FStudioConfig.DisplayConfig.DisplayType + '@' + FStudioConfig.DisplayConfig.IntName;
+    DisplayTypeLabel.Caption:= RsDspType + FStudioConfig.DisplayConfig.DisplayType + '@' + dspConnection;
 
   VersionLabel.Caption := 'v' + {$I ..\BUNDLEVERSION.txt};
 
@@ -1124,10 +1134,13 @@ begin
   ConfigForm.ClearOnCloseCheckBox.Checked := FStudioConfig.ApplicationConfig.DoClearOnExit;
   ConfigForm.Language := FStudioConfig.ApplicationConfig.Language;
 
+  ConfigForm.MaskEditIP.Text := FStudioConfig.DisplayConfig.IpAddr;
+  ConfigForm.LazIntegerEditPort.Value := FStudioConfig.DisplayConfig.TcpPort;
   ConfigForm.InterfaceCombo.Caption := FStudioConfig.DisplayConfig.IntName;
+  ConfigForm.IfCfgCombo.Caption := IntToStr(FStudioConfig.DisplayConfig.Baudrate);
+
   ConfigForm.ResXSpinEdit.Value := FStudioConfig.DisplayConfig.ResX;
   ConfigForm.ResYSpinEdit.Value := FStudioConfig.DisplayConfig.ResY;
-  ConfigForm.IfCfgCombo.Caption := IntToStr(FStudioConfig.DisplayConfig.Baudrate);
 
   if (FStudioConfig.DisplayConfig.DisplayType = 'NTK800') then
     ConfigForm.DspTypeCombo.ItemIndex := 1
@@ -1137,6 +1150,9 @@ begin
   else
     if (FStudioConfig.DisplayConfig.DisplayType = 'U8G2') then
     ConfigForm.DspTypeCombo.ItemIndex := 3
+  else
+    if (FStudioConfig.DisplayConfig.DisplayType = 'U8G2TCP') then
+    ConfigForm.DspTypeCombo.ItemIndex := 4
   else
     ConfigForm.DspTypeCombo.ItemIndex := 0;
 
@@ -2199,9 +2215,16 @@ begin
   if (3 = ConfigForm.DspTypeCombo.ItemIndex) then
     FStudioConfig.DisplayConfig.DisplayType := 'U8G2'
   else
+  if (4 = ConfigForm.DspTypeCombo.ItemIndex) then
+    FStudioConfig.DisplayConfig.DisplayType := 'U8G2TCP'
+  else
     FStudioConfig.DisplayConfig.DisplayType := '';
+
+  FStudioConfig.DisplayConfig.IpAddr := ConfigForm.MaskEditIP.Text;
+  FStudioConfig.DisplayConfig.TcpPort := ConfigForm.LazIntegerEditPort.Value;
   FStudioConfig.DisplayConfig.IntName := ConfigForm.InterfaceCombo.Caption;
   FStudioConfig.DisplayConfig.Baudrate := StrToIntDef(ConfigForm.IfCfgCombo.Caption, 115200);
+
   FStudioConfig.DisplayConfig.ResX := ConfigForm.ResXSpinEdit.Value;
   FStudioConfig.DisplayConfig.ResY := ConfigForm.ResYSpinEdit.Value;
 
@@ -2217,6 +2240,8 @@ begin
   if (PreviousDisplayConfig.DisplayType <> FStudioConfig.DisplayConfig.DisplayType) or
      (PreviousDisplayConfig.Baudrate <> FStudioConfig.DisplayConfig.Baudrate) or
      (PreviousDisplayConfig.IntName <> FStudioConfig.DisplayConfig.IntName) or
+     (PreviousDisplayConfig.IpAddr <> FStudioConfig.DisplayConfig.IpAddr) or
+     (PreviousDisplayConfig.TcpPort <> FStudioConfig.DisplayConfig.TcpPort) or
      (PreviousDisplayConfig.ResX <> FStudioConfig.DisplayConfig.ResX) or
      (PreviousDisplayConfig.ResY <> FStudioConfig.DisplayConfig.ResY) then
   begin
